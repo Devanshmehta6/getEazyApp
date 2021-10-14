@@ -28,8 +28,66 @@ class _FourthPageState extends State<FourthPage> {
     Color myColor = Color(0xff4044fc);
     return MaterialApp(
       home: Scaffold(
-        body: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
+        bottomNavigationBar: Container(
+          height: height * 0.1,
+          margin: EdgeInsets.only(top:2),
+          child: SafeArea(
+            child: Row(children: [
+              Container(
+                margin: EdgeInsets.only(top: height * 0.031),
+                width: width * 0.50,
+                child: SizedBox(
+                  height: height * 0.06,
+                  child: FlatButton(
+                    color: Colors.white,
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ThirdPage(),
+                          ));
+                    },
+                    child: Text(
+                      'Back',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(fontSize: 17, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                //height: height * 0.01,
+                margin: EdgeInsets.only(top: height * 0.031),
+                height: height*0.12,
+                width: width * 0.50,
+                child: SizedBox(
+                  
+                  child: FlatButton(
+                    height: 300,
+                    color: myColor,
+                    onPressed: () {
+                      
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => SecondPage(),
+                      //   ),
+                      // );
+                    },
+                    child: Text(
+                      'Next',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(fontSize: 17, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
+        body: Container(
           child: Center(
             child: Container(
               child: Column(
@@ -45,10 +103,9 @@ class _FourthPageState extends State<FourthPage> {
                   ),
                   SizedBox(height: height * 0.04),
                   Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.12),
+                    margin: EdgeInsets.only(left: width * 0.12),
                     child: Text(
-                      'UrbanPlace welcomes you to UrbanPlace Project',
+                      'Work Information',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
@@ -130,6 +187,8 @@ class _FourthPageState extends State<FourthPage> {
                       border: Border(bottom: BorderSide(color: myColor)),
                     ),
                     child: TextFormField(
+                      style: GoogleFonts.poppins(
+                          fontSize: 16, color: Colors.black),
                       decoration: InputDecoration(
                         hintText: 'What is your designation',
                         hintStyle: GoogleFonts.poppins(
@@ -186,50 +245,6 @@ class _FourthPageState extends State<FourthPage> {
                         });
                       },
                     ),
-                  ),
-                  SizedBox(height : height*0.03),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.grey,
-                          textStyle: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ThirdPage(),
-                              ));
-                        },
-                        child: Text('Go back'),
-                      ),
-                      SizedBox(width: width * 0.04),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          primary: myColor,
-                          textStyle: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ThirdPage(),
-                              ));
-                        },
-                        child: Text('Submit'),
-                      ),
-                    ],
                   ),
                 ],
               ),

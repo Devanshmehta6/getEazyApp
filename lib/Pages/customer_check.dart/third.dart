@@ -1,7 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:eazy_app/Pages/customer_check.dart/fourth.dart';
 import 'package:eazy_app/Pages/customer_check.dart/second.dart';
+import 'package:eazy_app/Services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_session/flutter_session.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class ThirdPage extends StatefulWidget {
   const ThirdPage({Key? key}) : super(key: key);
@@ -23,8 +31,40 @@ class _ThirdPageState extends State<ThirdPage> {
     '1.75CR - 2CR',
     '2CR AND ABOVE',
   ];
+
   @override
   Widget build(BuildContext context) {
+    
+    postData() async {
+      List sendConfig = ModalRoute.of(context)!.settings.arguments as List;
+      var curr_date = DateFormat("yyyy-MM-dd").format(
+        DateTime.now(),
+      );
+      Uri url = Uri.parse(
+          'https://geteazyapp.com/projects/urbanplace-project-by-urbanplace-210720084736-210720090839/api');
+      String sessionId = await FlutterSession().get('session');
+
+      String csrf = await FlutterSession().get('csrf');
+      final sp = await SharedPreferences.getInstance();
+      String? authorization = sp.getString('token');
+      String? tokenn = authorization;
+      final cookie = sp.getString('cookie');
+      final token = await AuthService.getToken();
+      final settoken = 'Token ${token['token']}';
+      final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
+      http.Response response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': settoken,
+            HttpHeaders.cookieHeader: setcookie,
+          },
+          body: jsonEncode(
+            {'project': 2, 'mobile': sendConfig[0], 'first_name' : sendConfig[1] , 'last_name' : sendConfig[2]  , 'email' : sendConfig[3],'last_visited': curr_date},
+          ));
+      print('RESPONSE BODY ${response.body}');
+    }
+
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -32,6 +72,64 @@ class _ThirdPageState extends State<ThirdPage> {
     Color myColor = Color(0xff4044fc);
     return MaterialApp(
       home: Scaffold(
+        bottomNavigationBar: Container(
+          height: height * 0.1,
+          margin: EdgeInsets.only(top: 2),
+          child: SafeArea(
+            child: Row(children: [
+              Container(
+                margin: EdgeInsets.only(top: height * 0.031),
+                width: width * 0.50,
+                child: SizedBox(
+                  height: height * 0.06,
+                  child: FlatButton(
+                    color: Colors.white,
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SecondPage(),
+                          ));
+                    },
+                    child: Text(
+                      'Back',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(fontSize: 17, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                //height: height * 0.01,
+                margin: EdgeInsets.only(top: height * 0.031),
+                height: height * 0.12,
+                width: width * 0.50,
+                child: SizedBox(
+                  child: FlatButton(
+                    height: 300,
+                    color: myColor,
+                    onPressed: () {
+                      postData();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FourthPage(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Next',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(fontSize: 17, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Center(
@@ -49,10 +147,9 @@ class _ThirdPageState extends State<ThirdPage> {
                   ),
                   SizedBox(height: height * 0.04),
                   Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.12),
+                    margin: EdgeInsets.only(left: width * 0.12),
                     child: Text(
-                      'UrbanPlace welcomes you to UrbanPlace Project',
+                      'Requirements',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
@@ -193,7 +290,8 @@ class _ThirdPageState extends State<ThirdPage> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.only(top: height * 0.02 , right : width*0.16),
+                    margin: EdgeInsets.only(
+                        top: height * 0.02, right: width * 0.16),
                     child: Text(
                       'Provide your mode of funding',
                       style: GoogleFonts.poppins(
@@ -221,7 +319,7 @@ class _ThirdPageState extends State<ThirdPage> {
                             textStyle: TextStyle(fontSize: 14),
                           ),
                         ),
-                        SizedBox(width:width*0.055),
+                        SizedBox(width: width * 0.055),
                         Radio(
                             value: 2,
                             groupValue: _value2,
@@ -236,53 +334,8 @@ class _ThirdPageState extends State<ThirdPage> {
                             textStyle: TextStyle(fontSize: 14),
                           ),
                         ),
-
                       ],
                     ),
-                  ),
-                  SizedBox(height: height * 0.05),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.grey,
-                          textStyle: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SecondPage(),
-                              ));
-                        },
-                        child: Text('Go back'),
-                      ),
-                      SizedBox(width: width * 0.04),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          primary: myColor,
-                          textStyle: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FourthPage(),
-                              ));
-                        },
-                        child: Text('Submit'),
-                      ),
-                    ],
                   ),
                 ],
               ),

@@ -148,13 +148,13 @@ class _DashboardState extends State<Dashboard> {
                     case ConnectionState.done:
                       return Column(
                         children: <Widget>[
-                          SizedBox(height: height * 0.03),
+                          SizedBox(height: height * 0.025),
                           Total(context),
-                          SizedBox(height: height * 0.03),
+                          SizedBox(height: height * 0.025),
                           Direct(context),
-                          SizedBox(height: height * 0.03),
+                          SizedBox(height: height * 0.025),
                           CP(context),
-                          SizedBox(height: height * 0.02),
+                          SizedBox(height: height * 0.025),
                         ],
                       );
                   }

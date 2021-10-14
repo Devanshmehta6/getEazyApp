@@ -81,9 +81,6 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         HttpHeaders.cookieHeader: setcookie,
       });
       final jsonData = jsonDecode(response.body);
-      print('jsonnnnn data $jsonData');
-      print(jsonData['Developer_logo']);
-      //var ima = jsonData['Developer_logo'][0].toString();
 
       final projectData = jsonData['projects'];
       print(projectData);
@@ -105,7 +102,6 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
-    
 
     return Drawer(
       child: SingleChildScrollView(
@@ -144,7 +140,6 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
               },
             ),
 
-            //EAZY VISITS
             Theme(
               data:
                   Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -176,17 +171,6 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                           future: getVisits(),
                           builder:
                               (BuildContext context, AsyncSnapshot snapshot) {
-                            if (snapshot.data == null) {
-                              return ListTile(
-                                title: Text('oaotn'),
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => FirstPage()));
-                                },
-                              ); //return CircularProgressIndicator();
-                            }
                             return ListView.builder(
                               padding: EdgeInsets.all(0),
                               shrinkWrap: true,
@@ -213,10 +197,10 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                           Text(
                                             snapshot.data[index].project_name,
                                             style: GoogleFonts.poppins(
-                                                textStyle: TextStyle(
-                                                    color: Colors.blueGrey,
-                                                    fontWeight:
-                                                        FontWeight.w500)),
+                                              textStyle: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
                                           ),
                                         ],
                                       )),
@@ -272,7 +256,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => EazyVisits(),
+                                            builder: (context) => EazyTeams(),
                                             settings: RouteSettings(
                                                 arguments: snapshot
                                                     .data[index].project_url),
@@ -289,7 +273,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                             snapshot.data[index].project_name,
                                             style: GoogleFonts.poppins(
                                                 textStyle: TextStyle(
-                                                    color: Colors.blueGrey,
+                                                    color: Colors.grey,
                                                     fontWeight:
                                                         FontWeight.w500)),
                                           ),

@@ -14,11 +14,11 @@ import 'package:flutter_session/flutter_session.dart';
 import 'package:eazy_app/Services/auth_service.dart';
 
 class User {
-  late String Name;
-  late String Phone;
-  late String Allocated_to;
+  late String name;
+  late String phone;
+  late String assign_to;
 
-  User(this.Name, this.Phone, this.Allocated_to);
+  User(this.name, this.phone, this.assign_to);
 }
 
 class User2 {
@@ -53,6 +53,7 @@ class _EazyVisitsState extends State<EazyVisits> {
   List<User2> users2 = [];
   late String token;
   late String settoken;
+  
 
   Future<List<User>> ongoingclass() async {
     final pref = await SharedPreferences.getInstance();
@@ -90,7 +91,7 @@ class _EazyVisitsState extends State<EazyVisits> {
       ongoingdata = entireJson['on_going_visits'];
  
       for (var i in ongoingdata) {
-        User user = User(i['Name'], i['Phone'], i['Allocated_to']);
+        User user = User(i['name'], i['phone'], i['assign_to']);
 
         users.add(user);
       }
@@ -104,9 +105,10 @@ class _EazyVisitsState extends State<EazyVisits> {
     final pref = await SharedPreferences.getInstance();
     final isLoggedIn = pref.getBool('log');
     print('Logged in visit page : $isLoggedIn');
+    final project_url = ModalRoute.of(context)!.settings.arguments.toString();
     if (isLoggedIn == true) {
       Uri url = Uri.parse(
-          'https://geteazyapp.com/projects/urbanplace-project-by-urbanplace-210720084736-210720090839/completed-visits/api');
+          'https://geteazyapp.com/projects/$project_url/completed-visits/api');
 
       String sessionId = await FlutterSession().get('session');
 
@@ -131,11 +133,11 @@ class _EazyVisitsState extends State<EazyVisits> {
       completeddata = entireJson2['completed_visits'];
       print('yqyqyqyqyq :: $entireJson2');
 
-      // for (var u in completeddata) {
-      //   User2 user2 = User2(u['Name'], u['Phone'], u['Assign_to']);
+      for (var u in completeddata) {
+        User2 user2 = User2(u['Name'], u['Phone'], u['Assign_to']);
 
-      //   users2.add(user2);
-      // }
+        users2.add(user2);
+      }
     } else {
       print('Logged out ');
     }
@@ -276,7 +278,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                       Container(
                                         padding: EdgeInsets.only(top: 9),
                                         child: Text(
-                                          'Name : ${snapshot.data[index].Name}',
+                                          'Name : ${snapshot.data[index].name}',
                                           style: GoogleFonts.poppins(
                                             textStyle: TextStyle(
                                               fontSize: 14,
@@ -288,7 +290,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                       Container(
                                         padding: EdgeInsets.only(top: 9),
                                         child: Text(
-                                          'Phone : ${snapshot.data[index].Phone}',
+                                          'Phone : ${snapshot.data[index].phone}',
                                           style: GoogleFonts.poppins(
                                             textStyle: TextStyle(
                                               fontSize: 14,
@@ -300,7 +302,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                       Container(
                                         padding: EdgeInsets.only(top: 9),
                                         child: snapshot
-                                                    .data[index].Allocated_to ==
+                                                    .data[index].assign_to ==
                                                 null
                                             ? Text(
                                                 'Allocated To : -',
@@ -312,7 +314,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                                 ),
                                               )
                                             : Text(
-                                                'Allocated To : ${snapshot.data[index].Allocated_to}',
+                                                'Allocated To : ${snapshot.data[index].assign_to}',
                                                 style: GoogleFonts.poppins(
                                                   textStyle: TextStyle(
                                                     fontSize: 14,

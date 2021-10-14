@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:eazy_app/Pages/customer_check.dart/first.dart';
 import 'package:eazy_app/Pages/eazy_visits.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +19,18 @@ class SecondPage extends StatefulWidget {
 class _SecondPageState extends State<SecondPage> {
   String? valueChoose;
   int _value = 1;
+  List values = [];
+  bool value = true;
+
+  final TextEditingController fname = TextEditingController();
+  final TextEditingController lname = TextEditingController();
+  final TextEditingController wNumber = TextEditingController();
+  final TextEditingController email = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    List sendBasic = ModalRoute.of(context)!.settings.arguments as List;
+    
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -38,9 +50,81 @@ class _SecondPageState extends State<SecondPage> {
       'Other'
     ];
 
+    fillData() {
+      final name1 = fname.text;
+      final name2 = lname.text;
+      final number = wNumber.text;
+      final mail = email.text;
+      sendBasic.add(name1);
+      sendBasic.add(name2);
+      
+      sendBasic.add(mail);
+      sendBasic.add(number);
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        resizeToAvoidBottomInset: false,
+        bottomNavigationBar: Container(
+          height: height * 0.1,
+          margin: EdgeInsets.only(top: 2),
+          child: SafeArea(
+            child: Row(children: [
+              Container(
+                margin: EdgeInsets.only(top: height * 0.031),
+                width: width * 0.50,
+                child: SizedBox(
+                  height: height * 0.06,
+                  child: FlatButton(
+                    color: Colors.white,
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FirstPage(),
+                          ));
+                    },
+                    child: Text(
+                      'Back',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(fontSize: 17, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                //height: height * 0.01,
+                margin: EdgeInsets.only(top: height * 0.031),
+                height: height * 0.12,
+                width: width * 0.50,
+                child: SizedBox(
+                  child: FlatButton(
+                    height: 300,
+                    color: myColor,
+                    onPressed: () {
+                      fillData();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ThirdPage(),
+                          settings: RouteSettings(arguments: sendBasic),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Next',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(fontSize: 17, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
         body: Container(
           child: Center(
             child: Column(
@@ -48,7 +132,7 @@ class _SecondPageState extends State<SecondPage> {
               children: <Widget>[
                 Container(
                   height: height * 0.1,
-                  margin: EdgeInsets.only(top: height * 0.05),
+                  margin: EdgeInsets.only(top: height * 0.02),
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage('images/eazyapp-logo-blue.png'),
@@ -75,6 +159,7 @@ class _SecondPageState extends State<SecondPage> {
                       left: width * 0.075, right: width * 0.075),
                   padding: EdgeInsets.all(5),
                   child: TextFormField(
+                    controller: fname,
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(color: Colors.black, fontSize: 16),
                     ),
@@ -103,6 +188,7 @@ class _SecondPageState extends State<SecondPage> {
                       left: width * 0.075, right: width * 0.075),
                   padding: EdgeInsets.all(5),
                   child: TextFormField(
+                    controller: lname,
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(color: Colors.black, fontSize: 16),
                     ),
@@ -157,60 +243,41 @@ class _SecondPageState extends State<SecondPage> {
                     top: height * 0.02,
                     left: width * 0.050,
                   ),
-                  child: Column(
+                  child: Row(
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(right: width * 0.3),
-                        child: Text('Is this your whatsapp number?',
-                            style: GoogleFonts.poppins(
-                                textStyle: TextStyle(fontSize: 16))),
-                      ),
-                      Row(
-                        children: [
-                          Radio(
-                              value: 1,
-                              groupValue: _value,
-                              onChanged: (value) {
-                                setState(() {
-                                  _value = value as int;
-                                });
-                              }),
-                          Text(
-                            'Yes',
-                            style: GoogleFonts.poppins(
-                              textStyle: TextStyle(
-                                fontSize: 14,
-                              ),
-                            ),
+                      Container(
+                        padding: EdgeInsets.only(
+                            right: width * 0.1, left: width * 0.03),
+                        child: Text(
+                          'Is this your Whatsapp Number?',
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(fontSize: 16),
                           ),
-                          Radio(
-                              value: 2,
-                              groupValue: _value,
-                              onChanged: (value) {
-                                setState(() {
-                                  _value = value as int;
-                                });
-                              }),
-                          Text(
-                            'No',
-                            style: GoogleFonts.poppins(
-                              textStyle: TextStyle(
-                                fontSize: 14,
-                              ),
-                            ),
-                          )
-                        ],
+                        ),
+                      ),
+                      Container(
+                        child: Transform.scale(
+                          scale: 1,
+                          child: Switch.adaptive(
+                            activeColor: myColor,
+                            value: value,
+                            onChanged: (value) => setState(() {
+                              this.value = value;
+                            }),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  child: _value == 2
+                  child: value == false
                       ? Container(
                           margin: EdgeInsets.only(
                               left: width * 0.075, right: width * 0.075),
                           padding: EdgeInsets.all(5),
                           child: TextFormField(
+                            controller: wNumber,
                             style: GoogleFonts.poppins(
                               textStyle:
                                   TextStyle(color: Colors.black, fontSize: 16),
@@ -241,6 +308,7 @@ class _SecondPageState extends State<SecondPage> {
                       left: width * 0.075, right: width * 0.075),
                   padding: EdgeInsets.all(5),
                   child: TextFormField(
+                    controller: email,
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(color: Colors.black, fontSize: 16),
                     ),
@@ -305,7 +373,6 @@ class _SecondPageState extends State<SecondPage> {
                     iconDisabledColor: myColor,
                     iconEnabledColor: myColor,
                     icon: Icon(Icons.arrow_drop_down),
-                    disabledHint: Text('MYdata'),
                     underline: SizedBox(),
                     hint: Text(
                       "Where did you heard about us",
@@ -313,7 +380,7 @@ class _SecondPageState extends State<SecondPage> {
                     ),
                     value: valueChoose,
                     style: GoogleFonts.poppins(
-                      textStyle: TextStyle(color: myColor, fontSize: 14),
+                      textStyle: TextStyle(color: Colors.black, fontSize: 16),
                     ),
                     items: items.map((valueItem) {
                       return DropdownMenuItem(
@@ -326,7 +393,6 @@ class _SecondPageState extends State<SecondPage> {
                     },
                   ),
                 ),
-                SizedBox(height: height * 0.22),
               ],
             ),
             //color: Colors.grey.shade200,

@@ -20,32 +20,29 @@ class AuthService {
     }
   }
 
-  static setToken(String token ) async {
+  static setToken(String token) async {
     AuthData data = AuthData(token);
     return await SESSION.set('tokens', data);
   }
 
-  static Future<Map<String , dynamic>>getToken() async {
+  static Future<Map<String, dynamic>> getToken() async {
     return await SESSION.get('tokens');
   }
 
-  static  removeToken() async {
+  static removeToken() async {
     await SESSION.prefs.clear();
   }
 }
 
-  
-
-class AuthData{
-
-  String token ;
+class AuthData {
+  String token;
   AuthData(this.token);
 
-  Map<String , dynamic> toJson(){
-    final Map<String , dynamic> data = Map<String , dynamic>();
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
 
     data['token'] = token;
-    
+
     return data;
   }
 }

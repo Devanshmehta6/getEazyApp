@@ -12,6 +12,7 @@ import 'package:flutter_session/flutter_session.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:eazy_app/sales part/sales_dashboard.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -35,8 +36,13 @@ class LoginPageState extends State<LoginPage> {
     final width = MediaQuery.of(context).size.width;
 
     bool isLoggedIn = false;
-
+    bool _validate = false;
     var authInfo;
+
+    validateSave() {
+      if (formKey.currentState!.validate()) {
+      } else {}
+    }
 
     dynamic login(BuildContext context) async {
       authInfo = AuthService();
@@ -52,18 +58,21 @@ class LoginPageState extends State<LoginPage> {
       final endIndex = str.indexOf(end, startIndex + start.length);
       final id = str.substring(startIndex + start.length, endIndex);
       await FlutterSession().set('session', id);
+      final str1 = headers;
+      final start1 = 'set-cookie: ';
+      final end1 = '; expires=';
+      final startIndex1 = str1.indexOf(start1);
+      final endIndex1 = str1.indexOf(end1, startIndex1 + start1.length);
+      final csrf = str1.substring(startIndex1 + start1.length, endIndex1);
+      await FlutterSession().set('csrf', csrf);
+      print('===============CRF======= $csrf');
 
-      if (res.statusCode != 200) {
-        print('error! inside login page');
-        
-      } else {
-        AuthService.setToken(
-          data['token'],
-        );
-        
+      if (data.containsKey('token')) {
+        AuthService.setToken(data['token']);
+
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Dashboard()),
+          MaterialPageRoute(builder: (context) => Sales_Dashboard()),
         );
 
         isLoggedIn = true;
@@ -76,12 +85,13 @@ class LoginPageState extends State<LoginPage> {
         print('Token ${token['token']}');
 
         return data;
+      } else if (data.containsKey('expiry')) {
+        print('no');
       }
     }
 
     Map mapResponse = {};
 
-    
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -140,23 +150,33 @@ class LoginPageState extends State<LoginPage> {
                             children: <Widget>[
                               Container(
                                 padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey.shade100),
-                                  ),
-                                ),
                                 child: TextFormField(
                                   style: GoogleFonts.poppins(
                                       textStyle: TextStyle(
                                     fontSize: 16,
                                   )),
                                   controller: emailController,
-                                  autovalidate: true,
-                                  validator: EmailValidator(
-                                      errorText: 'Invalid Email'),
+                                  validator: (val) => val!.length == 0
+                                      ? "Cannot be empty"
+                                      : null,
                                   keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
+                                    errorStyle: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    errorBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.red.shade200),
+                                    ),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.grey.shade300),
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: myColor),
+                                    ),
                                     suffixIcon: Icon(Icons.email,
                                         color: myColor, size: 20),
                                     border: InputBorder.none,
@@ -174,19 +194,33 @@ class LoginPageState extends State<LoginPage> {
                               Container(
                                 width: width - 0.3,
                                 padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(
-                                            color: Colors.grey.shade100))),
                                 child: TextFormField(
                                   style: GoogleFonts.poppins(
                                       textStyle: TextStyle(
                                     fontSize: 16,
                                   )),
                                   controller: passController,
-                                  autovalidate: true,
+                                  validator: (val) => val!.length == 0
+                                      ? "Cannot be empty"
+                                      : null,
                                   obscureText: isHiddenPassword,
                                   decoration: InputDecoration(
+                                    errorStyle: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    errorBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.red.shade200),
+                                    ),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.grey.shade300),
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: myColor),
+                                    ),
                                     suffixIcon: InkWell(
                                       onTap: _togglePass,
                                       child: Icon(
@@ -268,13 +302,14 @@ class LoginPageState extends State<LoginPage> {
                                         ),
                                   onPressed: () {
                                     setState(
-                                      () => isLoading = false,
+                                      () => isLoading = !isLoading,
                                     );
-                                    login(context);
-
-                                    setState(
-                                      () => isLoading = false,
-                                    );
+                                    validateSave();
+                                    login(context).whenComplete(() {
+                                      setState(
+                                        () => isLoading = !isLoading,
+                                      );
+                                    });
                                   },
                                 ),
                               ),

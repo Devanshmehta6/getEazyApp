@@ -20,8 +20,9 @@ class ThirdPage extends StatefulWidget {
 
 class _ThirdPageState extends State<ThirdPage> {
   String? valueChoose;
-  int _value = 1;
-  int _value2 = 1;
+  String _value = "";
+  String _value2 = "";
+  bool isLoading = false;
   final budgetList = [
     '50L - 75L',
     '75L - 1CR',
@@ -34,14 +35,17 @@ class _ThirdPageState extends State<ThirdPage> {
 
   @override
   Widget build(BuildContext context) {
-    
     postData() async {
       List sendConfig = ModalRoute.of(context)!.settings.arguments as List;
       var curr_date = DateFormat("yyyy-MM-dd").format(
         DateTime.now(),
       );
+      final pref = await SharedPreferences.getInstance();
+      final project_url = pref.getString('project_url');
+
       Uri url = Uri.parse(
-          'https://geteazyapp.com/projects/urbanplace-project-by-urbanplace-210720084736-210720090839/api');
+          'https://geteazyapp.com/projects/$project_url/requirements_api');
+      print('---------------$url');
       String sessionId = await FlutterSession().get('session');
 
       String csrf = await FlutterSession().get('csrf');
@@ -52,17 +56,29 @@ class _ThirdPageState extends State<ThirdPage> {
       final token = await AuthService.getToken();
       final settoken = 'Token ${token['token']}';
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
-      http.Response response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': settoken,
-            HttpHeaders.cookieHeader: setcookie,
+      final cust_id = sp.getInt('cust_id');
+      print('--------third--------$cust_id');
+      http.Response response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': settoken,
+          HttpHeaders.cookieHeader: setcookie,
+        },
+        body: jsonEncode(
+          {
+            'project': 2,
+            'customer': cust_id,
+            'budget': valueChoose,
+            'purpose_of_purchase': _value,
+            'funding_mode': _value2
           },
-          body: jsonEncode(
-            {'project': 2, 'mobile': sendConfig[0], 'first_name' : sendConfig[1] , 'last_name' : sendConfig[2]  , 'email' : sendConfig[3],'last_visited': curr_date},
-          ));
+        ),
+      );
       print('RESPONSE BODY ${response.body}');
+      print('valueeee choose :::: $valueChoose');
+      print('valueeee 2 :::: $_value2');
     }
 
     final height = MediaQuery.of(context).size.height -
@@ -71,6 +87,7 @@ class _ThirdPageState extends State<ThirdPage> {
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         bottomNavigationBar: Container(
           height: height * 0.1,
@@ -91,12 +108,32 @@ class _ThirdPageState extends State<ThirdPage> {
                             builder: (context) => SecondPage(),
                           ));
                     },
-                    child: Text(
-                      'Back',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(fontSize: 17, color: Colors.black),
-                      ),
-                    ),
+                    child: isLoading
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 24),
+                              Text(
+                                'Please Wait',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              )
+                            ],
+                          )
+                        : Text(
+                            'Back',
+                            style: GoogleFonts.poppins(
+                              textStyle:
+                                  TextStyle(fontSize: 17, color: Colors.black),
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -118,12 +155,32 @@ class _ThirdPageState extends State<ThirdPage> {
                         ),
                       );
                     },
-                    child: Text(
-                      'Next',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(fontSize: 17, color: Colors.white),
-                      ),
-                    ),
+                    child: isLoading
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 24),
+                              Text(
+                                'Please Wait',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              )
+                            ],
+                          )
+                        : Text(
+                            'Next',
+                            style: GoogleFonts.poppins(
+                              textStyle:
+                                  TextStyle(fontSize: 17, color: Colors.white),
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -147,29 +204,36 @@ class _ThirdPageState extends State<ThirdPage> {
                   ),
                   SizedBox(height: height * 0.04),
                   Container(
-                    margin: EdgeInsets.only(left: width * 0.12),
-                    child: Text(
-                      'Requirements',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                    margin: EdgeInsets.only(
+                        left: width * 0.085, right: width * 0.11),
+                    child: Padding(
+                      padding: EdgeInsets.only(right: width * 0.45),
+                      child: Text(
+                        'Requirements',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ),
                   Container(
                     margin: EdgeInsets.only(top: height * 0.025),
-                    child: Text(
-                      'What configuration are you looking at?',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                    child: Padding(
+                      padding: EdgeInsets.only(right: width * 0.08),
+                      child: Text(
+                        'What configuration are you looking at?',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
                       ),
                     ),
                   ),
                   SizedBox(height: height * 0.01),
                   Container(
                     margin: EdgeInsets.only(
-                        left: width * 0.12, right: width * 0.12),
+                        left: width * 0.075, right: width * 0.075),
                     padding: EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       border: Border(
@@ -189,7 +253,7 @@ class _ThirdPageState extends State<ThirdPage> {
                       ),
                       value: valueChoose,
                       style: GoogleFonts.poppins(
-                        textStyle: TextStyle(color: myColor, fontSize: 14),
+                        textStyle: TextStyle(color: Colors.black, fontSize: 16),
                       ),
                       items: budgetList.map((valueItem) {
                         return DropdownMenuItem(
@@ -204,9 +268,9 @@ class _ThirdPageState extends State<ThirdPage> {
                   ),
                   Container(
                     margin: EdgeInsets.only(
-                        top: height * 0.02,
-                        left: width * 0.050,
-                        right: width * 0.050),
+                      top: height * 0.03,
+                      right: width * 0.09,
+                    ),
                     child: Column(
                       children: [
                         Text('What is the purpose of your purchase?',
@@ -215,38 +279,46 @@ class _ThirdPageState extends State<ThirdPage> {
                         Row(
                           children: [
                             SizedBox(width: width * 0.04),
-                            Radio(
-                                value: 1,
-                                groupValue: _value,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _value = value as int;
-                                  });
-                                }),
+                            Transform.scale(
+                              scale: 1.1,
+                              child: Radio(
+                                  value: "Self Use",
+                                  groupValue: _value,
+                                  activeColor: myColor,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _value = value.toString();
+                                    });
+                                  }),
+                            ),
                             Text(
                               'Self Use',
                               style: GoogleFonts.poppins(
                                 textStyle: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 15,
                                 ),
                               ),
                             ),
                             SizedBox(
                               width: width * 0.16,
                             ),
-                            Radio(
-                                value: 2,
-                                groupValue: _value,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _value = value as int;
-                                  });
-                                }),
+                            Transform.scale(
+                              scale: 1.1,
+                              child: Radio(
+                                  value: "Second Home",
+                                  groupValue: _value,
+                                  activeColor: myColor,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _value = val.toString();
+                                    });
+                                  }),
+                            ),
                             Text(
                               'Second home',
                               style: GoogleFonts.poppins(
                                 textStyle: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 15,
                                 ),
                               ),
                             )
@@ -255,33 +327,42 @@ class _ThirdPageState extends State<ThirdPage> {
                         Row(
                           children: [
                             SizedBox(width: width * 0.04),
-                            Radio(
-                                value: 3,
-                                groupValue: _value,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _value = value as int;
-                                  });
-                                }),
+                            Transform.scale(
+                              scale: 1.1,
+                              child: Radio(
+                                  value: 'Investment',
+                                  groupValue: _value,
+                                  activeColor: myColor,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _value = val.toString();
+                                    });
+                                  }),
+                            ),
                             Text(
                               'Investment',
                               style: GoogleFonts.poppins(
-                                textStyle: TextStyle(fontSize: 14),
+                                textStyle: TextStyle(fontSize: 15),
                               ),
                             ),
                             SizedBox(width: width * 0.10),
-                            Radio(
-                                value: 4,
-                                groupValue: _value,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _value = value as int;
-                                  });
-                                }),
+                            Transform.scale(
+                              scale: 1.1,
+                              child: Radio(
+                                  value: 'Organizational',
+                                  groupValue: _value,
+                                  activeColor: myColor,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _value = val.toString();
+                                      print(">>>>>>>>>> $_value");
+                                    });
+                                  }),
+                            ),
                             Text(
                               'Organizational',
                               style: GoogleFonts.poppins(
-                                textStyle: TextStyle(fontSize: 14),
+                                textStyle: TextStyle(fontSize: 15),
                               ),
                             ),
                           ],
@@ -291,7 +372,7 @@ class _ThirdPageState extends State<ThirdPage> {
                   ),
                   Container(
                     margin: EdgeInsets.only(
-                        top: height * 0.02, right: width * 0.16),
+                        top: height * 0.02, right: width * 0.27),
                     child: Text(
                       'Provide your mode of funding',
                       style: GoogleFonts.poppins(
@@ -300,38 +381,45 @@ class _ThirdPageState extends State<ThirdPage> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.050, right: width * 0.050),
+                    margin: EdgeInsets.only(right: width * 0.1),
                     child: Row(
                       children: [
                         SizedBox(width: width * 0.04),
-                        Radio(
-                            value: 1,
-                            groupValue: _value2,
-                            onChanged: (value) {
-                              setState(() {
-                                _value2 = value as int;
-                              });
-                            }),
+                        Transform.scale(
+                          scale: 1.1,
+                          child: Radio(
+                              value: 'Maximum Self',
+                              groupValue: _value2,
+                              activeColor: myColor,
+                              onChanged: (value) {
+                                setState(() {
+                                  _value2 = value.toString();
+                                });
+                              }),
+                        ),
                         Text(
                           'Maximum self',
                           style: GoogleFonts.poppins(
-                            textStyle: TextStyle(fontSize: 14),
+                            textStyle: TextStyle(fontSize: 15),
                           ),
                         ),
-                        SizedBox(width: width * 0.055),
-                        Radio(
-                            value: 2,
-                            groupValue: _value2,
-                            onChanged: (value) {
-                              setState(() {
-                                _value2 = value as int;
-                              });
-                            }),
+                        SizedBox(width: width * 0.050),
+                        Transform.scale(
+                          scale: 1.1,
+                          child: Radio(
+                              value: 'Maximum Loan',
+                              groupValue: _value2,
+                              activeColor: myColor,
+                              onChanged: (value) {
+                                setState(() {
+                                  _value2 = value.toString();
+                                });
+                              }),
+                        ),
                         Text(
-                          'Maximum loan',
+                          'Maximum Loan',
                           style: GoogleFonts.poppins(
-                            textStyle: TextStyle(fontSize: 14),
+                            textStyle: TextStyle(fontSize: 15),
                           ),
                         ),
                       ],

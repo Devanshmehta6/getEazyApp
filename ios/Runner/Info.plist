@@ -42,6 +42,8 @@
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
 		<key>UIStatusBarHidden</key>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>This app need to use Photos.</string>
 		<false/>
 	</dict>
 </plist>

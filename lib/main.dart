@@ -3,15 +3,20 @@ import 'package:eazy_app/Services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:eazy_app/Pages/login_page.dart';
 import 'package:eazy_app/Pages/splash_screen.dart';
-
 import 'Pages/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(EazyApp());
 }
 
-class EazyApp extends StatelessWidget {
+class EazyApp extends StatefulWidget {
+  @override
+  State<EazyApp> createState() => _EazyAppState();
+}
+
+class _EazyAppState extends State<EazyApp> {
   clearData() async {
     final pref = await SharedPreferences.getInstance();
     pref.clear();
@@ -30,9 +35,9 @@ class EazyApp extends StatelessWidget {
               return CircularProgressIndicator();
             } else if (snapshot.hasData) {
               clearData();
-              return LoginPage();//SplashScreen();
+              return LoginPage(); //SplashScreen();
             } else {
-              return LoginPage();//SplashScreen();
+              return LoginPage(); //SplashScreen();
             }
           }),
     );

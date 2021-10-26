@@ -23,6 +23,8 @@ class _DashboardState extends State<Dashboard> {
   Map mapResponse = {};
   late String token;
   late String settoken;
+  String? image;
+
   Future getData() async {
     final pref = await SharedPreferences.getInstance();
 
@@ -39,13 +41,8 @@ class _DashboardState extends State<Dashboard> {
       String sessionId = await FlutterSession().get('session');
 
       String csrf = await FlutterSession().get('csrf');
-
+      print('%%%%%%%%%%%% $csrf');
       final sp = await SharedPreferences.getInstance();
-      //String? authorization = sp.getString('token');
-      //String? tokenn = authorization;
-      // final token = await AuthService.getToken();
-      // print('TOKENENNENEN :$token');
-      // final settoken = token['token'];
       print('Token $settoken');
 
       //final finalToken = 'Token ${token[token]}';
@@ -69,6 +66,13 @@ class _DashboardState extends State<Dashboard> {
       }
       print('RESPONSE BODY : ${response.body}');
       final entireJson = jsonDecode(response.body);
+      final img = entireJson['developer_logo'][0];
+      final pref = await SharedPreferences.getInstance();
+      pref.setString('image_url', img);
+      print('-------entire json----------$entireJson');
+      //final project = entireJson['projects'];
+      //print('---------------project----------$project');
+      //final project_url = entireJson['projects']['project_url'];
 
       //FetchData fetchData = FetchData.fromJson(entireJson);
       //print(entireJson[0]['Name']);

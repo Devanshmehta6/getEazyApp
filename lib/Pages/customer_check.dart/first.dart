@@ -20,21 +20,80 @@ class FirstPage extends StatefulWidget {
 
 class _FirstPageState extends State<FirstPage> {
   List sendMobile = [];
+  String? project_name;
+  final TextEditingController mobileController = TextEditingController();
 
-  postData(){
-    final mobile = mobileController.text;
-    sendMobile.add(mobile); 
+  getName() async {
+    final pref = await SharedPreferences.getInstance();
+    project_name = pref.getString('project_name');
+    print('heeeeeeeeeeeeeeeee $project_name');
+  }
+
+  postData() async {
+    var curr_date = DateFormat("yyyy-MM-dd").format(
+      DateTime.now(),
+    );
+    final pref = await SharedPreferences.getInstance();
+    final project_url = pref.getString('project_url');
+    Uri url = Uri.parse('https://geteazyapp.com/projects/$project_url/api');
+    String sessionId = await FlutterSession().get('session');
+
+    String csrf = await FlutterSession().get('csrf');
+    final sp = await SharedPreferences.getInstance();
+    String? authorization = sp.getString('token');
+    String? tokenn = authorization;
+    final cookie = sp.getString('cookie');
+    final token = await AuthService.getToken();
+    final settoken = 'Token ${token['token']}';
+    final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
+    http.Response response = await http.post(url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': settoken,
+          HttpHeaders.cookieHeader: setcookie,
+        },
+        body: jsonEncode(
+          {
+            'project': 2,
+            'mobile': mobileController.text,
+            'last_visited': curr_date
+          },
+        ));
+    print('RESPONSE BODY FIRST ${response.body}');
+    final body = jsonDecode(response.body);
+    final cust_url = body['customer_url'];
+    pref.setString('customer_url', cust_url);
+    final cust_id = body['id'];
+    pref.setInt('cust_id', cust_id);
+    final c_id = pref.getInt('cust_id');
+    print('--------------$c_id');
+    pref.setString('mobile', mobileController.text);
+
+    sendMobile.add(mobileController.text);
+    sendMobile.add(cust_url);
+
+    pref.setString('mobile', mobileController.text);
+    final mob = pref.getString('mobile');
+    print('-------$mob');
   }
 
   @override
-  final TextEditingController mobileController = TextEditingController();
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getName();
+  }
 
+  @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
+    bool isLoading = false;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -76,22 +135,49 @@ class _FirstPageState extends State<FirstPage> {
                   child: FlatButton(
                     height: 300,
                     color: myColor,
-                    onPressed: () {
-                      postData();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SecondPage(),
-                          settings: RouteSettings(arguments: sendMobile),
-                        ),
-                      );
+                    onPressed: () async {
+                      postData().then((dynamic) {
+                        setState(() {
+                          isLoading = !isLoading;
+                        });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SecondPage(),
+                            settings: RouteSettings(arguments: sendMobile),
+                          ),
+                        );
+                        setState(() {
+                          isLoading = !isLoading;
+                        });
+                      });
                     },
-                    child: Text(
-                      'Next',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(fontSize: 17, color: Colors.white),
-                      ),
-                    ),
+                    child: isLoading
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 24),
+                              Text(
+                                'Please Wait',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              )
+                            ],
+                          )
+                        : Text(
+                            'Next',
+                            style: GoogleFonts.poppins(
+                              textStyle:
+                                  TextStyle(fontSize: 17, color: Colors.white),
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -113,19 +199,28 @@ class _FirstPageState extends State<FirstPage> {
                   ),
                 ),
                 SizedBox(height: height * 0.04),
-                Text(
-                  'Check In - UrbanPlace Project',
-                  style: GoogleFonts.poppins(
-                    textStyle:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
+                project_name == null
+                    ? Text(
+                        'Check In - Loading..',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    : Text(
+                        'Check In - $project_name',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                 SizedBox(height: height * 0.02),
                 Container(
                   margin: EdgeInsets.only(
                       top: 10, left: width * 0.075, right: width * 0.075),
                   padding: EdgeInsets.all(5),
                   child: TextFormField(
+                    autofocus: true,
                     controller: mobileController,
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(color: Colors.black, fontSize: 16),

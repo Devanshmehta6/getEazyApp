@@ -28,6 +28,7 @@ class NavigationDrawerWidget extends StatefulWidget {
 class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
   final padding = EdgeInsets.symmetric(horizontal: 10);
   Color myColor = Color(0xff4044fc);
+
   List<User> users = [];
   bool is1Selected = false;
   bool is2Selected = false;
@@ -51,6 +52,13 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
 
   int selectedIndex = 0;
   int count = 0;
+
+  String img = '';
+
+  getImage() async {
+    final pref = await SharedPreferences.getInstance();
+    img = pref.getString('image_url');
+  }
 
   Future<List<User>> getVisits() async {
     final pref = await SharedPreferences.getInstance();
@@ -84,16 +92,23 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
 
       final projectData = jsonData['projects'];
       print(projectData);
-
+      print('=====================###########=============$jsonData');
       for (var u in projectData) {
-        User user = User(u["project_name"], u["project_url"]);
+        User user = User(u["project_name"].toString(), u["project_url"]);
         users.add(user);
       }
-      //return users;
+      //return users;s
     } else {
       print('Logged Out...');
     }
     return users;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getImage();
   }
 
   @override
@@ -102,6 +117,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
+    final project_name = getVisits();
 
     return Drawer(
       child: SingleChildScrollView(
@@ -114,9 +130,9 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
               child: DrawerHeader(
                 padding:
                     EdgeInsets.only(left: 10, right: 10, bottom: 15, top: 15),
-                child: Image.network(
-                  '',
-                ),
+                child: img.isEmpty
+                    ? Center(child: CircularProgressIndicator())
+                    : Image.network('$img'),
               ),
             ),
             //EAZY DASHBOARD
@@ -144,8 +160,6 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
               data:
                   Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: Column(
-                //height: height*0.15,
-
                 children: [
                   ExpansionTile(
                       iconColor: Colors.black,
@@ -168,43 +182,57 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                       ),
                       children: [
                         FutureBuilder(
-                          future: getVisits(),
+                          future: project_name,
                           builder:
                               (BuildContext context, AsyncSnapshot snapshot) {
+                            if (snapshot.data == null) {
+                              return Center(child: CircularProgressIndicator());
+                            }
+
                             return ListView.builder(
-                              padding: EdgeInsets.all(0),
-                              shrinkWrap: true,
-                              itemCount: snapshot.data.length,
-                              itemBuilder: (BuildContext context, int index) =>
-                                  ListTile(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => EazyVisits(),
-                                            settings: RouteSettings(
-                                                arguments: snapshot
-                                                    .data[index].project_url),
-                                          ),
-                                        );
-                                      },
-                                      title: Row(
-                                        children: [
-                                          SizedBox(width: width * 0.06),
-                                          Icon(FontAwesomeIcons.userClock,
-                                              color: Colors.grey, size: 18),
-                                          SizedBox(width: width * 0.04),
-                                          Text(
-                                            snapshot.data[index].project_name,
-                                            style: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontWeight: FontWeight.w500),
+                                padding: EdgeInsets.all(0),
+                                shrinkWrap: true,
+                                itemCount: snapshot.data.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return ListTile(
+                                    onTap: () async {
+                                      final pref =
+                                          await SharedPreferences.getInstance();
+                                      pref.setString('project_url',
+                                          snapshot.data[index].project_url);
+                                      pref.setString('project_name',
+                                          snapshot.data[index].project_name);
+
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => EazyVisits(),
+                                          settings: RouteSettings(
+                                              arguments: snapshot
+                                                  .data[index].project_name),
+                                        ),
+                                      );
+                                    },
+                                    title: Row(
+                                      children: [
+                                        SizedBox(width: width * 0.06),
+                                        Icon(FontAwesomeIcons.userClock,
+                                            color: Colors.grey.shade700,
+                                            size: 16),
+                                        SizedBox(width: width * 0.04),
+                                        Text(
+                                          snapshot.data[index].project_name,
+                                          style: GoogleFonts.poppins(
+                                            textStyle: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontWeight: FontWeight.w500,
                                             ),
                                           ),
-                                        ],
-                                      )),
-                            );
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                });
                           },
                         ),
                       ]),
@@ -240,26 +268,29 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                       ),
                       children: [
                         FutureBuilder(
-                          future: getVisits(),
+                          future: project_name,
                           builder:
-                              (BuildContext context, AsyncSnapshot snapshot) {
-                            if (snapshot.data == null) {
+                              (BuildContext context, AsyncSnapshot snapshot2) {
+                            if (snapshot2.data == null) {
                               return CircularProgressIndicator();
                             }
                             return ListView.builder(
                               padding: EdgeInsets.all(0),
                               shrinkWrap: true,
-                              itemCount: snapshot.data.length,
+                              itemCount: snapshot2.data.length,
                               itemBuilder: (BuildContext context, int index) =>
                                   ListTile(
-                                      onTap: () {
+                                      onTap: () async {
+                                        final pref = await SharedPreferences
+                                            .getInstance();
+                                        pref.setString('project_url',
+                                            snapshot2.data[index].project_url);
+                                        pref.setString('project_name',
+                                            snapshot2.data[index].project_name);
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) => EazyTeams(),
-                                            settings: RouteSettings(
-                                                arguments: snapshot
-                                                    .data[index].project_url),
                                           ),
                                         );
                                       },
@@ -267,15 +298,16 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                         children: [
                                           SizedBox(width: width * 0.06),
                                           Icon(FontAwesomeIcons.userFriends,
-                                              color: Colors.grey, size: 18),
+                                              color: Colors.grey.shade700,
+                                              size: 16),
                                           SizedBox(width: width * 0.04),
                                           Text(
-                                            snapshot.data[index].project_name,
+                                            snapshot2.data[index].project_name,
                                             style: GoogleFonts.poppins(
-                                                textStyle: TextStyle(
-                                                    color: Colors.grey,
-                                                    fontWeight:
-                                                        FontWeight.w500)),
+                                              textStyle: TextStyle(
+                                                  color: Colors.grey.shade700,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
                                           ),
                                         ],
                                       )),

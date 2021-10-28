@@ -23,8 +23,7 @@ class _DashboardState extends State<Dashboard> {
   Map mapResponse = {};
   late String token;
   late String settoken;
-  String? image;
-  late final String? img;
+  late String id;
 
   Future getData() async {
     final pref = await SharedPreferences.getInstance();
@@ -65,20 +64,8 @@ class _DashboardState extends State<Dashboard> {
           mapResponse = json.decode(response.body);
         });
       }
-      print('RESPONSE BODY : ${response.body}');
+      print('RESPONSE BODY  DASHBOARD: ${response.body}');
       final entireJson = jsonDecode(response.body);
-      img = entireJson['developer_logo'][0];
-      // final pref = await SharedPreferences.getInstance();
-      // pref.setString('image_url', img);
-      // print('-------entire json----------$entireJson');
-      //final project = entireJson['projects'];
-      //print('---------------project----------$project');
-      //final project_url = entireJson['projects']['project_url'];
-
-      //FetchData fetchData = FetchData.fromJson(entireJson);
-      //print(entireJson[0]['Name']);
-      //naam = entireJson[0]['Name'];
-
     } else {
       print('Logged out ');
     }
@@ -111,9 +98,7 @@ class _DashboardState extends State<Dashboard> {
           return true;
         },
         child: Scaffold(
-          endDrawer: NavigationDrawerWidget(
-            
-          ),
+          endDrawer: NavigationDrawerWidget(),
           appBar: AppBar(
             //centerTitle : true,
             iconTheme: IconThemeData(color: myColor),
@@ -181,7 +166,9 @@ class _DashboardState extends State<Dashboard> {
     return Column(
       children: <Widget>[
         Container(
-          decoration : BoxDecoration(borderRadius: BorderRadius.circular(10) , color : Color(0xff007bff)),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Color(0xff007bff)),
           height: height * 0.28,
           width: width,
           //color: Colors.blue.shade300,
@@ -252,7 +239,9 @@ class _DashboardState extends State<Dashboard> {
         Container(
           height: height * 0.28,
           width: width,
-          decoration : BoxDecoration(borderRadius: BorderRadius.circular(10) , color : Color(0xff28a745)),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Color(0xff28a745)),
           margin: EdgeInsets.only(left: 10, right: 10),
           padding: EdgeInsets.only(left: 20, top: 15),
           child: Row(
@@ -324,7 +313,9 @@ class _DashboardState extends State<Dashboard> {
         Container(
           height: height * 0.28,
           width: width,
-          decoration : BoxDecoration(borderRadius: BorderRadius.circular(10) , color : Color(0xffdc3545)),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Color(0xffdc3545)),
           margin: EdgeInsets.only(left: 10, right: 10),
           padding: EdgeInsets.only(left: 20, top: 15),
           child: Row(

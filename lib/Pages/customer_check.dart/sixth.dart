@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:eazy_app/Pages/customer_check.dart/fifth.dart';
+import 'package:eazy_app/Pages/dashboard.dart';
 import 'package:eazy_app/Pages/eazy_visits.dart';
 import 'package:eazy_app/Services/auth_service.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -37,6 +38,7 @@ class _SixthPageState extends State<SixthPage> {
     final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
     final cust_id = pref.getInt('cust_id');
     final mobile = pref.getString('mobile');
+    final project_id = pref.getString('project_id');
 
     var request = http.MultipartRequest('PUT', Uri.parse(url));
     request.files.add(await http.MultipartFile.fromPath("pic", filepath));
@@ -45,7 +47,7 @@ class _SixthPageState extends State<SixthPage> {
       'Authorization': settoken,
       HttpHeaders.cookieHeader: setcookie,
     });
-    request.fields['project'] = '2';
+    request.fields['project'] = project_id;
     request.fields['customer'] = '$cust_id';
     request.fields['mobile'] = mobile;
 
@@ -130,7 +132,7 @@ class _SixthPageState extends State<SixthPage> {
                         () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EazyVisits(),
+                            builder: (context) => Dashboard(),
                           ),
                         ),
                       );

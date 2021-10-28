@@ -60,6 +60,7 @@ class _SecondPageState extends State<SecondPage> {
     final settoken = 'Token ${token['token']}';
     final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
     final cust_id = sp.getInt('cust_id');
+    final project_id = pref.getString('project_id');
     http.Response response = await http.put(url,
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +70,7 @@ class _SecondPageState extends State<SecondPage> {
         },
         body: jsonEncode(
           {
-            'project': 2,
+            'project': project_id,
             'last_visited': curr_date,
             'customer': cust_id,
             'mobile': cust_mobile,

@@ -46,6 +46,7 @@ class _FirstPageState extends State<FirstPage> {
     final token = await AuthService.getToken();
     final settoken = 'Token ${token['token']}';
     final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
+    final project_id = pref.getString('project_id');
     http.Response response = await http.post(url,
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +56,7 @@ class _FirstPageState extends State<FirstPage> {
         },
         body: jsonEncode(
           {
-            'project': 2,
+            'project': project_id,
             'mobile': mobileController.text,
             'last_visited': curr_date
           },

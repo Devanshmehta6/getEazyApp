@@ -62,6 +62,7 @@ class _CPState extends State<CP> {
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
 
       print('--------set cookie--------$setcookie');
+      final project_id = pref.getString('project_id');
       http.Response response = await http.post(
         url,
         headers: {
@@ -72,7 +73,7 @@ class _CPState extends State<CP> {
         },
         body: jsonEncode(
           {
-            'project': 2,
+            'project': project_id,
             'rera_no': reg_num.text,
             'cp_mobile': cp_mobile.text,
             'mobile': cust_mobile.text,

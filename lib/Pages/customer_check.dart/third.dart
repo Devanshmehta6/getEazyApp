@@ -58,6 +58,7 @@ class _ThirdPageState extends State<ThirdPage> {
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
       final cust_id = sp.getInt('cust_id');
       print('--------third--------$cust_id');
+      final project_id = pref.getString('project_id');
       http.Response response = await http.post(
         url,
         headers: {
@@ -68,7 +69,7 @@ class _ThirdPageState extends State<ThirdPage> {
         },
         body: jsonEncode(
           {
-            'project': 2,
+            'project': project_id,
             'customer': cust_id,
             'budget': valueChoose,
             'purpose_of_purchase': _value,

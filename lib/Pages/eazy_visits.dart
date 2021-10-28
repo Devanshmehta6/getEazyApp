@@ -63,11 +63,12 @@ class _EazyVisitsState extends State<EazyVisits> {
   List<Sales> managers = [];
   String? dropDownValue;
   late Future myFuture;
+  late Future myFuture2;
   late Future futureForSales;
+  var proj_id;
 
   Future<List<User>> ongoingclass() async {
     final pref = await SharedPreferences.getInstance();
-    print("================ ON GOING VISITs ===========");
 
     final isLoggedIn = pref.getBool('log');
     print('Logged in visit page : $isLoggedIn');
@@ -101,7 +102,14 @@ class _EazyVisitsState extends State<EazyVisits> {
 
       var entireJson = jsonDecode(response.body);
       ongoingdata = entireJson['on_going_visits'];
+      //final cust_url = ongoingdata['customer_url'];
       sales = entireJson['sales_manager'];
+      final p_id = entireJson['current project'][0]['project_no'];
+      print('======== ....... $p_id');
+      pref.setString('project_id', p_id);
+
+      // print('---------------PROJ ------------ $proj_id');
+
       print('-----------------------$sales');
 
       for (var i in ongoingdata) {
@@ -166,6 +174,7 @@ class _EazyVisitsState extends State<EazyVisits> {
 
       managers.add(sales);
     }
+    print('-----------MANAGERS------------ $managers');
     return managers;
   }
 
@@ -189,6 +198,7 @@ class _EazyVisitsState extends State<EazyVisits> {
     final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
     final cust_id = sp.getInt('cust_id');
     final mobile = sp.getString('mobile');
+    final project_id = pref.getString('project_id');
 
     http.Response response = await http.put(url,
         headers: {
@@ -199,7 +209,7 @@ class _EazyVisitsState extends State<EazyVisits> {
         },
         body: jsonEncode(
           {
-            'project': 2,
+            'project': project_id,
             'customer': cust_id,
             'mobile': mobile,
             'assign_to': '$id',
@@ -255,7 +265,8 @@ class _EazyVisitsState extends State<EazyVisits> {
                       items:
                           snapshot.data.map<DropdownMenuItem<String>>((item) {
                         return DropdownMenuItem<String>(
-                          value: item.id.toString(), //value = string
+                          value: item.id.toString(),
+                          //value = string
                           child: Text(
                             item.name,
                             style: GoogleFonts.poppins(fontSize: 14),
@@ -320,11 +331,9 @@ class _EazyVisitsState extends State<EazyVisits> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print("================== Printing Image ================= ");
-    myFuture = ongoingclass();
-    //futureForSales = managerClass();
 
-    print("================== Image Printed ================= ");
+    myFuture = ongoingclass();
+    myFuture2 = completedclass();
   }
 
   @override
@@ -335,7 +344,6 @@ class _EazyVisitsState extends State<EazyVisits> {
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
 
-    final completedvisits = completedclass();
     bool isLoading = false;
 
     final project_name = ModalRoute.of(context)!.settings.arguments.toString();
@@ -609,7 +617,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                   }
                 }),
             FutureBuilder(
-              future: completedvisits,
+              future: myFuture2,
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:

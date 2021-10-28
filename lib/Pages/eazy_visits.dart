@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:camera/camera.dart';
+//import 'package:camera/camera.dart';
 import 'package:intl/intl.dart';
 import 'package:eazy_app/Pages/dashboard.dart';
 import 'package:http/http.dart' as http;
@@ -322,7 +322,8 @@ class _EazyVisitsState extends State<EazyVisits> {
     super.initState();
     print("================== Printing Image ================= ");
     myFuture = ongoingclass();
-    futureForSales = managerClass();
+    //futureForSales = managerClass();
+
     print("================== Image Printed ================= ");
   }
 
@@ -338,9 +339,9 @@ class _EazyVisitsState extends State<EazyVisits> {
     bool isLoading = false;
 
     final project_name = ModalRoute.of(context)!.settings.arguments.toString();
-    final new_project = project_name.substring(0, 17);
-    final dot = '...';
-    final latest_project = new_project + dot;
+    final new_project = project_name.substring(0, 18) + "...";
+    // final dot = '...';
+    // final latest_project = new_project + dot;
 
     return DefaultTabController(
       length: 2,
@@ -428,7 +429,7 @@ class _EazyVisitsState extends State<EazyVisits> {
             children: <Widget>[
               SizedBox(width: width * 0.13),
               Text(
-                latest_project,
+                new_project,
                 style: GoogleFonts.poppins(
                   textStyle: TextStyle(fontSize: 16, color: Colors.black),
                 ),

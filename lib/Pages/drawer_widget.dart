@@ -17,6 +17,7 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // import 'package:dio/dio.dart' as http;
 import 'package:eazy_app/Services/teams_json.dart';
@@ -35,7 +36,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
   bool is2Selected = false;
   bool is3Selected = false;
   var jsonData;
-   String? ima;
+  String ima = '';
   late Future myFuture;
 
   List<bool> bool_list = [
@@ -54,6 +55,38 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
 
   int selectedIndex = 0;
   int count = 0;
+
+  getData() async {
+    final pref = await SharedPreferences.getInstance();
+    final cust_url = pref.getString('customer_url');
+    final project_url = pref.getString('project_url');
+    Uri url = Uri.parse('https://geteazyapp.com/api/developer-logo');
+    print('------------------url----------------$url');
+    String sessionId = await FlutterSession().get('session');
+
+    String csrf = await FlutterSession().get('csrf');
+    print('==================== C S R F  VISITS =       $csrf');
+    final sp = await SharedPreferences.getInstance();
+    String? authorization = sp.getString('token');
+    String? tokenn = authorization;
+    final cookie = sp.getString('cookie');
+    final token = await AuthService.getToken();
+    final settoken = 'Token ${token['token']}';
+    final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
+
+    http.Response response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': settoken,
+        HttpHeaders.cookieHeader: setcookie,
+      },
+    );
+    final imgResponse = jsonDecode(response.body);
+    ima = imgResponse['developer_logo'];
+    print('-----------IMMMMAAA  ---------------$ima');
+  }
 
   Future<List<User>> getProjName() async {
     final pref = await SharedPreferences.getInstance();
@@ -85,7 +118,8 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
       });
       final jsonData = jsonDecode(response.body);
 
-      ima = jsonData['developer_logo'][0];
+      //ima = jsonData['developer_logo'][0];
+      //print('============IMA =========== $ima');
       final projectData = jsonData['projects'];
       print(projectData);
 
@@ -110,6 +144,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    getData();
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -124,10 +159,9 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
             Container(
               height: height * 0.2,
               padding: EdgeInsets.only(top: height * 0.01),
-              child: DrawerHeader(
-                padding:
-                    EdgeInsets.only(left: 10, right: 10, bottom: 15, top: 15),
-                child:  Text(''),
+              child: CachedNetworkImage(
+                imageUrl: ima,
+                placeholder: (context, url) => CircularProgressIndicator(),
               ),
             ),
             //EAZY DASHBOARD

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_session/flutter_session.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,6 +15,8 @@ class AuthService {
         'username': email,
         'password': password,
       });
+
+      print("==================== >>>>>>>>>>>>> ${jsonDecode(res.body)}");
 
       return res;
     } finally {

@@ -116,7 +116,7 @@ class _DashboardState extends State<Dashboard> {
           ),
           appBar: AppBar(
             //centerTitle : true,
-            iconTheme: IconThemeData(color: Colors.blue.shade800),
+            iconTheme: IconThemeData(color: myColor),
             backgroundColor: Colors.white,
             title: Row(
               children: <Widget>[
@@ -181,9 +181,10 @@ class _DashboardState extends State<Dashboard> {
     return Column(
       children: <Widget>[
         Container(
+          decoration : BoxDecoration(borderRadius: BorderRadius.circular(10) , color : Color(0xff007bff)),
           height: height * 0.28,
           width: width,
-          color: Colors.blue.shade300,
+          //color: Colors.blue.shade300,
           margin: EdgeInsets.only(left: 10, right: 10),
           padding: EdgeInsets.only(left: 20, top: 15),
           child: Row(
@@ -231,7 +232,7 @@ class _DashboardState extends State<Dashboard> {
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),
                 child: Icon(FontAwesomeIcons.users,
-                    size: 120, color: Colors.blue.shade100),
+                    size: 120, color: Color(0xffffff).withOpacity(0.5)),
               ),
             ],
           ),
@@ -251,7 +252,7 @@ class _DashboardState extends State<Dashboard> {
         Container(
           height: height * 0.28,
           width: width,
-          color: Colors.green.shade400,
+          decoration : BoxDecoration(borderRadius: BorderRadius.circular(10) , color : Color(0xff28a745)),
           margin: EdgeInsets.only(left: 10, right: 10),
           padding: EdgeInsets.only(left: 20, top: 15),
           child: Row(
@@ -302,7 +303,7 @@ class _DashboardState extends State<Dashboard> {
                 child: Icon(
                   FontAwesomeIcons.solidUser,
                   size: 120,
-                  color: Colors.green.shade100,
+                  color: Color(0xffffff).withOpacity(0.5),
                 ),
               ),
             ],
@@ -323,7 +324,7 @@ class _DashboardState extends State<Dashboard> {
         Container(
           height: height * 0.28,
           width: width,
-          color: Colors.red.shade400,
+          decoration : BoxDecoration(borderRadius: BorderRadius.circular(10) , color : Color(0xffdc3545)),
           margin: EdgeInsets.only(left: 10, right: 10),
           padding: EdgeInsets.only(left: 20, top: 15),
           child: Row(
@@ -373,7 +374,7 @@ class _DashboardState extends State<Dashboard> {
                 child: Icon(
                   FontAwesomeIcons.userTie,
                   size: 120,
-                  color: Colors.red.shade100,
+                  color: Color(0xffffff).withOpacity(0.5),
                 ),
               ),
             ],

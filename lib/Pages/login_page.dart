@@ -13,6 +13,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:eazy_app/sales part/sales_dashboard.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -28,6 +29,7 @@ class LoginPageState extends State<LoginPage> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passController = TextEditingController();
+  String? userRole;
 
   @override
   Widget build(BuildContext context) {
@@ -44,36 +46,74 @@ class LoginPageState extends State<LoginPage> {
       } else {}
     }
 
+    getRole() async {
+      Uri url = Uri.parse('https://geteazyapp.com/api/user-role/');
+
+      String sessionId = await FlutterSession().get('session');
+
+      String csrf = await FlutterSession().get('csrf');
+
+      final sp = await SharedPreferences.getInstance();
+      String? authorization = sp.getString('token');
+      String? tokenn = authorization;
+      final cookie = sp.getString('cookie');
+      final token = await AuthService.getToken();
+      final settoken = 'Token ${token['token']}';
+
+      final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
+      http.Response response = await http.get(url, headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': settoken,
+        HttpHeaders.cookieHeader: setcookie,
+      });
+
+      print('RESPONSE BODY USER ROLE : ${response.body}');
+      final userData = jsonDecode(response.body);
+      userRole = userData['user_role'];
+      print('========== $userRole');
+      print('-------USER ----------- ${userData['user_role']}');
+    }
+
     dynamic login(BuildContext context) async {
       authInfo = AuthService();
 
       final res =
           await authInfo.login(emailController.text, passController.text);
       final data = jsonDecode(res.body) as Map<String, dynamic>;
-      final headers = res.headers.toString();
-      final str = headers;
-      final start = 'sessionid=';
-      final end = '; expires=';
-      final startIndex = str.indexOf(start);
-      final endIndex = str.indexOf(end, startIndex + start.length);
-      final id = str.substring(startIndex + start.length, endIndex);
-      await FlutterSession().set('session', id);
-      final str1 = headers;
-      final start1 = 'set-cookie: ';
-      final end1 = '; expires=';
-      final startIndex1 = str1.indexOf(start1);
-      final endIndex1 = str1.indexOf(end1, startIndex1 + start1.length);
-      final csrf = str1.substring(startIndex1 + start1.length, endIndex1);
-      await FlutterSession().set('csrf', csrf);
-      print('===============CRF======= $csrf');
 
       if (data.containsKey('token')) {
+        final headers = res.headers.toString();
+        final str = headers;
+        final start = 'sessionid=';
+        final end = '; expires=';
+        final startIndex = str.indexOf(start);
+        final endIndex = str.indexOf(end, startIndex + start.length);
+        final id = str.substring(startIndex + start.length, endIndex);
+        await FlutterSession().set('session', id);
+        final str1 = headers;
+        final start1 = 'set-cookie: ';
+        final end1 = '; expires=';
+        final startIndex1 = str1.indexOf(start1);
+        final endIndex1 = str1.indexOf(end1, startIndex1 + start1.length);
+        final csrf = str1.substring(startIndex1 + start1.length, endIndex1);
+        await FlutterSession().set('csrf', csrf);
+
         AuthService.setToken(data['token']);
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Dashboard()),
-        );
+        getRole().whenComplete(() {
+          if (userRole == 'Visits Manager') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Dashboard()),
+            );
+          } else if (userRole == 'Sales Manager') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Sales_Dashboard()),
+            );
+          }
+        });
 
         isLoggedIn = true;
 
@@ -85,8 +125,8 @@ class LoginPageState extends State<LoginPage> {
         print('Token ${token['token']}');
 
         return data;
-      } else if (data.containsKey('expiry')) {
-        print('no');
+      } else if (data.containsKey('non_field_errors')) {
+        print('-------------- ELSE IF ---------------');
       }
     }
 
@@ -249,13 +289,17 @@ class LoginPageState extends State<LoginPage> {
                                     side: BorderSide(
                                         width: 0, color: Colors.white),
                                   ),
-                                  child: Text('Forgot Password?',
-                                      style: GoogleFonts.poppins(
-                                        textStyle: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey.shade600,
-                                            fontWeight: FontWeight.w500),
-                                      )),
+                                  child: InkWell(
+                                    child: Text('Forgot Password?',
+                                        style: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey.shade600,
+                                              fontWeight: FontWeight.w500),
+                                        )),
+                                    onTap: () => launch(
+                                        'https://geteazyapp.com/reset_password/'),
+                                  ),
                                   onPressed: () {},
                                 ),
                               ),

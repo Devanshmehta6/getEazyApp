@@ -62,9 +62,12 @@ class _EazyVisitsState extends State<EazyVisits> {
   var sales;
   List<Sales> managers = [];
   String? dropDownValue;
+  late Future myFuture;
+  late Future futureForSales;
 
   Future<List<User>> ongoingclass() async {
     final pref = await SharedPreferences.getInstance();
+    print("================ ON GOING VISITs ===========");
 
     final isLoggedIn = pref.getBool('log');
     print('Logged in visit page : $isLoggedIn');
@@ -202,7 +205,7 @@ class _EazyVisitsState extends State<EazyVisits> {
             'assign_to': '$id',
           },
         ));
-    print(response.body.toString());
+    print('--------------PUT-----------------${response.body.toString()}');
   }
 
   showAlertDialog(BuildContext context) {
@@ -211,9 +214,10 @@ class _EazyVisitsState extends State<EazyVisits> {
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
-    Dialog alert = Dialog(
+    print('---------------WIDGETTTTTTTTTTT---------------------');
+    AlertDialog alert = AlertDialog(
       //clipBehavior: Clip.antiAliasWithSaveLayer,
-      child: Padding(
+      title: Padding(
         padding: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -259,11 +263,16 @@ class _EazyVisitsState extends State<EazyVisits> {
                         );
                       }).toList(),
                       onChanged: (value) async {
+                        print("================ Onchange ===============");
                         setState(() {
                           dropDownValue = value;
                         });
-                        final pref = await SharedPreferences.getInstance();
-                        pref.setString('sales_id', dropDownValue);
+                        //final pref = await SharedPreferences.getInstance();
+                        //pref.setString('sales_id', dropDownValue);
+                        print(
+                            "================ dropDownValue = $dropDownValue ===============");
+                        postManager(context, dropDownValue.toString());
+                        Navigator.pop(context);
                       },
                     );
                 }
@@ -279,7 +288,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                         height: height * 0.05,
                         width: width * 0.35,
                         child: FlatButton(
-                          color: Colors.white,
+                          color: Colors.grey,
                           onPressed: () {
                             Navigator.of(context, rootNavigator: true).pop();
                           },
@@ -290,24 +299,6 @@ class _EazyVisitsState extends State<EazyVisits> {
                           ),
                         ),
                       ),
-                      Container(
-                        width: width * 0.35,
-                        child: FlatButton(
-                          color: myColor,
-                          onPressed: () async {
-                            final pref = await SharedPreferences.getInstance();
-                            final String id = pref.getString('sales_id');
-                            postManager(context, id).whenComplete(() {
-                              Navigator.of(context).pop();
-                            });
-                          },
-                          child: Text(
-                            'Assign',
-                            style: GoogleFonts.poppins(
-                                fontSize: 14, color: Colors.white),
-                          ),
-                        ),
-                      )
                     ],
                   ),
                 ),
@@ -326,6 +317,16 @@ class _EazyVisitsState extends State<EazyVisits> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print("================== Printing Image ================= ");
+    myFuture = ongoingclass();
+    futureForSales = managerClass();
+    print("================== Image Printed ================= ");
+  }
+
+  @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
@@ -333,11 +334,13 @@ class _EazyVisitsState extends State<EazyVisits> {
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
 
-    final ongoingvisits = ongoingclass();
     final completedvisits = completedclass();
     bool isLoading = false;
 
     final project_name = ModalRoute.of(context)!.settings.arguments.toString();
+    final new_project = project_name.substring(0, 17);
+    final dot = '...';
+    final latest_project = new_project + dot;
 
     return DefaultTabController(
       length: 2,
@@ -423,9 +426,9 @@ class _EazyVisitsState extends State<EazyVisits> {
           backgroundColor: Colors.white,
           title: Row(
             children: <Widget>[
-              SizedBox(width: width * 0.15),
+              SizedBox(width: width * 0.13),
               Text(
-                project_name,
+                latest_project,
                 style: GoogleFonts.poppins(
                   textStyle: TextStyle(fontSize: 16, color: Colors.black),
                 ),
@@ -442,7 +445,7 @@ class _EazyVisitsState extends State<EazyVisits> {
         body: TabBarView(
           children: [
             FutureBuilder(
-                future: ongoingvisits,
+                future: myFuture,
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   final height = MediaQuery.of(context).size.height -
                       MediaQuery.of(context).padding.top -
@@ -467,6 +470,8 @@ class _EazyVisitsState extends State<EazyVisits> {
                           ),
                         );
                       }
+                      print(
+                          "========================== snapshot.data.length = ${snapshot.data.length} =====================");
                       return ListView.builder(
                           itemCount: snapshot.data.length,
                           itemBuilder: (BuildContext context, int index) {
@@ -548,7 +553,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                                             ),
                                                           )
                                                         : Text(
-                                                            'Allocated To : ${snapshot.data[index].assign_to}',
+                                                            '', //'Allocated To : ${snapshot.data[index].assign_to}',
                                                             style: GoogleFonts
                                                                 .poppins(
                                                               textStyle:

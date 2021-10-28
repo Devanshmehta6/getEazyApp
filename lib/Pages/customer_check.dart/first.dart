@@ -67,7 +67,7 @@ class _FirstPageState extends State<FirstPage> {
     final cust_id = body['id'];
     pref.setInt('cust_id', cust_id);
     final c_id = pref.getInt('cust_id');
-    print('--------------$c_id');
+    print('--------------$cust_url');
     pref.setString('mobile', mobileController.text);
 
     sendMobile.add(mobileController.text);

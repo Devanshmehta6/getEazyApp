@@ -24,6 +24,7 @@ class _DashboardState extends State<Dashboard> {
   late String token;
   late String settoken;
   String? image;
+  late final String? img;
 
   Future getData() async {
     final pref = await SharedPreferences.getInstance();
@@ -66,10 +67,10 @@ class _DashboardState extends State<Dashboard> {
       }
       print('RESPONSE BODY : ${response.body}');
       final entireJson = jsonDecode(response.body);
-      final img = entireJson['developer_logo'][0];
-      final pref = await SharedPreferences.getInstance();
-      pref.setString('image_url', img);
-      print('-------entire json----------$entireJson');
+      img = entireJson['developer_logo'][0];
+      // final pref = await SharedPreferences.getInstance();
+      // pref.setString('image_url', img);
+      // print('-------entire json----------$entireJson');
       //final project = entireJson['projects'];
       //print('---------------project----------$project');
       //final project_url = entireJson['projects']['project_url'];
@@ -110,7 +111,9 @@ class _DashboardState extends State<Dashboard> {
           return true;
         },
         child: Scaffold(
-          endDrawer: NavigationDrawerWidget(),
+          endDrawer: NavigationDrawerWidget(
+            
+          ),
           appBar: AppBar(
             //centerTitle : true,
             iconTheme: IconThemeData(color: Colors.blue.shade800),

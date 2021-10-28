@@ -13,6 +13,7 @@ import 'package:eazy_app/Pages/eazy_visits.dart';
 import 'package:eazy_app/Pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -34,7 +35,8 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
   bool is2Selected = false;
   bool is3Selected = false;
   var jsonData;
-  var ima;
+   String? ima;
+  late Future myFuture;
 
   List<bool> bool_list = [
     false,
@@ -53,14 +55,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
   int selectedIndex = 0;
   int count = 0;
 
-  String img = '';
-
-  getImage() async {
-    final pref = await SharedPreferences.getInstance();
-    img = pref.getString('image_url');
-  }
-
-  Future<List<User>> getVisits() async {
+  Future<List<User>> getProjName() async {
     final pref = await SharedPreferences.getInstance();
 
     final isLoggedIn = pref.getBool('log');
@@ -90,9 +85,10 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
       });
       final jsonData = jsonDecode(response.body);
 
+      ima = jsonData['developer_logo'][0];
       final projectData = jsonData['projects'];
       print(projectData);
-      print('=====================###########=============$jsonData');
+
       for (var u in projectData) {
         User user = User(u["project_name"].toString(), u["project_url"]);
         users.add(user);
@@ -108,7 +104,8 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getImage();
+
+    myFuture = getProjName();
   }
 
   @override
@@ -117,8 +114,8 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
-    final project_name = getVisits();
 
+    print('DRAWERRRRRRRRRRRRRRRRRRRRRR');
     return Drawer(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -130,9 +127,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
               child: DrawerHeader(
                 padding:
                     EdgeInsets.only(left: 10, right: 10, bottom: 15, top: 15),
-                child: img.isEmpty
-                    ? Center(child: CircularProgressIndicator())
-                    : Image.network('$img'),
+                child:  Text(''),
               ),
             ),
             //EAZY DASHBOARD
@@ -182,7 +177,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                       ),
                       children: [
                         FutureBuilder(
-                          future: project_name,
+                          future: myFuture,
                           builder:
                               (BuildContext context, AsyncSnapshot snapshot) {
                             if (snapshot.data == null) {
@@ -268,7 +263,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                       ),
                       children: [
                         FutureBuilder(
-                          future: project_name,
+                          future: myFuture,
                           builder:
                               (BuildContext context, AsyncSnapshot snapshot2) {
                             if (snapshot2.data == null) {

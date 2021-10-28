@@ -1,3 +1,4 @@
+import 'package:eazy_app/sales%20part/drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,10 +19,11 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
     return Scaffold(
+      endDrawer: DrawerWidget(),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         //centerTitle : true,
-        iconTheme: IconThemeData(color: Colors.blue.shade800),
+        iconTheme: IconThemeData(color: myColor),
         backgroundColor: Colors.white,
         title: Row(
           children: <Widget>[
@@ -42,7 +44,7 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
         ),
       ),
       body: Container(
-        margin: EdgeInsets.symmetric(vertical: height*0.013),
+        margin: EdgeInsets.symmetric(vertical: height * 0.013),
         child: SingleChildScrollView(
           child: Column(
             children: [

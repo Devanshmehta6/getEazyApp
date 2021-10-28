@@ -72,7 +72,7 @@ class LoginPageState extends State<LoginPage> {
 
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Sales_Dashboard()),
+          MaterialPageRoute(builder: (context) => Dashboard()),
         );
 
         isLoggedIn = true;

@@ -28,6 +28,7 @@ class _EazyTeamsState extends State<EazyTeams> {
   List<User> users = [];
   bool check = true;
   String? project_name;
+  late Future getteams;
 
   String? checkintime;
   String? checkouttime;
@@ -112,6 +113,7 @@ class _EazyTeamsState extends State<EazyTeams> {
       ),
     );
     final res = jsonDecode(response.body);
+    print('-------------- res ---------------- $res');
     setState(() {
       checkintime = res[0]['history_data']['checkin_time'];
     });
@@ -158,13 +160,22 @@ class _EazyTeamsState extends State<EazyTeams> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print("================== Printing Image ================= ");
+    getteams = getTeams();
+    print("================== Image Printed ================= ");
+  }
+
+  @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
-    final getteams = getTeams();
+
     String? formattedDate; //DateFormat('kk:mm:ss').format(now);
     return Scaffold(
       backgroundColor: Colors.grey.shade300,

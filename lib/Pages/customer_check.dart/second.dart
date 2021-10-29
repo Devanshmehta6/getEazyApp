@@ -42,7 +42,8 @@ class _SecondPageState extends State<SecondPage> {
     );
     final pref = await SharedPreferences.getInstance();
     final project_url = pref.getString('project_url');
-    final cust_mobile = pref.getString('mobile');
+     
+    final cust_mobile = wNumber.text == null ? pref.getString('mobile') : wNumber.text;
 
     final cust_url = pref.getString('customer_url');
 
@@ -551,9 +552,9 @@ class _SecondPageState extends State<SecondPage> {
                 SizedBox(height: height * 0.04),
                 Container(
                   margin: EdgeInsets.only(
-                      left: width * 0.075, right: width * 0.075),
-                  child: Padding(
-                    padding: EdgeInsets.only(right: width * 0.38),
+                      right: width * 0.33),
+                  child: Container(
+                    //padding: EdgeInsets.only(right: width * 0.38),
                     child: Text(
                       'Basic Information',
                       style: GoogleFonts.poppins(
@@ -657,7 +658,7 @@ class _SecondPageState extends State<SecondPage> {
                     children: [
                       Container(
                         padding: EdgeInsets.only(
-                            right: width * 0.1, left: width * 0.03),
+                            right : width*0.03 ,left: width * 0.03),
                         child: Text(
                           'Is this your Whatsapp Number?',
                           style: GoogleFonts.poppins(
@@ -743,7 +744,7 @@ class _SecondPageState extends State<SecondPage> {
                 ),
                 Container(
                   margin: EdgeInsets.only(
-                      left: width * 0.085, right: width * 0.085),
+                      left: width * 0.075, right: width * 0.075),
                   child: Container(
                     padding: EdgeInsets.all(5),
                     decoration: BoxDecoration(
@@ -781,7 +782,7 @@ class _SecondPageState extends State<SecondPage> {
                 ),
                 Container(
                   margin: EdgeInsets.only(
-                      left: width * 0.085, right: width * 0.085),
+                      left: width * 0.075, right: width * 0.075),
                   padding: EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     border: Border(

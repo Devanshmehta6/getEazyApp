@@ -524,7 +524,7 @@ class _FourthPageState extends State<FourthPage> {
                   ),
                   SizedBox(height: height * 0.04),
                   Container(
-                    margin: EdgeInsets.only(right: width * 0.41),
+                    margin: EdgeInsets.only(right: width * 0.35),
                     child: Text(
                       'Work Information',
                       style: GoogleFonts.poppins(
@@ -535,7 +535,7 @@ class _FourthPageState extends State<FourthPage> {
                   ),
                   Container(
                     margin: EdgeInsets.only(
-                        top: height * 0.02, right: width * 0.29),
+                        top: height * 0.02, right: width * 0.22),
                     child: Text(
                       'What is your occupation?',
                       style: GoogleFonts.poppins(
@@ -632,7 +632,7 @@ class _FourthPageState extends State<FourthPage> {
                   ),
                   Container(
                     margin:
-                        EdgeInsets.only(top: height * 0.02, right: width * 0.5),
+                        EdgeInsets.only(top: height * 0.02, right: width * 0.48),
                     child: Text(
                       'Office Location',
                       style: GoogleFonts.poppins(
@@ -644,7 +644,7 @@ class _FourthPageState extends State<FourthPage> {
                   SizedBox(height: height * 0.005),
                   Container(
                     margin: EdgeInsets.only(
-                        left: width * 0.075, right: width * 0.075),
+                        left: width * 0.07, right: width * 0.075),
                     padding: EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       border: Border(

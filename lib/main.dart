@@ -1,4 +1,6 @@
 // @dart=2.9
+import 'package:eazy_app/Pages/customer_check.dart/fourth.dart';
+import 'package:eazy_app/Pages/customer_check.dart/second.dart';
 import 'package:eazy_app/Pages/customer_check.dart/third.dart';
 import 'package:eazy_app/Services/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -32,14 +34,15 @@ class _EazyAppState extends State<EazyApp> {
       home: FutureBuilder(
           future: AuthService.getToken(),
           builder: (_, snapshot) {
+
             if (snapshot.connectionState == ConnectionState.waiting) {
               return CircularProgressIndicator();
             } else if (snapshot.hasData) {
               clearData();
               
-              return ThirdPage(); //SplashScreen();
+              return SecondPage(); //SplashScreen();
             } else {
-              return ThirdPage(); //SplashScreen();
+              return SecondPage(); //SplashScreen();
             }
           }),
     );

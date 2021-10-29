@@ -210,7 +210,7 @@ class _ThirdPageState extends State<ThirdPage> {
                     margin: EdgeInsets.only(
                         left: width * 0.04),
                     child: Padding(
-                      padding: EdgeInsets.only(right: width * 0.45),
+                      padding: EdgeInsets.only(right: width * 0.48),
                       child: Text(
                         'Requirements',
                         style: GoogleFonts.poppins(
@@ -222,8 +222,8 @@ class _ThirdPageState extends State<ThirdPage> {
                   ),
                   Container(
                     margin: EdgeInsets.only(top: height * 0.025),
-                    child: Padding(
-                      padding: EdgeInsets.only(right: width * 0.08),
+                    child: Container(
+                      padding: EdgeInsets.only(left: width * 0.003),
                       child: Text(
                         'What configuration are you looking at?',
                         style: GoogleFonts.poppins(
@@ -276,12 +276,15 @@ class _ThirdPageState extends State<ThirdPage> {
                     ),
                     child: Column(
                       children: [
-                        Text('What is the purpose of your purchase?',
-                            style: GoogleFonts.poppins(
-                                textStyle: TextStyle(fontSize: 16))),
+                        Container(
+                          padding: EdgeInsets.only(left: width * 0.08),
+                          child: Text('What is the purpose of your purchase?',
+                              style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(fontSize: 16))),
+                        ),
                         Row(
                           children: [
-                            SizedBox(width: width * 0.04),
+                            SizedBox(width: width * 0.05),
                             Transform.scale(
                               scale: 1.1,
                               child: Radio(
@@ -329,7 +332,7 @@ class _ThirdPageState extends State<ThirdPage> {
                         ),
                         Row(
                           children: [
-                            SizedBox(width: width * 0.04),
+                            SizedBox(width: width * 0.05),
                             Transform.scale(
                               scale: 1.1,
                               child: Radio(
@@ -348,7 +351,7 @@ class _ThirdPageState extends State<ThirdPage> {
                                 textStyle: TextStyle(fontSize: 15),
                               ),
                             ),
-                            SizedBox(width: width * 0.10),
+                            SizedBox(width: width * 0.09),
                             Transform.scale(
                               scale: 1.1,
                               child: Radio(
@@ -376,6 +379,7 @@ class _ThirdPageState extends State<ThirdPage> {
                   Container(
                     margin: EdgeInsets.only(
                         top: height * 0.02, right: width * 0.27),
+                        padding: EdgeInsets.only(left:width*0.075),
                     child: Text(
                       'Provide your mode of funding',
                       style: GoogleFonts.poppins(
@@ -387,7 +391,7 @@ class _ThirdPageState extends State<ThirdPage> {
                     margin: EdgeInsets.only(right: width * 0.1),
                     child: Row(
                       children: [
-                        SizedBox(width: width * 0.04),
+                        SizedBox(width: width * 0.05),
                         Transform.scale(
                           scale: 1.1,
                           child: Radio(
@@ -406,7 +410,7 @@ class _ThirdPageState extends State<ThirdPage> {
                             textStyle: TextStyle(fontSize: 15),
                           ),
                         ),
-                        SizedBox(width: width * 0.050),
+                        SizedBox(width: width * 0.03),
                         Transform.scale(
                           scale: 1.1,
                           child: Radio(

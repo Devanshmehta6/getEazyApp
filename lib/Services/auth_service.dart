@@ -9,14 +9,10 @@ class AuthService {
 
   Future<dynamic> login(String email, String password) async {
     try {
-      print(" >>>>>>>>>>>> ${email} ");
-      print(" >>>>>>>>>>>> ${password} ");
       var res = await http.post(baseUrl, body: {
         'username': email,
         'password': password,
       });
-
-      print("==================== >>>>>>>>>>>>> ${jsonDecode(res.body)}");
 
       return res;
     } finally {

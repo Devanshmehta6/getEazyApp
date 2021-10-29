@@ -422,10 +422,11 @@ class _FourthPageState extends State<FourthPage> {
                   child: FlatButton(
                     color: Colors.white,
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pop(
                           context,
                           MaterialPageRoute(
                             builder: (context) => ThirdPage(),
+                            maintainState: true
                           ));
                     },
                     child: isLoading
@@ -471,7 +472,7 @@ class _FourthPageState extends State<FourthPage> {
                       await availableCameras().then((value) => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => FifthPage(cameras: value),
+                              builder: (context) => FifthPage(cameras: value), 
                             ),
                           ));
                     },

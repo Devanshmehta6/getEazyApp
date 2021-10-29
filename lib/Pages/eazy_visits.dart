@@ -22,8 +22,9 @@ class User {
   late String name;
   late String phone;
   late String assign_to;
+  late String customer_url;
 
-  User(this.name, this.phone, this.assign_to);
+  User(this.name, this.phone, this.assign_to, this.customer_url);
 }
 
 class User2 {
@@ -36,10 +37,13 @@ class User2 {
 
 class Sales {
   late String name;
-  late int id;
-  late String assign_to;
+  late String id;
+  //late String assign_to;
 
-  Sales(this.name, this.id, this.assign_to);
+  Sales(
+    this.name,
+    this.id,
+  ); //this.assign_to);
 }
 
 class EazyVisits extends StatefulWidget {
@@ -56,16 +60,15 @@ class _EazyVisitsState extends State<EazyVisits> {
   var completeddata;
   List<User> users = [];
   List<User2> users2 = [];
-  late String token;
-  late String settoken;
-  String project_url = '';
+
   var sales;
   List<Sales> managers = [];
   String? dropDownValue;
   late Future myFuture;
   late Future myFuture2;
   late Future futureForSales;
-  var proj_id;
+  String project_name = '';
+  String new_project = '';
 
   Future<List<User>> ongoingclass() async {
     final pref = await SharedPreferences.getInstance();
@@ -104,16 +107,16 @@ class _EazyVisitsState extends State<EazyVisits> {
       ongoingdata = entireJson['on_going_visits'];
       //final cust_url = ongoingdata['customer_url'];
       sales = entireJson['sales_manager'];
+      print('==========sales===========$sales');
       final p_id = entireJson['current project'][0]['project_no'];
       print('======== ....... $p_id');
       pref.setString('project_id', p_id);
 
       // print('---------------PROJ ------------ $proj_id');
 
-      print('-----------------------$sales');
-
       for (var i in ongoingdata) {
-        User user = User(i['name'], i['phone'], i['assign_to']);
+        User user =
+            User(i['name'], i['phone'], i['assign_to'], i['customer_url']);
 
         users.add(user);
       }
@@ -170,8 +173,7 @@ class _EazyVisitsState extends State<EazyVisits> {
 
   Future<List<Sales>> managerClass() async {
     for (var i in sales) {
-      Sales sales = Sales(i['name'], i['id'], i['assign_to']);
-
+      Sales sales = Sales(i['name'], i['id']); //, i['assign_to']);
       managers.add(sales);
     }
     print('-----------MANAGERS------------ $managers');
@@ -180,7 +182,9 @@ class _EazyVisitsState extends State<EazyVisits> {
 
   postManager(BuildContext context, String id) async {
     final pref = await SharedPreferences.getInstance();
-    final cust_url = pref.getString('customer_url');
+    final cust_url = pref.getString('cust_url');
+    print(
+        '---------CUSTOMER URL THAT HAS BEEN PRINTED---------------$cust_url');
     final project_url = pref.getString('project_url');
     Uri url =
         Uri.parse('https://geteazyapp.com/projects/$project_url/$cust_url/api');
@@ -215,7 +219,6 @@ class _EazyVisitsState extends State<EazyVisits> {
             'assign_to': '$id',
           },
         ));
-    print('--------------PUT-----------------${response.body.toString()}');
   }
 
   showAlertDialog(BuildContext context) {
@@ -224,7 +227,7 @@ class _EazyVisitsState extends State<EazyVisits> {
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
-    print('---------------WIDGETTTTTTTTTTT---------------------');
+
     AlertDialog alert = AlertDialog(
       //clipBehavior: Clip.antiAliasWithSaveLayer,
       title: Padding(
@@ -235,6 +238,8 @@ class _EazyVisitsState extends State<EazyVisits> {
             FutureBuilder(
               future: managerClass(),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
+                print(
+                    '>>>>>>>>>>>> SNAPSHOT >>>>>>>>>>> ${snapshot.data.length}');
                 final height = MediaQuery.of(context).size.height -
                     MediaQuery.of(context).padding.top -
                     kToolbarHeight;
@@ -261,7 +266,11 @@ class _EazyVisitsState extends State<EazyVisits> {
                             fontSize: 16,
                             color: Colors.black,
                           )),
-                      value: dropDownValue,
+                      // selectedItemBuilder: (BuildContext context) {
+                      //   return snapshot.data.map<Widget>((Sales item) {
+                      //     return Text(item.name);
+                      //   }).toList();
+                      // },
                       items:
                           snapshot.data.map<DropdownMenuItem<String>>((item) {
                         return DropdownMenuItem<String>(
@@ -274,14 +283,10 @@ class _EazyVisitsState extends State<EazyVisits> {
                         );
                       }).toList(),
                       onChanged: (value) async {
-                        print("================ Onchange ===============");
                         setState(() {
                           dropDownValue = value;
                         });
-                        //final pref = await SharedPreferences.getInstance();
-                        //pref.setString('sales_id', dropDownValue);
-                        print(
-                            "================ dropDownValue = $dropDownValue ===============");
+
                         postManager(context, dropDownValue.toString());
                         Navigator.pop(context);
                       },
@@ -331,7 +336,7 @@ class _EazyVisitsState extends State<EazyVisits> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
+//futureForSales = managerClass();
     myFuture = ongoingclass();
     myFuture2 = completedclass();
   }
@@ -346,11 +351,19 @@ class _EazyVisitsState extends State<EazyVisits> {
 
     bool isLoading = false;
 
-    final project_name = ModalRoute.of(context)!.settings.arguments.toString();
-    final new_project = project_name.substring(0, 18) + "...";
+    getName() async {
+      final pref = await SharedPreferences.getInstance();
+      project_name = pref.getString('project_name');
+      setState(() {
+        new_project = project_name.substring(0, 18) + "...";
+      });
+    }
+
+    //final project_name = ModalRoute.of(context)!.settings.arguments.toString();
+
     // final dot = '...';
     // final latest_project = new_project + dot;
-
+    getName();
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -390,7 +403,6 @@ class _EazyVisitsState extends State<EazyVisits> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => FirstPage(),
-                        settings: RouteSettings(arguments: project_url),
                       ),
                     );
                   },
@@ -442,12 +454,9 @@ class _EazyVisitsState extends State<EazyVisits> {
                   textStyle: TextStyle(fontSize: 16, color: Colors.black),
                 ),
               ),
-              SizedBox(width: width * 0.16),
-              Image.asset(
-                'images/eazyapp-logo-blue.png',
-                height: 48,
-                width: 40,
-              ),
+              SizedBox(width: width * 0.12),
+              Image.asset('images/eazyapp-logo-blue.png',
+                  height: 45, width: 40),
             ],
           ),
         ),
@@ -479,8 +488,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                           ),
                         );
                       }
-                      print(
-                          "========================== snapshot.data.length = ${snapshot.data.length} =====================");
+
                       return ListView.builder(
                           itemCount: snapshot.data.length,
                           itemBuilder: (BuildContext context, int index) {
@@ -547,7 +555,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                                         EdgeInsets.only(top: 9),
                                                     child: snapshot.data[index]
                                                                 .assign_to ==
-                                                            null
+                                                            'None'
                                                         ? Text(
                                                             'Allocated To : -',
                                                             style: GoogleFonts
@@ -562,7 +570,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                                             ),
                                                           )
                                                         : Text(
-                                                            '', //'Allocated To : ${snapshot.data[index].assign_to}',
+                                                            'Allocated To : ${snapshot.data[index].assign_to}',
                                                             style: GoogleFonts
                                                                 .poppins(
                                                               textStyle:
@@ -592,19 +600,39 @@ class _EazyVisitsState extends State<EazyVisits> {
                                       child: Container(
                                         color: Colors.white,
                                         child: OutlinedButton(
-                                          //color: myColor,
                                           style: OutlinedButton.styleFrom(
                                             side: BorderSide(
                                                 color: myColor, width: 1.5),
                                           ),
-
-                                          child: Text(
-                                            'ASSIGN SALES MANAGER',
-                                            style: GoogleFonts.poppins(
-                                                fontSize: 16, color: myColor),
-                                          ),
-                                          onPressed: () {
+                                          child: snapshot
+                                                      .data[index].assign_to ==
+                                                  'None'
+                                              ? Text(
+                                                  'ASSIGN SALES MANAGER',
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      color: myColor),
+                                                )
+                                              : Text(
+                                                  'RE-ASSIGN SALES MANAGER',
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      color: myColor),
+                                                ),
+                                          onPressed: () async {
                                             showAlertDialog(context);
+                                            final cust_url = snapshot
+                                                .data[index].customer_url;
+                                            final pref = await SharedPreferences
+                                                .getInstance();
+                                            pref.setString(
+                                                'cust_url', cust_url);
+                                            print(
+                                                '----CUSTOMER URL HAS BEEN SET------ $cust_url');
+
+                                            //customer_url.add(snapshot.data[index].customer_url[0]);
+                                            //print('------------$customer_url');
+                                            //print('===============${snapshot.data[index].customer_url}');
                                           },
                                         ),
                                       ),

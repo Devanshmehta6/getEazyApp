@@ -156,13 +156,15 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         scrollDirection: Axis.vertical,
         child: Column(
           children: <Widget>[
+            
             Container(
               height: height * 0.2,
               padding: EdgeInsets.only(top: height * 0.01),
-              child: CachedNetworkImage(
-                imageUrl: ima,
-                placeholder: (context, url) => CircularProgressIndicator(),
-              ),
+
+              // child: CachedNetworkImage(
+              //   imageUrl: ima,
+              //   placeholder: (context, url) => CircularProgressIndicator(),
+              // ),
             ),
             //EAZY DASHBOARD
             ListTile(
@@ -236,9 +238,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => EazyVisits(),
-                                          settings: RouteSettings(
-                                              arguments: snapshot
-                                                  .data[index].project_name),
+                                        
                                         ),
                                       );
                                     },

@@ -97,46 +97,67 @@ class _FifthPageState extends State<FifthPage> {
         ),
       );
     }
-    return Scaffold(
-      backgroundColor: Colors.grey.shade300,
-      body: Center(
-        child: Column(
-          children: [
-            Container(
-                margin:
-                    EdgeInsets.only(top: height * 0.067, bottom: height * 0.03),
-                height: 400,
-                width: width,
-                child: CameraPreview(controller)),
-           
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: myColor),
-              onPressed: () async {
-                ogFile = await controller.takePicture().whenComplete(() {
-                  setState(() {});
-                });
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SixthPage(),
-                    settings: RouteSettings(arguments: ogFile),
-                  ),
-                );
-              },
-              child: Text(
-                'Capture Image',
-                style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
-              ),
-            ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Colors.grey.shade300,
+        body: Center(
+          child: Column(
+            children: [
+              Container(
+                  margin: EdgeInsets.only(
+                      top: height * 0.067, bottom: height * 0.03),
+                  height: height * 0.95,
+                  width: width,
+                  child: CameraPreview(controller)),
 
-            // Positioned.fill(
-            //   child: ogFile == null
-            //       ? Text('')
-            //       : Image.file(
-            //           File(ogFile!.path),
-            //         ),
-            // ),
-          ],
+              Container(
+                height: height * 0.065,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(primary: Color(0xff007bff)),
+                  onPressed: () async {
+                    XFile tempFile = await controller.takePicture();
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SixthPage(),
+                        settings: RouteSettings(arguments: tempFile),
+                      ),
+                    );
+                    //ogFile = await controller.takePicture().whenComplete(() {
+                    //print('>>>>>>>>>>>>>>>>... ${ogFile!.path.toString()}');
+                    //setState(() {});
+
+                    //});
+                    // ogFile = await controller.takePicture().whenComplete(() {
+                    //   //setState(() {});
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => SixthPage(),
+                    //       settings: RouteSettings(arguments: ogFile),
+                    //     ),
+                    //   );
+                    // });
+                  },
+                  child: Text(
+                    'Capture Image',
+                    style:
+                        GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+
+              // Positioned.fill(
+              //   child: ogFile == null
+              //       ? Text('')
+              //       : Image.file(
+              //           File(ogFile!.path),
+              //         ),
+              // ),
+            ],
+          ),
         ),
       ),
     );

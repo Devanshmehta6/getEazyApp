@@ -1,5 +1,7 @@
 // import 'dart:js';
 
+import 'package:eazy_app/Pages/customer_check.dart/fifth.dart';
+import 'package:eazy_app/Pages/customer_check.dart/fourth.dart';
 import 'package:eazy_app/Services/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +32,9 @@ class LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passController = TextEditingController();
   String? userRole;
+  FocusNode _focus = new FocusNode();
+  bool showError = false;
+  var _text = '';
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +44,7 @@ class LoginPageState extends State<LoginPage> {
 
     bool isLoggedIn = false;
     bool _validate = false;
+
     var authInfo;
 
     validateSave() {
@@ -126,9 +132,13 @@ class LoginPageState extends State<LoginPage> {
 
         return data;
       } else if (data.containsKey('non_field_errors')) {
-        print('-------------- ELSE IF ---------------');
+        setState(() {
+          showError = true;
+        });
       }
     }
+
+
 
     Map mapResponse = {};
 
@@ -146,7 +156,7 @@ class LoginPageState extends State<LoginPage> {
                 children: <Widget>[
                   Container(
                       // margin : EdgeInsets.only(top :150 , right : 230) ,
-                      padding: EdgeInsets.only(top: height * 0.15, right: 230),
+                      padding: EdgeInsets.only(top: height * 0.15, right: 210),
                       child: Image.asset('images/eazyapp-logo-blue.png',
                           height: height * 0.1)),
                   Container(
@@ -176,7 +186,23 @@ class LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.only(top: 50, left: 18, right: 18),
+                    margin: EdgeInsets.only(
+                      top: height * 0.02,
+                      right: width * 0.21,
+                    ),
+                    //padding : EdgeInsets.symmetric(horizontal: width*0.04),
+                    height: height * 0.04,
+                    child: showError
+                        ? Text(
+                            'Invalid username or password',
+                            style: GoogleFonts.poppins(
+                                fontSize: 16, fontWeight: FontWeight.w500),
+                          )
+                        : Container(),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(
+                        top: height * 0.01, left: 18, right: 18),
                     child: Column(
                       children: <Widget>[
                         Container(
@@ -191,6 +217,10 @@ class LoginPageState extends State<LoginPage> {
                               Container(
                                 padding: EdgeInsets.all(8),
                                 child: TextFormField(
+                                  onChanged: (text) {
+                                    setState(() => _text);
+                                  },
+                                  focusNode: _focus,
                                   style: GoogleFonts.poppins(
                                       textStyle: TextStyle(
                                     fontSize: 16,
@@ -218,7 +248,10 @@ class LoginPageState extends State<LoginPage> {
                                       borderSide: BorderSide(color: myColor),
                                     ),
                                     suffixIcon: Icon(Icons.email,
-                                        color: myColor, size: 20),
+                                        color: emailController.text != null
+                                            ? myColor
+                                            : Colors.grey.shade300,
+                                        size: 20),
                                     border: InputBorder.none,
                                     hintText: 'Email',
                                     hintStyle: GoogleFonts.poppins(
@@ -283,7 +316,7 @@ class LoginPageState extends State<LoginPage> {
                               ),
                               SizedBox(height: height * 0.001),
                               Container(
-                                margin: EdgeInsets.only(left: 190),
+                                margin: EdgeInsets.only(left: width * 0.45),
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
                                     side: BorderSide(
@@ -293,7 +326,7 @@ class LoginPageState extends State<LoginPage> {
                                     child: Text('Forgot Password?',
                                         style: GoogleFonts.poppins(
                                           textStyle: TextStyle(
-                                              fontSize: 14,
+                                              fontSize: 15,
                                               color: Colors.grey.shade600,
                                               fontWeight: FontWeight.w500),
                                         )),

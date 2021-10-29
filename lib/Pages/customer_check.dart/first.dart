@@ -18,10 +18,12 @@ class FirstPage extends StatefulWidget {
   _FirstPageState createState() => _FirstPageState();
 }
 
-class _FirstPageState extends State<FirstPage> {
+class _FirstPageState extends State<FirstPage>
+    with AutomaticKeepAliveClientMixin<FirstPage> {
   List sendMobile = [];
   String? project_name;
   final TextEditingController mobileController = TextEditingController();
+  String mobile = '';
 
   getName() async {
     final pref = await SharedPreferences.getInstance();
@@ -86,8 +88,12 @@ class _FirstPageState extends State<FirstPage> {
     getName();
   }
 
+  // TODO: implement wantKeepAlive
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -144,9 +150,9 @@ class _FirstPageState extends State<FirstPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SecondPage(),
-                            settings: RouteSettings(arguments: sendMobile),
-                          ),
+                              builder: (context) => SecondPage(),
+                              maintainState: true,
+                              fullscreenDialog: true),
                         );
                         setState(() {
                           isLoading = !isLoading;
@@ -221,6 +227,12 @@ class _FirstPageState extends State<FirstPage> {
                       top: 10, left: width * 0.075, right: width * 0.075),
                   padding: EdgeInsets.all(5),
                   child: TextFormField(
+                    onChanged: (text) {
+                      setState(() {
+                        //mobileController.text = text;
+                        mobile = text;
+                      });
+                    },
                     autofocus: true,
                     controller: mobileController,
                     style: GoogleFonts.poppins(
@@ -255,4 +267,6 @@ class _FirstPageState extends State<FirstPage> {
       ),
     );
   }
+
+  bool get wantKeepAlive => true;
 }

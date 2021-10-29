@@ -66,7 +66,10 @@ class _SixthPageState extends State<SixthPage> {
     Color myColor = Color(0xff4044fc);
 
     final XFile? displayImage =
-        ModalRoute.of(context)!.settings.arguments as XFile;
+        ModalRoute.of(context)!.settings.arguments as XFile?;
+
+        print('>>>>>>>>>>>>>>>>>... ${displayImage!.path}');
+
     return MaterialApp(
       home: Scaffold(
         bottomNavigationBar: Container(
@@ -82,11 +85,11 @@ class _SixthPageState extends State<SixthPage> {
                   child: FlatButton(
                     color: Colors.white,
                     onPressed: () async {
-                      await availableCameras().then((value) => Navigator.push(
+                      await availableCameras().then((value) => Navigator.pop(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => FifthPage(cameras: value),
-                            ),
+                                builder: (context) => FifthPage(cameras: value),
+                                maintainState: true),
                           ));
                     },
                     child: isLoading
@@ -128,12 +131,12 @@ class _SixthPageState extends State<SixthPage> {
                     height: 300,
                     color: myColor,
                     onPressed: () async {
-                      patchImage(displayImage!.path).whenComplete(
+                      patchImage(displayImage.path).whenComplete(
                         () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Dashboard(),
-                          ),
+                              builder: (context) => EazyVisits(),
+                              maintainState: true),
                         ),
                       );
                     },
@@ -174,8 +177,8 @@ class _SixthPageState extends State<SixthPage> {
           padding: EdgeInsets.only(top: height * 0.07),
           height: height * 2.2,
           width: width,
-          child: Image.file(
-            File(displayImage!.path),
+          child:Image.file(
+            File(displayImage.path),
           ),
         ),
       ),

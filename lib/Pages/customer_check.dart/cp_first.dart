@@ -144,6 +144,7 @@ class _CPState extends State<CP> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => SecondPage(),
+                            maintainState: true
                           ),
                         );
                       },

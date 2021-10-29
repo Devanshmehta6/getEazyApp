@@ -446,10 +446,11 @@ class _SecondPageState extends State<SecondPage> {
                   child: FlatButton(
                     color: Colors.white,
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pop(
                           context,
                           MaterialPageRoute(
                             builder: (context) => FirstPage(),
+                            maintainState: true
                           ));
                     },
                     child: isLoading
@@ -496,6 +497,7 @@ class _SecondPageState extends State<SecondPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ThirdPage(),
+                          maintainState: true
                         ),
                       );
                     },

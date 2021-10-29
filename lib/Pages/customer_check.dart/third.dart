@@ -103,10 +103,11 @@ class _ThirdPageState extends State<ThirdPage> {
                   child: FlatButton(
                     color: Colors.white,
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pop(
                           context,
                           MaterialPageRoute(
                             builder: (context) => SecondPage(),
+                            maintainState: true
                           ));
                     },
                     child: isLoading
@@ -153,6 +154,7 @@ class _ThirdPageState extends State<ThirdPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => FourthPage(),
+                          maintainState: true
                         ),
                       );
                     },
@@ -206,7 +208,7 @@ class _ThirdPageState extends State<ThirdPage> {
                   SizedBox(height: height * 0.04),
                   Container(
                     margin: EdgeInsets.only(
-                        left: width * 0.085, right: width * 0.11),
+                        left: width * 0.04),
                     child: Padding(
                       padding: EdgeInsets.only(right: width * 0.45),
                       child: Text(

@@ -1,4 +1,5 @@
 // @dart=2.9
+import 'package:eazy_app/Pages/customer_check.dart/third.dart';
 import 'package:eazy_app/Services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:eazy_app/Pages/login_page.dart';
@@ -35,9 +36,10 @@ class _EazyAppState extends State<EazyApp> {
               return CircularProgressIndicator();
             } else if (snapshot.hasData) {
               clearData();
-              return LoginPage(); //SplashScreen();
+              
+              return ThirdPage(); //SplashScreen();
             } else {
-              return LoginPage(); //SplashScreen();
+              return ThirdPage(); //SplashScreen();
             }
           }),
     );

@@ -35,15 +35,14 @@ class _DashboardState extends State<Dashboard> {
       final token = await AuthService.getToken();
       //print('TOKENENNENEN :$token');
       final settoken = 'Token ${token['token']}';
-      print('Set token :: $settoken');
+
       Uri url = Uri.parse('https://geteazyapp.com/dashboard_api/');
 
       String sessionId = await FlutterSession().get('session');
 
       String csrf = await FlutterSession().get('csrf');
-      print('%%%%%%%%%%%% $csrf');
+
       final sp = await SharedPreferences.getInstance();
-      print('Token $settoken');
 
       //final finalToken = 'Token ${token[token]}';
 
@@ -64,7 +63,7 @@ class _DashboardState extends State<Dashboard> {
           mapResponse = json.decode(response.body);
         });
       }
-      print('RESPONSE BODY  DASHBOARD: ${response.body}');
+
       final entireJson = jsonDecode(response.body);
     } else {
       print('Logged out ');
@@ -188,10 +187,15 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ),
                   SizedBox(height: height * 0.01),
+
                   Text(
-                    DateFormat("dd-MM-yyyy").format(
-                      DateTime.now(),
-                    ),
+                    DateFormat("EEEE").format(
+                          DateTime.now(),
+                        ) +
+                        ' , ' +
+                        DateFormat("dd-MM-yyyy").format(
+                          DateTime.now(),
+                        ),
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(
                         fontSize: 17,
@@ -214,7 +218,7 @@ class _DashboardState extends State<Dashboard> {
                       : CircularProgressIndicator()
                 ],
               ),
-              SizedBox(width: width * 0.16),
+              SizedBox(width: width * 0.1),
               Container(
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),
@@ -251,7 +255,7 @@ class _DashboardState extends State<Dashboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Total Visits - Direct',
+                    'Direct Visits',
                     style: GoogleFonts.poppins(
                       fontSize: 21,
                       fontWeight: FontWeight.w700,
@@ -259,9 +263,13 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   SizedBox(height: height * 0.01),
                   Text(
-                    DateFormat("dd-MM-yyyy").format(
-                      DateTime.now(),
-                    ),
+                    DateFormat("EEEE").format(
+                          DateTime.now(),
+                        ) +
+                        ' , ' +
+                        DateFormat("dd-MM-yyyy").format(
+                          DateTime.now(),
+                        ),
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(
                         fontSize: 17,
@@ -285,7 +293,7 @@ class _DashboardState extends State<Dashboard> {
                       : CircularProgressIndicator()
                 ],
               ),
-              SizedBox(width: width * 0.025),
+              SizedBox(width: width * 0.185),
               Container(
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),
@@ -308,8 +316,9 @@ class _DashboardState extends State<Dashboard> {
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     //sabKuch();
-    return Column(
+    return Stack(
       children: <Widget>[
+        
         Container(
           height: height * 0.28,
           width: width,
@@ -324,18 +333,25 @@ class _DashboardState extends State<Dashboard> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    'Total Visits - CP',
-                    style: GoogleFonts.poppins(
-                      fontSize: 21,
-                      fontWeight: FontWeight.w700,
+                  Positioned(
+                    right : 50,
+                    child: Text(
+                      'Channel Partner Visits',
+                      style: GoogleFonts.poppins(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   SizedBox(height: height * 0.01),
                   Text(
-                    DateFormat("dd-MM-yyyy").format(
-                      DateTime.now(),
-                    ),
+                    DateFormat("EEEE").format(
+                          DateTime.now(),
+                        ) +
+                        ' , ' +
+                        DateFormat("dd-MM-yyyy").format(
+                          DateTime.now(),
+                        ),
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(
                         fontSize: 17,
@@ -358,13 +374,14 @@ class _DashboardState extends State<Dashboard> {
                       : CircularProgressIndicator()
                 ],
               ),
-              SizedBox(width: width * 0.12),
+              //SizedBox(width: width * 0.05),
+
               Container(
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),
                 child: Icon(
                   FontAwesomeIcons.userTie,
-                  size: 120,
+                  size: 100,
                   color: Color(0xffffff).withOpacity(0.5),
                 ),
               ),

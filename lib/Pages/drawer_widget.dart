@@ -56,7 +56,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
   int selectedIndex = 0;
   int count = 0;
 
-  getData() async {
+  getImage() async {
     final pref = await SharedPreferences.getInstance();
     final cust_url = pref.getString('customer_url');
     final project_url = pref.getString('project_url');
@@ -85,6 +85,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
     );
     final imgResponse = jsonDecode(response.body);
     ima = imgResponse['developer_logo'];
+    return ima;
     print('-----------IMMMMAAA  ---------------$ima');
   }
 
@@ -144,27 +145,36 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    getData();
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
 
-    print('DRAWERRRRRRRRRRRRRRRRRRRRRR');
     return Drawer(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
           children: <Widget>[
-            
             Container(
               height: height * 0.2,
               padding: EdgeInsets.only(top: height * 0.01),
-
-              // child: CachedNetworkImage(
-              //   imageUrl: ima,
-              //   placeholder: (context, url) => CircularProgressIndicator(),
-              // ),
+              child: FutureBuilder(
+                  future: getImage(),
+                  builder: (context, snapshot) {
+                    print('>>>>>>>>>......${snapshot.data}');
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.none:
+                        return Text('none');
+                      case ConnectionState.active:
+                        return Text('active');
+                      case ConnectionState.waiting:
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      case ConnectionState.done:
+                        return Image.network(ima.toString());
+                    }
+                  }),
             ),
             //EAZY DASHBOARD
             ListTile(
@@ -238,7 +248,6 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => EazyVisits(),
-                                        
                                         ),
                                       );
                                     },

@@ -172,11 +172,15 @@ class _EazyVisitsState extends State<EazyVisits> {
   }
 
   Future<List<Sales>> managerClass() async {
+    print('-----------BEFORE LOOP--------------$managers');
+    managers.clear();
     for (var i in sales) {
+      //managers.clear();
       Sales sales = Sales(i['name'], i['id']); //, i['assign_to']);
       managers.add(sales);
+      print('----------IN LOOP AFTER ADDITION===========$managers');
     }
-    print('-----------MANAGERS------------ $managers');
+    print('-----------AFTER LOOP------------ $managers');
     return managers;
   }
 
@@ -238,8 +242,8 @@ class _EazyVisitsState extends State<EazyVisits> {
             FutureBuilder(
               future: managerClass(),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
-                print(
-                    '>>>>>>>>>>>> SNAPSHOT >>>>>>>>>>> ${snapshot.data.length}');
+                //print(
+                // '>>>>>>>>>>>> SNAPSHOT >>>>>>>>>>> ${snapshot.data.length}');
                 final height = MediaQuery.of(context).size.height -
                     MediaQuery.of(context).padding.top -
                     kToolbarHeight;
@@ -287,7 +291,8 @@ class _EazyVisitsState extends State<EazyVisits> {
                           dropDownValue = value;
                         });
 
-                        postManager(context, dropDownValue.toString());
+                        postManager(context, dropDownValue.toString())
+                            .whenComplete(() => managers.clear());
                         Navigator.pop(context);
                       },
                     );

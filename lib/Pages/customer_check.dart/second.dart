@@ -42,13 +42,16 @@ class _SecondPageState extends State<SecondPage> {
     );
     final pref = await SharedPreferences.getInstance();
     final project_url = pref.getString('project_url');
-     
-    final cust_mobile = wNumber.text == null ? pref.getString('mobile') : wNumber.text;
+
+    final cust_mobile =
+        wNumber.text == null ? wNumber.text : pref.getString('mobile') ;
+        print('>>>>>>>>>>>> MOBILE >>>>>>>>> $cust_mobile');
 
     final cust_url = pref.getString('customer_url');
 
     Uri url =
         Uri.parse('https://geteazyapp.com/projects/$project_url/$cust_url/api');
+        print('>>>>>>>>>>>>>url>>>>>>>>>.. $url');
 
     String sessionId = await FlutterSession().get('session');
 
@@ -75,12 +78,15 @@ class _SecondPageState extends State<SecondPage> {
             'last_visited': curr_date,
             'customer': cust_id,
             'mobile': cust_mobile,
+            'whatsapp_no': wNumber.text == null ? cust_mobile : wNumber.text,
             'first_name': fname.text,
             'last_name': lname.text,
             'email': email.text,
             'residence_location': valueChooseForLocation,
           },
         ));
+
+        print('===========SECOND========${response.body}');
   }
 
   String? valueChoose;
@@ -450,9 +456,8 @@ class _SecondPageState extends State<SecondPage> {
                       Navigator.pop(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FirstPage(),
-                            maintainState: true
-                          ));
+                              builder: (context) => FirstPage(),
+                              maintainState: true));
                     },
                     child: isLoading
                         ? Row(
@@ -493,14 +498,12 @@ class _SecondPageState extends State<SecondPage> {
                     height: 300,
                     color: myColor,
                     onPressed: () {
-                      postData();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ThirdPage(),
-                          maintainState: true
-                        ),
-                      );
+                      postData().whenComplete(() => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ThirdPage(),
+                                maintainState: true),
+                          ));
                     },
                     child: isLoading
                         ? Row(
@@ -551,8 +554,7 @@ class _SecondPageState extends State<SecondPage> {
                 ),
                 SizedBox(height: height * 0.04),
                 Container(
-                  margin: EdgeInsets.only(
-                      right: width * 0.33),
+                  margin: EdgeInsets.only(right: width * 0.33),
                   child: Container(
                     //padding: EdgeInsets.only(right: width * 0.38),
                     child: Text(
@@ -658,7 +660,7 @@ class _SecondPageState extends State<SecondPage> {
                     children: [
                       Container(
                         padding: EdgeInsets.only(
-                            right : width*0.03 ,left: width * 0.03),
+                            right: width * 0.03, left: width * 0.03),
                         child: Text(
                           'Is this your Whatsapp Number?',
                           style: GoogleFonts.poppins(

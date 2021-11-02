@@ -218,12 +218,12 @@ class _DashboardState extends State<Dashboard> {
                       : CircularProgressIndicator()
                 ],
               ),
-              SizedBox(width: width * 0.1),
+              SizedBox(width: width * 0.08),
               Container(
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),
                 child: Icon(FontAwesomeIcons.users,
-                    size: 120, color: Color(0xffffff).withOpacity(0.5)),
+                    size: 110, color: Color(0xffffff).withOpacity(0.5)),
               ),
             ],
           ),
@@ -293,13 +293,13 @@ class _DashboardState extends State<Dashboard> {
                       : CircularProgressIndicator()
                 ],
               ),
-              SizedBox(width: width * 0.185),
+              SizedBox(width: width * 0.165),
               Container(
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),
                 child: Icon(
                   FontAwesomeIcons.solidUser,
-                  size: 120,
+                  size: 110,
                   color: Color(0xffffff).withOpacity(0.5),
                 ),
               ),
@@ -316,9 +316,8 @@ class _DashboardState extends State<Dashboard> {
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     //sabKuch();
-    return Stack(
+    return Column(
       children: <Widget>[
-        
         Container(
           height: height * 0.28,
           width: width,
@@ -333,14 +332,11 @@ class _DashboardState extends State<Dashboard> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Positioned(
-                    right : 50,
-                    child: Text(
-                      'Channel Partner Visits',
-                      style: GoogleFonts.poppins(
-                        fontSize: 21,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  Text(
+                    'CP Visits',
+                    style: GoogleFonts.poppins(
+                      fontSize: 21,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   SizedBox(height: height * 0.01),
@@ -363,7 +359,8 @@ class _DashboardState extends State<Dashboard> {
                   SizedBox(height: height * 0.02),
                   mapResponse != null
                       ? Text(
-                          mapResponse['dashboard_statistics']['cp_customers']
+                          mapResponse['dashboard_statistics']
+                                  ['cp_customers']
                               .toString(), //"$total_customers",
                           style: GoogleFonts.poppins(
                             textStyle: TextStyle(
@@ -374,14 +371,13 @@ class _DashboardState extends State<Dashboard> {
                       : CircularProgressIndicator()
                 ],
               ),
-              //SizedBox(width: width * 0.05),
-
+              SizedBox(width: width * 0.155),
               Container(
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),
                 child: Icon(
                   FontAwesomeIcons.userTie,
-                  size: 100,
+                  size: 110,
                   color: Color(0xffffff).withOpacity(0.5),
                 ),
               ),

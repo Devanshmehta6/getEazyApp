@@ -40,9 +40,9 @@ class _EazyAppState extends State<EazyApp> {
             } else if (snapshot.hasData) {
               clearData();
               
-              return SecondPage(); //SplashScreen();
+              return LoginPage(); //SplashScreen();
             } else {
-              return SecondPage(); //SplashScreen();
+              return LoginPage(); //SplashScreen();
             }
           }),
     );

@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:another_flushbar/flushbar.dart';
 
 class Sales_Dashboard extends StatefulWidget {
   const Sales_Dashboard({Key? key}) : super(key: key);
@@ -20,6 +21,7 @@ class Sales_Dashboard extends StatefulWidget {
 
 class _Sales_DashboardState extends State<Sales_Dashboard> {
   List dashboard_response = [];
+  
 
   Future getData() async {
     final pref = await SharedPreferences.getInstance();
@@ -58,23 +60,26 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
       dashboard_response = jsonDecode(response.body);
       print('>>>>>>>>>>....$dashboard_response');
       final image = dashboard_response[0]['developer_logo'];
-      //final project_url = dashboard_response[0]['project'][];
-      //print('>>>>>>>>>>>>>>>>>>>>>>>>>>>> $project_url');
-      final SESSION = FlutterSession();
-      await SESSION.set('image', image);
+      
+      
     } else {
       print('Logged out ');
     }
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
+    final bool snack = ModalRoute.of(context)!.settings.arguments as bool;
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
+
     return Scaffold(
+      
       endDrawer: DrawerWidget(),
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -167,7 +172,7 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
                                 ),
                                 Container(
                                   margin: EdgeInsets.symmetric(
-                                      horizontal: width * 0.085,
+                                      horizontal: width * 0.065,
                                       vertical: height * 0.035),
                                   child: Icon(
                                     FontAwesomeIcons.users,
@@ -229,7 +234,7 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(
-                                      left: width * 0.19, top: height * 0.035),
+                                      left: width * 0.16, top: height * 0.035),
                                   child: Icon(
                                     FontAwesomeIcons.grinHearts,
                                     size: 110,
@@ -290,7 +295,7 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(
-                                      left: width * 0.12, top: height * 0.035),
+                                      left: width * 0.085, top: height * 0.035),
                                   child: Icon(
                                     FontAwesomeIcons.smile,
                                     size: 110,
@@ -357,7 +362,7 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(
-                                      left: width * 0.16, top: height * 0.035),
+                                      left: width * 0.12, top: height * 0.035),
                                   child: Icon(
                                     FontAwesomeIcons.headset,
                                     size: 110,

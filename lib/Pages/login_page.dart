@@ -3,6 +3,7 @@
 import 'package:eazy_app/Pages/customer_check.dart/fifth.dart';
 import 'package:eazy_app/Pages/customer_check.dart/fourth.dart';
 import 'package:eazy_app/Services/auth_service.dart';
+import 'package:eazy_app/sales%20part/assigned_customer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -32,6 +33,7 @@ class LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passController = TextEditingController();
   String? userRole;
+  bool? isbusy;
   FocusNode _focus = new FocusNode();
   bool showError = false;
   var _text = '';
@@ -77,6 +79,10 @@ class LoginPageState extends State<LoginPage> {
       print('RESPONSE BODY USER ROLE : ${response.body}');
       final userData = jsonDecode(response.body);
       userRole = userData['user_role'];
+      if (userRole == 'Sales Manager') {
+        isbusy = userData['is_busy'];
+        print('>>>>>>>> is bsy >>>>>>>>>. $isbusy');
+      }
       print('========== $userRole');
       print('-------USER ----------- ${userData['user_role']}');
     }
@@ -114,10 +120,21 @@ class LoginPageState extends State<LoginPage> {
               MaterialPageRoute(builder: (context) => Dashboard()),
             );
           } else if (userRole == 'Sales Manager') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Sales_Dashboard()),
-            );
+            isbusy == true
+                ? Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AssginedCustomer(),
+                    ),
+                  )
+                : Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Sales_Dashboard(),
+                    ),
+                  );
+
+            print('ghij');
           }
         });
 
@@ -137,8 +154,6 @@ class LoginPageState extends State<LoginPage> {
         });
       }
     }
-
-
 
     Map mapResponse = {};
 

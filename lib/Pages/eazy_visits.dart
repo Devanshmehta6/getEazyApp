@@ -470,6 +470,7 @@ class _EazyVisitsState extends State<EazyVisits> {
             FutureBuilder(
                 future: myFuture,
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  print('>>>>>>>>>>>> IOGQNWEIOGIO $snapshot');
                   final height = MediaQuery.of(context).size.height -
                       MediaQuery.of(context).padding.top -
                       kToolbarHeight;

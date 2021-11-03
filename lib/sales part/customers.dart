@@ -29,10 +29,8 @@ class EazyCustomers extends StatefulWidget {
 }
 
 class _EazyCustomersState extends State<EazyCustomers> {
-
-   
   List<getDetails> cust_details = [];
-  
+
   String project_name = '';
   String new_project = '';
 
@@ -82,14 +80,11 @@ class _EazyCustomersState extends State<EazyCustomers> {
     return cust_details;
   }
 
- 
-
   @override
   Widget build(BuildContext context) {
+    
     String pname = ModalRoute.of(context)!.settings.arguments.toString();
-    
-    
-     
+
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -178,7 +173,6 @@ class _EazyCustomersState extends State<EazyCustomers> {
                                     child: Container(
                                       child: Column(
                                         children: [
-                                          
                                           Row(
                                             children: <Widget>[
                                               Padding(
@@ -283,11 +277,14 @@ class _EazyCustomersState extends State<EazyCustomers> {
                                               .getInstance();
                                           pref.setString('cust_name',
                                               snapshot.data[index].name);
+
                                           Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      Detailspage()));
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Detailspage(),
+                                            ),
+                                          );
                                         },
                                         child: Text(
                                           'View',
@@ -297,7 +294,7 @@ class _EazyCustomersState extends State<EazyCustomers> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height:height*0.01),
+                                  SizedBox(height: height * 0.01),
                                 ],
                               );
                             });

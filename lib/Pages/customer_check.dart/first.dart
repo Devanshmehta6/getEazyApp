@@ -101,167 +101,178 @@ class _FirstPageState extends State<FirstPage>
     Color myColor = Color(0xff4044fc);
     bool isLoading = false;
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        resizeToAvoidBottomInset: false,
-        bottomNavigationBar: Container(
-          height: height * 0.1,
-          margin: EdgeInsets.only(top: 2),
-          child: SafeArea(
-            child: Row(children: [
-              Container(
-                margin: EdgeInsets.only(top: height * 0.031),
-                width: width * 0.50,
-                child: SizedBox(
-                  height: height * 0.06,
-                  child: FlatButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EazyVisits(),
-                          ));
-                    },
-                    child: Text(
-                      'Back',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(fontSize: 17, color: Colors.black),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          resizeToAvoidBottomInset: false,
+          bottomNavigationBar: Container(
+            height: height * 0.1,
+            margin: EdgeInsets.only(top: 2),
+            child: SafeArea(
+              child: Row(children: [
+                Container(
+                  margin: EdgeInsets.only(top: height * 0.031),
+                  width: width * 0.50,
+                  child: SizedBox(
+                    height: height * 0.06,
+                    child: FlatButton(
+                      color: Colors.white,
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EazyVisits(),
+                            ));
+                      },
+                      child: Text(
+                        'Back',
+                        style: GoogleFonts.poppins(
+                          textStyle:
+                              TextStyle(fontSize: 17, color: Colors.black),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Container(
-                //height: height * 0.01,
-                margin: EdgeInsets.only(top: height * 0.031),
-                height: height * 0.12,
-                width: width * 0.50,
-                child: SizedBox(
-                  child: FlatButton(
-                    height: 300,
-                    color: myColor,
-                    onPressed: () async {
-                      postData().then((dynamic) {
-                        setState(() {
-                          isLoading = !isLoading;
+                Container(
+                  //height: height * 0.01,
+                  margin: EdgeInsets.only(top: height * 0.031),
+                  height: height * 0.12,
+                  width: width * 0.50,
+                  child: SizedBox(
+                    child: FlatButton(
+                      height: 300,
+                      color: myColor,
+                      onPressed: () async {
+                        postData().then((dynamic) {
+                          setState(() {
+                            isLoading = !isLoading;
+                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SecondPage(),
+                                maintainState: true,
+                                fullscreenDialog: true),
+                          );
+                          setState(() {
+                            isLoading = !isLoading;
+                          });
                         });
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SecondPage(),
-                              maintainState: true,
-                              fullscreenDialog: true),
-                        );
-                        setState(() {
-                          isLoading = !isLoading;
-                        });
-                      });
-                    },
-                    child: isLoading
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 24),
-                              Text(
-                                'Please Wait',
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                      },
+                      child: isLoading
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: Colors.white,
                                 ),
-                              )
-                            ],
+                                SizedBox(width: 24),
+                                Text(
+                                  'Please Wait',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            )
+                          : Text(
+                              'Next',
+                              style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                    fontSize: 17, color: Colors.white),
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+          body: GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
+            child: Center(
+              child: Container(
+                height: height,
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      height: height * 0.1,
+                      margin: EdgeInsets.only(top: height * 0.3),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('images/eazyapp-logo-blue.png'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: height * 0.04),
+                    project_name == null
+                        ? Text(
+                            'Check In - Loading..',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
                           )
                         : Text(
-                            'Next',
+                            'Check In - $project_name',
                             style: GoogleFonts.poppins(
-                              textStyle:
-                                  TextStyle(fontSize: 17, color: Colors.white),
+                              textStyle: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ),
-                  ),
+                    SizedBox(height: height * 0.02),
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: 10, left: width * 0.075, right: width * 0.075),
+                      padding: EdgeInsets.all(5),
+                      child: TextFormField(
+                        onChanged: (text) {
+                          setState(() {
+                            //mobileController.text = text;
+                            mobile = text;
+                          });
+                        },
+                        autofocus: true,
+                        controller: mobileController,
+                        style: GoogleFonts.poppins(
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        autovalidate: true,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: myColor),
+                          ),
+                          suffixIcon:
+                              Icon(Icons.phone, color: myColor, size: 20),
+                          border: InputBorder.none,
+                          hintText: 'Enter your 10 digit mobile number',
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                                fontWeight: FontWeight.w300,
+                                fontSize: 16,
+                                color: Colors.grey.shade700),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                //color: Colors.grey.shade200,
               ),
-            ]),
-          ),
-        ),
-        body: Center(
-          child: Container(
-            height: height,
-            child: Column(
-              children: <Widget>[
-                Container(
-                  height: height * 0.1,
-                  margin: EdgeInsets.only(top: height * 0.3),
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('images/eazyapp-logo-blue.png'),
-                    ),
-                  ),
-                ),
-                SizedBox(height: height * 0.04),
-                project_name == null
-                    ? Text(
-                        'Check In - Loading..',
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      )
-                    : Text(
-                        'Check In - $project_name',
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                SizedBox(height: height * 0.02),
-                Container(
-                  margin: EdgeInsets.only(
-                      top: 10, left: width * 0.075, right: width * 0.075),
-                  padding: EdgeInsets.all(5),
-                  child: TextFormField(
-                    onChanged: (text) {
-                      setState(() {
-                        //mobileController.text = text;
-                        mobile = text;
-                      });
-                    },
-                    autofocus: true,
-                    controller: mobileController,
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                    ),
-                    autovalidate: true,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: myColor),
-                      ),
-                      suffixIcon: Icon(Icons.phone, color: myColor, size: 20),
-                      border: InputBorder.none,
-                      hintText: 'Enter your 10 digit mobile number',
-                      hintStyle: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            fontWeight: FontWeight.w300,
-                            fontSize: 16,
-                            color: Colors.grey.shade700),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
-            //color: Colors.grey.shade200,
           ),
         ),
       ),

@@ -87,354 +87,357 @@ class _ThirdPageState extends State<ThirdPage> {
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        bottomNavigationBar: Container(
-          height: height * 0.1,
-          margin: EdgeInsets.only(top: 2),
-          child: SafeArea(
-            child: Row(children: [
-              Container(
-                margin: EdgeInsets.only(top: height * 0.031),
-                width: width * 0.50,
-                child: SizedBox(
-                  height: height * 0.06,
-                  child: FlatButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      Navigator.pop(
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          bottomNavigationBar: Container(
+            height: height * 0.1,
+            margin: EdgeInsets.only(top: 2),
+            child: SafeArea(
+              child: Row(children: [
+                Container(
+                  margin: EdgeInsets.only(top: height * 0.031),
+                  width: width * 0.50,
+                  child: SizedBox(
+                    height: height * 0.06,
+                    child: FlatButton(
+                      color: Colors.white,
+                      onPressed: () {
+                        Navigator.pop(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SecondPage(),
+                              maintainState: true
+                            ));
+                      },
+                      child: isLoading
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 24),
+                                Text(
+                                  'Please Wait',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            )
+                          : Text(
+                              'Back',
+                              style: GoogleFonts.poppins(
+                                textStyle:
+                                    TextStyle(fontSize: 17, color: Colors.black),
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+                Container(
+                  //height: height * 0.01,
+                  margin: EdgeInsets.only(top: height * 0.031),
+                  height: height * 0.12,
+                  width: width * 0.50,
+                  child: SizedBox(
+                    child: FlatButton(
+                      height: 300,
+                      color: myColor,
+                      onPressed: () {
+                        postData();
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SecondPage(),
+                            builder: (context) => FourthPage(),
                             maintainState: true
-                          ));
-                    },
-                    child: isLoading
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 24),
-                              Text(
-                                'Please Wait',
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              )
-                            ],
-                          )
-                        : Text(
-                            'Back',
-                            style: GoogleFonts.poppins(
-                              textStyle:
-                                  TextStyle(fontSize: 17, color: Colors.black),
-                            ),
                           ),
-                  ),
-                ),
-              ),
-              Container(
-                //height: height * 0.01,
-                margin: EdgeInsets.only(top: height * 0.031),
-                height: height * 0.12,
-                width: width * 0.50,
-                child: SizedBox(
-                  child: FlatButton(
-                    height: 300,
-                    color: myColor,
-                    onPressed: () {
-                      postData();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FourthPage(),
-                          maintainState: true
-                        ),
-                      );
-                    },
-                    child: isLoading
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 24),
-                              Text(
-                                'Please Wait',
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              )
-                            ],
-                          )
-                        : Text(
-                            'Next',
-                            style: GoogleFonts.poppins(
-                              textStyle:
-                                  TextStyle(fontSize: 17, color: Colors.white),
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ]),
-          ),
-        ),
-        body: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Center(
-            child: Container(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    height: height * 0.1,
-                    margin: EdgeInsets.only(top: height * 0.2),
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('images/eazyapp-logo-blue.png'),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: height * 0.04),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.04),
-                    child: Padding(
-                      padding: EdgeInsets.only(right: width * 0.48),
-                      child: Text(
-                        'Requirements',
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: height * 0.025),
-                    child: Container(
-                      padding: EdgeInsets.only(left: width * 0.003),
-                      child: Text(
-                        'What configuration are you looking at?',
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: height * 0.01),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.075, right: width * 0.075),
-                    padding: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: myColor),
-                      ),
-                    ),
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      iconSize: 46,
-                      iconDisabledColor: myColor,
-                      iconEnabledColor: myColor,
-                      icon: Icon(Icons.arrow_drop_down),
-                      underline: SizedBox(),
-                      hint: Text(
-                        "What is your budget?",
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                      value: valueChoose,
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      ),
-                      items: budgetList.map((valueItem) {
-                        return DropdownMenuItem(
-                            value: valueItem, child: Text(valueItem));
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          valueChoose = newValue;
-                        });
+                        );
                       },
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                      top: height * 0.03,
-                      right: width * 0.09,
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.only(left: width * 0.08),
-                          child: Text('What is the purpose of your purchase?',
-                              style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(fontSize: 16))),
-                        ),
-                        Row(
-                          children: [
-                            SizedBox(width: width * 0.05),
-                            Transform.scale(
-                              scale: 1.1,
-                              child: Radio(
-                                  value: "Self Use",
-                                  groupValue: _value,
-                                  activeColor: myColor,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _value = value.toString();
-                                    });
-                                  }),
-                            ),
-                            Text(
-                              'Self Use',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontSize: 15,
+                      child: isLoading
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: Colors.white,
                                 ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: width * 0.16,
-                            ),
-                            Transform.scale(
-                              scale: 1.1,
-                              child: Radio(
-                                  value: "Second Home",
-                                  groupValue: _value,
-                                  activeColor: myColor,
-                                  onChanged: (val) {
-                                    setState(() {
-                                      _value = val.toString();
-                                    });
-                                  }),
-                            ),
-                            Text(
-                              'Second home',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontSize: 15,
-                                ),
-                              ),
+                                SizedBox(width: 24),
+                                Text(
+                                  'Please Wait',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                )
+                              ],
                             )
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            SizedBox(width: width * 0.05),
-                            Transform.scale(
-                              scale: 1.1,
-                              child: Radio(
-                                  value: 'Investment',
-                                  groupValue: _value,
-                                  activeColor: myColor,
-                                  onChanged: (val) {
-                                    setState(() {
-                                      _value = val.toString();
-                                    });
-                                  }),
-                            ),
-                            Text(
-                              'Investment',
+                          : Text(
+                              'Next',
                               style: GoogleFonts.poppins(
-                                textStyle: TextStyle(fontSize: 15),
+                                textStyle:
+                                    TextStyle(fontSize: 17, color: Colors.white),
                               ),
                             ),
-                            SizedBox(width: width * 0.09),
-                            Transform.scale(
-                              scale: 1.1,
-                              child: Radio(
-                                  value: 'Organizational',
-                                  groupValue: _value,
-                                  activeColor: myColor,
-                                  onChanged: (val) {
-                                    setState(() {
-                                      _value = val.toString();
-                                      print(">>>>>>>>>> $_value");
-                                    });
-                                  }),
-                            ),
-                            Text(
-                              'Organizational',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(fontSize: 15),
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        top: height * 0.02, right: width * 0.27),
-                        padding: EdgeInsets.only(left:width*0.075),
-                    child: Text(
-                      'Provide your mode of funding',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(fontSize: 16),
+                ),
+              ]),
+            ),
+          ),
+          body: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Center(
+              child: Container(
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      height: height * 0.1,
+                      margin: EdgeInsets.only(top: height * 0.2),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('images/eazyapp-logo-blue.png'),
+                        ),
                       ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(right: width * 0.1),
-                    child: Row(
-                      children: [
-                        SizedBox(width: width * 0.05),
-                        Transform.scale(
-                          scale: 1.1,
-                          child: Radio(
-                              value: 'Maximum Self',
-                              groupValue: _value2,
-                              activeColor: myColor,
-                              onChanged: (value) {
-                                setState(() {
-                                  _value2 = value.toString();
-                                });
-                              }),
-                        ),
-                        Text(
-                          'Maximum self',
+                    SizedBox(height: height * 0.04),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.04),
+                      child: Padding(
+                        padding: EdgeInsets.only(right: width * 0.48),
+                        child: Text(
+                          'Requirements',
                           style: GoogleFonts.poppins(
-                            textStyle: TextStyle(fontSize: 15),
+                            textStyle: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        SizedBox(width: width * 0.03),
-                        Transform.scale(
-                          scale: 1.1,
-                          child: Radio(
-                              value: 'Maximum Loan',
-                              groupValue: _value2,
-                              activeColor: myColor,
-                              onChanged: (value) {
-                                setState(() {
-                                  _value2 = value.toString();
-                                });
-                              }),
-                        ),
-                        Text(
-                          'Maximum Loan',
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(fontSize: 15),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                    Container(
+                      margin: EdgeInsets.only(top: height * 0.025),
+                      child: Container(
+                        padding: EdgeInsets.only(left: width * 0.003),
+                        child: Text(
+                          'What configuration are you looking at?',
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: height * 0.01),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.075, right: width * 0.075),
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: myColor),
+                        ),
+                      ),
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        iconSize: 46,
+                        iconDisabledColor: myColor,
+                        iconEnabledColor: myColor,
+                        icon: Icon(Icons.arrow_drop_down),
+                        underline: SizedBox(),
+                        hint: Text(
+                          "What is your budget?",
+                          style: GoogleFonts.poppins(fontSize: 16),
+                        ),
+                        value: valueChoose,
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        items: budgetList.map((valueItem) {
+                          return DropdownMenuItem(
+                              value: valueItem, child: Text(valueItem));
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            valueChoose = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                        top: height * 0.03,
+                        right: width * 0.09,
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.only(left: width * 0.08),
+                            child: Text('What is the purpose of your purchase?',
+                                style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(fontSize: 16))),
+                          ),
+                          Row(
+                            children: [
+                              SizedBox(width: width * 0.05),
+                              Transform.scale(
+                                scale: 1.1,
+                                child: Radio(
+                                    value: "Self Use",
+                                    groupValue: _value,
+                                    activeColor: myColor,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _value = value.toString();
+                                      });
+                                    }),
+                              ),
+                              Text(
+                                'Self Use',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: width * 0.16,
+                              ),
+                              Transform.scale(
+                                scale: 1.1,
+                                child: Radio(
+                                    value: "Second Home",
+                                    groupValue: _value,
+                                    activeColor: myColor,
+                                    onChanged: (val) {
+                                      setState(() {
+                                        _value = val.toString();
+                                      });
+                                    }),
+                              ),
+                              Text(
+                                'Second home',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              SizedBox(width: width * 0.05),
+                              Transform.scale(
+                                scale: 1.1,
+                                child: Radio(
+                                    value: 'Investment',
+                                    groupValue: _value,
+                                    activeColor: myColor,
+                                    onChanged: (val) {
+                                      setState(() {
+                                        _value = val.toString();
+                                      });
+                                    }),
+                              ),
+                              Text(
+                                'Investment',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(fontSize: 15),
+                                ),
+                              ),
+                              SizedBox(width: width * 0.09),
+                              Transform.scale(
+                                scale: 1.1,
+                                child: Radio(
+                                    value: 'Organizational',
+                                    groupValue: _value,
+                                    activeColor: myColor,
+                                    onChanged: (val) {
+                                      setState(() {
+                                        _value = val.toString();
+                                        print(">>>>>>>>>> $_value");
+                                      });
+                                    }),
+                              ),
+                              Text(
+                                'Organizational',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(fontSize: 15),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: height * 0.02, right: width * 0.27),
+                          padding: EdgeInsets.only(left:width*0.075),
+                      child: Text(
+                        'Provide your mode of funding',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(right: width * 0.1),
+                      child: Row(
+                        children: [
+                          SizedBox(width: width * 0.05),
+                          Transform.scale(
+                            scale: 1.1,
+                            child: Radio(
+                                value: 'Maximum Self',
+                                groupValue: _value2,
+                                activeColor: myColor,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _value2 = value.toString();
+                                  });
+                                }),
+                          ),
+                          Text(
+                            'Maximum self',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(fontSize: 15),
+                            ),
+                          ),
+                          SizedBox(width: width * 0.03),
+                          Transform.scale(
+                            scale: 1.1,
+                            child: Radio(
+                                value: 'Maximum Loan',
+                                groupValue: _value2,
+                                activeColor: myColor,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _value2 = value.toString();
+                                  });
+                                }),
+                          ),
+                          Text(
+                            'Maximum Loan',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(fontSize: 15),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                //color: Colors.grey.shade200,
               ),
-              //color: Colors.grey.shade200,
             ),
           ),
         ),

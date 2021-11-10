@@ -65,8 +65,8 @@ class _SixthPageState extends State<SixthPage> {
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
 
-    final XFile? displayImage =
-        ModalRoute.of(context)!.settings.arguments as XFile?;
+    final File? displayImage =
+        ModalRoute.of(context)!.settings.arguments as File?;
 
         print('>>>>>>>>>>>>>>>>>... ${displayImage!.path}');
 

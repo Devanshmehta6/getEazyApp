@@ -17,7 +17,7 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 
 // import 'package:dio/dio.dart' as http;
 import 'package:eazy_app/Services/teams_json.dart';
@@ -157,11 +157,10 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
           children: <Widget>[
             Container(
               height: height * 0.2,
-              padding: EdgeInsets.only(top: height * 0.01),
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
               child: FutureBuilder(
                   future: getImage(),
                   builder: (context, snapshot) {
-                    print('>>>>>>>>>......${snapshot.data}');
                     switch (snapshot.connectionState) {
                       case ConnectionState.none:
                         return Text('none');
@@ -254,7 +253,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                     title: Row(
                                       children: [
                                         SizedBox(width: width * 0.06),
-                                        Icon(FontAwesomeIcons.userClock,
+                                        Icon(FontAwesomeIcons.building,
                                             color: Colors.grey.shade700,
                                             size: 16),
                                         SizedBox(width: width * 0.04),

@@ -28,11 +28,11 @@ class User {
 }
 
 class User2 {
-  late String Name;
-  late String Phone;
-  late String Assign_to;
+  late String name;
+  late String phone;
+  late String was_assign;
 
-  User2(this.Name, this.Phone, this.Assign_to);
+  User2(this.name, this.phone, this.was_assign);
 }
 
 class Sales {
@@ -161,7 +161,7 @@ class _EazyVisitsState extends State<EazyVisits> {
       print('yqyqyqyqyq :: $entireJson2');
 
       for (var u in completeddata) {
-        User2 user2 = User2(u['Name'], u['Phone'], u['Assign_to']);
+        User2 user2 = User2(u['name'], u['phone'], u['was_assign']);
 
         users2.add(user2);
       }
@@ -178,9 +178,9 @@ class _EazyVisitsState extends State<EazyVisits> {
       //managers.clear();
       Sales sales = Sales(i['name'], i['id']); //, i['assign_to']);
       managers.add(sales);
-      print('----------IN LOOP AFTER ADDITION===========$managers');
+      
     }
-    print('-----------AFTER LOOP------------ $managers');
+    
     return managers;
   }
 
@@ -223,6 +223,7 @@ class _EazyVisitsState extends State<EazyVisits> {
             'assign_to': '$id',
           },
         ));
+        print('>>>>>>>>>>>... RESPONSE BODY >>>>>>>>>>>>>. ${response.body}');
   }
 
   showAlertDialog(BuildContext context) {
@@ -459,9 +460,12 @@ class _EazyVisitsState extends State<EazyVisits> {
                   textStyle: TextStyle(fontSize: 16, color: Colors.black),
                 ),
               ),
-              SizedBox(width: width * 0.12),
-              Image.asset('images/eazyapp-logo-blue.png',
-                  height: 45, width: 40),
+              //SizedBox(width: width * 0.12),
+              Container(
+                padding : EdgeInsets.only(left : 50),
+                child: Image.asset('images/eazyapp-logo-blue.png',
+                    height: 45, width: 40),
+              ),
             ],
           ),
         ),
@@ -705,7 +709,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                                   padding:
                                                       EdgeInsets.only(top: 9),
                                                   child: Text(
-                                                    'Name : ${snapshot.data[index].name}',
+                                                   'Name : ${snapshot.data[index].name}',
                                                     style: GoogleFonts.poppins(
                                                       textStyle: TextStyle(
                                                         fontSize: 14,
@@ -733,7 +737,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                                   padding:
                                                       EdgeInsets.only(top: 9),
                                                   child: snapshot.data[index]
-                                                              .assign_to ==
+                                                              .was_assign ==
                                                           null
                                                       ? Text(
                                                           'Allocated To : -',
@@ -749,7 +753,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                                           ),
                                                         )
                                                       : Text(
-                                                          'Allocated To : ${snapshot.data[index].assign_to}',
+                                                          'Allocated To : ${snapshot.data[index].was_assign}',
                                                           style: GoogleFonts
                                                               .poppins(
                                                             textStyle:

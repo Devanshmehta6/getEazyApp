@@ -64,7 +64,7 @@ class _EazyTeamsState extends State<EazyTeams> {
       final responseData = jsonDecode(response.body);
       final mem = responseData[0]['team_member'];
       print(mem);
-      project_name = sp.getString('project_name');
+      //project_name = sp.getString('project_name');
 
       for (var u in mem) {
         User user = User(u['name'], u['id']);
@@ -75,6 +75,12 @@ class _EazyTeamsState extends State<EazyTeams> {
       print('Logged out ');
     }
     return users;
+  }
+
+  getName() async {
+    final pref = await SharedPreferences.getInstance();
+    project_name = pref.getString('project_name');
+    return project_name;
   }
 
   postCheckin() async {
@@ -162,9 +168,9 @@ class _EazyTeamsState extends State<EazyTeams> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print("================== Printing Image ================= ");
+    getName();
     getteams = getTeams();
-    print("================== Image Printed ================= ");
+    
   }
 
   @override

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:eazy_app/Pages/login_page.dart';
 import 'package:eazy_app/Services/auth_service.dart';
 import 'package:eazy_app/sales%20part/customers.dart';

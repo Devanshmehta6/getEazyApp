@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:camera_camera/camera_camera.dart';
 import 'package:eazy_app/Pages/customer_check.dart/fifth.dart';
 import 'package:eazy_app/Pages/customer_check.dart/first.dart';
+import 'package:eazy_app/Pages/customer_check.dart/sixth.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:eazy_app/Pages/customer_check.dart/second.dart';
@@ -401,285 +403,320 @@ class _FourthPageState extends State<FourthPage> {
       print('RESPONSE BODY ${response.body}');
     }
 
+    File? camFile;
+
+    void openCamera() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CameraCamera(
+            onFile: (file) {
+              camFile = file;
+              Navigator.pop(context);
+              setState(() {});
+            },
+          ),
+          settings: RouteSettings(arguments: camFile),
+        ),
+      );
+    }
+
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
-    return MaterialApp(
-      home: Scaffold(
-        resizeToAvoidBottomInset: false,
-        bottomNavigationBar: Container(
-          height: height * 0.1,
-          margin: EdgeInsets.only(top: 2),
-          child: SafeArea(
-            child: Row(children: [
-              Container(
-                margin: EdgeInsets.only(top: height * 0.031),
-                width: width * 0.50,
-                child: SizedBox(
-                  height: height * 0.06,
-                  child: FlatButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      Navigator.pop(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ThirdPage(),
-                            maintainState: true
-                          ));
-                    },
-                    child: isLoading
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 24),
-                              Text(
-                                'Please Wait',
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              )
-                            ],
-                          )
-                        : Text(
-                            'Back',
-                            style: GoogleFonts.poppins(
-                              textStyle:
-                                  TextStyle(fontSize: 17, color: Colors.black),
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-              Container(
-                //height: height * 0.01,
-                margin: EdgeInsets.only(top: height * 0.031),
-                height: height * 0.12,
-                width: width * 0.50,
-                child: SizedBox(
-                  child: FlatButton(
-                    height: 300,
-                    color: myColor,
-                    onPressed: () async {
-                      postData();
-                      await availableCameras().then((value) => Navigator.push(
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: MaterialApp(
+        home: Scaffold(
+          resizeToAvoidBottomInset: false,
+          bottomNavigationBar: Container(
+            height: height * 0.1,
+            margin: EdgeInsets.only(top: 2),
+            child: SafeArea(
+              child: Row(children: [
+                Container(
+                  margin: EdgeInsets.only(top: height * 0.031),
+                  width: width * 0.50,
+                  child: SizedBox(
+                    height: height * 0.06,
+                    child: FlatButton(
+                      color: Colors.white,
+                      onPressed: () {
+                        Navigator.pop(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => FifthPage(cameras: value), 
-                            ),
-                          ));
-                    },
-                    child: isLoading
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 24),
-                              Text(
-                                'Please Wait',
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                builder: (context) => ThirdPage(),
+                                maintainState: true));
+                      },
+                      child: isLoading
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: Colors.white,
                                 ),
-                              )
-                            ],
-                          )
-                        : Text(
-                            'Next',
-                            style: GoogleFonts.poppins(
-                              textStyle:
-                                  TextStyle(fontSize: 17, color: Colors.white),
+                                SizedBox(width: 24),
+                                Text(
+                                  'Please Wait',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            )
+                          : Text(
+                              'Back',
+                              style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                    fontSize: 17, color: Colors.black),
+                              ),
                             ),
-                          ),
+                    ),
                   ),
                 ),
-              ),
-            ]),
+                Container(
+                  //height: height * 0.01,
+                  margin: EdgeInsets.only(top: height * 0.031),
+                  height: height * 0.12,
+                  width: width * 0.50,
+                  child: SizedBox(
+                    child: FlatButton(
+                      height: 300,
+                      color: myColor,
+                      onPressed: () async {
+                        postData();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CameraCamera(
+                              onFile: (file) {
+                                camFile = file;
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SixthPage(),
+                                    settings: RouteSettings(arguments: camFile),
+                                  ),
+                                );
+                                setState(() {});
+                              },
+                            ),
+                            
+                          ),
+                        );
+                      },
+                      child: isLoading
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 24),
+                                Text(
+                                  'Please Wait',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            )
+                          : Text(
+                              'Next',
+                              style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                    fontSize: 17, color: Colors.white),
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
           ),
-        ),
-        body: Container(
-          child: Center(
-            child: Container(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    height: height * 0.1,
-                    margin: EdgeInsets.only(top: height * 0.2),
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('images/eazyapp-logo-blue.png'),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: height * 0.04),
-                  Container(
-                    margin: EdgeInsets.only(right: width * 0.35),
-                    child: Text(
-                      'Work Information',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        top: height * 0.02, right: width * 0.22),
-                    child: Text(
-                      'What is your occupation?',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: height * 0.005),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.075, right: width * 0.075),
-                    padding: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: myColor),
-                      ),
-                    ),
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      iconSize: 46,
-                      iconDisabledColor: myColor,
-                      iconEnabledColor: myColor,
-                      icon: Icon(Icons.arrow_drop_down),
-                      underline: SizedBox(),
-                      hint: Text(
-                        "Choose your occupation",
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                      value: valueChoose,
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      ),
-                      items: occ_list.map((valueItem) {
-                        return DropdownMenuItem(
-                            value: valueItem, child: Text(valueItem));
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          valueChoose = newValue;
-                        });
-                      },
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        top: height * 0.02,
-                        left: width * 0.075,
-                        right: width * 0.075),
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(color: myColor)),
-                    ),
-                    child: TextFormField(
-                      controller: org_name,
-                      decoration: InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: myColor),
-                        ),
-                        hintText: 'Name your organization',
-                        hintStyle: GoogleFonts.poppins(
-                          textStyle: TextStyle(fontSize: 16),
+          body: Container(
+            child: Center(
+              child: Container(
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      height: height * 0.1,
+                      margin: EdgeInsets.only(top: height * 0.2),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('images/eazyapp-logo-blue.png'),
                         ),
                       ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        top: height * 0.02,
-                        left: width * 0.075,
-                        right: width * 0.075),
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(color: myColor)),
-                    ),
-                    child: TextFormField(
-                      controller: designation,
-                      style: GoogleFonts.poppins(
-                          fontSize: 16, color: Colors.black),
-                      decoration: InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: myColor),
-                        ),
-                        hintText: 'What is your designation',
-                        hintStyle: GoogleFonts.poppins(
-                          textStyle: TextStyle(fontSize: 16),
+                    SizedBox(height: height * 0.04),
+                    Container(
+                      margin: EdgeInsets.only(right: width * 0.35),
+                      child: Text(
+                        'Work Information',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
-                  ),
-                  Container(
-                    margin:
-                        EdgeInsets.only(top: height * 0.02, right: width * 0.48),
-                    child: Text(
-                      'Office Location',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500),
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: height * 0.02, right: width * 0.22),
+                      child: Text(
+                        'What is your occupation?',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w500),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: height * 0.005),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.07, right: width * 0.075),
-                    padding: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: myColor),
+                    SizedBox(height: height * 0.005),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.075, right: width * 0.075),
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: myColor),
+                        ),
+                      ),
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        iconSize: 46,
+                        iconDisabledColor: myColor,
+                        iconEnabledColor: myColor,
+                        icon: Icon(Icons.arrow_drop_down),
+                        underline: SizedBox(),
+                        hint: Text(
+                          "Choose your occupation",
+                          style: GoogleFonts.poppins(fontSize: 16),
+                        ),
+                        value: valueChoose,
+                        style: GoogleFonts.poppins(
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        items: occ_list.map((valueItem) {
+                          return DropdownMenuItem(
+                              value: valueItem, child: Text(valueItem));
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            valueChoose = newValue;
+                          });
+                        },
                       ),
                     ),
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      iconSize: 46,
-                      iconDisabledColor: myColor,
-                      iconEnabledColor: myColor,
-                      icon: Icon(Icons.arrow_drop_down),
-                      underline: SizedBox(),
-                      hint: Text(
-                        "Choose your office location",
-                        style: GoogleFonts.poppins(fontSize: 16),
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: height * 0.02,
+                          left: width * 0.075,
+                          right: width * 0.075),
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(color: myColor)),
                       ),
-                      value: valueChooseForLocation,
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(color: Colors.black, fontSize: 16),
+                      child: TextFormField(
+                        controller: org_name,
+                        decoration: InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: myColor),
+                          ),
+                          hintText: 'Name your organization',
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(fontSize: 16),
+                          ),
+                        ),
                       ),
-                      items: locationList.map((valueItem) {
-                        return DropdownMenuItem(
-                            value: valueItem, child: Text(valueItem));
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          valueChooseForLocation = newValue;
-                        });
-                      },
                     ),
-                  ),
-                ],
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: height * 0.02,
+                          left: width * 0.075,
+                          right: width * 0.075),
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(color: myColor)),
+                      ),
+                      child: TextFormField(
+                        controller: designation,
+                        style: GoogleFonts.poppins(
+                            fontSize: 16, color: Colors.black),
+                        decoration: InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: myColor),
+                          ),
+                          hintText: 'What is your designation',
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: height * 0.02, right: width * 0.48),
+                      child: Text(
+                        'Office Location',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: height * 0.005),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.07, right: width * 0.075),
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: myColor),
+                        ),
+                      ),
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        iconSize: 46,
+                        iconDisabledColor: myColor,
+                        iconEnabledColor: myColor,
+                        icon: Icon(Icons.arrow_drop_down),
+                        underline: SizedBox(),
+                        hint: Text(
+                          "Choose your office location",
+                          style: GoogleFonts.poppins(fontSize: 16),
+                        ),
+                        value: valueChooseForLocation,
+                        style: GoogleFonts.poppins(
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        items: locationList.map((valueItem) {
+                          return DropdownMenuItem(
+                              value: valueItem, child: Text(valueItem));
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            valueChooseForLocation = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                //color: Colors.grey.shade200,
               ),
-              //color: Colors.grey.shade200,
             ),
           ),
         ),

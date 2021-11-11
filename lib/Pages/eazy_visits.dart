@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:eazy_app/Pages/dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:flutter_session/flutter_session.dart';
@@ -23,8 +23,10 @@ class User {
   late String phone;
   late String assign_to;
   late String customer_url;
+  late String customer_pic;
 
-  User(this.name, this.phone, this.assign_to, this.customer_url);
+  User(this.name, this.phone, this.assign_to, this.customer_url,
+      this.customer_pic);
 }
 
 class User2 {
@@ -58,7 +60,7 @@ class _EazyVisitsState extends State<EazyVisits> {
   var entireJson2;
   var ongoingdata;
   var completeddata;
-  List<User> users = [];
+  List<dynamic> users = [];
   List<User2> users2 = [];
 
   var sales;
@@ -70,7 +72,11 @@ class _EazyVisitsState extends State<EazyVisits> {
   String project_name = '';
   String new_project = '';
 
-  Future<List<User>> ongoingclass() async {
+  late StreamController _streamController;
+  late Stream _stream;
+  int len = 0;
+
+  ongoingclass() async {
     final pref = await SharedPreferences.getInstance();
 
     final isLoggedIn = pref.getBool('log');
@@ -106,6 +112,8 @@ class _EazyVisitsState extends State<EazyVisits> {
       var entireJson = jsonDecode(response.body);
       ongoingdata = entireJson['on_going_visits'];
       //final cust_url = ongoingdata['customer_url'];
+      print('>>>>>>>>>>>>>>> LENGTH >>>>> ${ongoingdata.length}');
+      len = ongoingdata.length;
       sales = entireJson['sales_manager'];
       print('==========sales===========$sales');
       final p_id = entireJson['current project'][0]['project_no'];
@@ -115,8 +123,8 @@ class _EazyVisitsState extends State<EazyVisits> {
       // print('---------------PROJ ------------ $proj_id');
 
       for (var i in ongoingdata) {
-        User user =
-            User(i['name'], i['phone'], i['assign_to'], i['customer_url']);
+        User user = User(i['name'], i['phone'], i['assign_to'],
+            i['customer_url'], i['customer_pic']);
 
         users.add(user);
       }
@@ -176,11 +184,11 @@ class _EazyVisitsState extends State<EazyVisits> {
     managers.clear();
     for (var i in sales) {
       //managers.clear();
+      print('>>>>>>>>>>>>>>> ${i['id']}');
       Sales sales = Sales(i['name'], i['id']); //, i['assign_to']);
       managers.add(sales);
-      
     }
-    
+
     return managers;
   }
 
@@ -221,9 +229,10 @@ class _EazyVisitsState extends State<EazyVisits> {
             'customer': cust_id,
             'mobile': mobile,
             'assign_to': '$id',
+            //'is_busy': 1,
           },
         ));
-        print('>>>>>>>>>>>... RESPONSE BODY >>>>>>>>>>>>>. ${response.body}');
+    print('>>>>>>>>>>>... RESPONSE BODY >>>>>>>>>>>>>. ${response.body}');
   }
 
   showAlertDialog(BuildContext context) {
@@ -295,6 +304,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                         postManager(context, dropDownValue.toString())
                             .whenComplete(() => managers.clear());
                         Navigator.pop(context);
+                        setState(() {});
                       },
                     );
                 }
@@ -343,8 +353,11 @@ class _EazyVisitsState extends State<EazyVisits> {
     // TODO: implement initState
     super.initState();
 //futureForSales = managerClass();
+
     myFuture = ongoingclass();
     myFuture2 = completedclass();
+    _streamController = StreamController();
+    _stream = _streamController.stream;
   }
 
   @override
@@ -462,7 +475,7 @@ class _EazyVisitsState extends State<EazyVisits> {
               ),
               //SizedBox(width: width * 0.12),
               Container(
-                padding : EdgeInsets.only(left : 50),
+                padding: EdgeInsets.only(left: 50),
                 child: Image.asset('images/eazyapp-logo-blue.png',
                     height: 45, width: 40),
               ),
@@ -474,7 +487,6 @@ class _EazyVisitsState extends State<EazyVisits> {
             FutureBuilder(
                 future: myFuture,
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  print('>>>>>>>>>>>> IOGQNWEIOGIO $snapshot');
                   final height = MediaQuery.of(context).size.height -
                       MediaQuery.of(context).padding.top -
                       kToolbarHeight;
@@ -517,8 +529,8 @@ class _EazyVisitsState extends State<EazyVisits> {
                                               Padding(
                                                 padding: EdgeInsets.only(
                                                     top: 8, left: 8, right: 8),
-                                                child: Image.asset(
-                                                    'images/user_image.png',
+                                                child: Image.network(
+                                                    '${snapshot.data[index].customer_pic.toString()}', //'images/user_image.png',
                                                     height: 100,
                                                     width: 100),
                                               ),
@@ -640,9 +652,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                             print(
                                                 '----CUSTOMER URL HAS BEEN SET------ $cust_url');
 
-                                            //customer_url.add(snapshot.data[index].customer_url[0]);
-                                            //print('------------$customer_url');
-                                            //print('===============${snapshot.data[index].customer_url}');
+                                            setState(() {});
                                           },
                                         ),
                                       ),
@@ -709,7 +719,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                                   padding:
                                                       EdgeInsets.only(top: 9),
                                                   child: Text(
-                                                   'Name : ${snapshot.data[index].name}',
+                                                    'Name : ${snapshot.data[index].name}',
                                                     style: GoogleFonts.poppins(
                                                       textStyle: TextStyle(
                                                         fontSize: 14,

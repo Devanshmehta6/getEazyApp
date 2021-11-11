@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:eazy_app/sales%20part/view_details.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 import 'package:eazy_app/Services/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:im_stepper/main.dart';
 import 'package:im_stepper/stepper.dart';
+import 'package:cupertino_stepper/cupertino_stepper.dart';
+import 'package:rxdart/rxdart.dart';
 
 class BasicInfo {
   late String first_name;
@@ -61,8 +65,6 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
   late final project;
   late final current_residence;
   late final cust_id;
-  int activeStep = 1;
-  int upperBound = 3;
 
   Future getUrl() async {
     final pref = await SharedPreferences.getInstance();
@@ -150,6 +152,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
       project_name = jsonData[0]['project'][0]['project_name'];
       current_residence = jsonData[0]['customers'][0]['current_residence'];
       cust_id = jsonData[0]['workinfo'][0][0]['customer'];
+
       _streamController_basic_info.add([
         jsonData[0]['customers'][0]['first_name'],
         jsonData[0]['customers'][0]['last_name'],
@@ -388,33 +391,23 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
 
   void initState() {
     super.initState();
-    _streamController_basic_info = StreamController();
+    _streamController_basic_info = BehaviorSubject();
     _stream_basic_info = _streamController_basic_info.stream;
-    _streamController_work_info = StreamController();
+    _streamController_work_info = BehaviorSubject();
     _stream_work_info = _streamController_work_info.stream;
-    _streamController_req = StreamController();
+    _streamController_req = BehaviorSubject();
     _stream_req = _streamController_req.stream;
     getUrl().whenComplete(() {
       getData();
-      WidgetsBinding.instance!.addPostFrameCallback(
-        (_) => _scaffoldKey.currentState!.showSnackBar(
-          SnackBar(
-            duration: Duration(seconds: 3),
-            backgroundColor: myColor,
-            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 5),
-            elevation: 10,
-            content: Text(
-              "Managing site visit for : $cust_name ",
-              style: GoogleFonts.poppins(fontSize: 16),
-            ),
-          ),
-        ),
-      );
     });
   }
 
   final items = ['Hot', 'Warm', 'Cold', 'Lost'];
   String? valueChoose;
+  int activeStep = 0; // Initial step set to 5.
+
+  int upperBound = 3;
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -425,7 +418,6 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
     Color myColor = Color(0xff4044fc);
 
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         //centerTitle : true,
         iconTheme: IconThemeData(color: myColor),
@@ -449,15 +441,119 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
           ],
         ),
       ),
+      bottomNavigationBar: Container(
+        height: height * 0.1,
+        margin: EdgeInsets.only(top: 2),
+        child: SafeArea(
+          child: Row(children: [
+            Container(
+              margin: EdgeInsets.only(top: height * 0.031),
+              width: width * 0.50,
+              child: SizedBox(
+                height: height * 0.06,
+                child: FlatButton(
+                  color: Colors.white,
+                  onPressed: () {
+                    if (activeStep == 0) {
+                      setState(() {
+                        activeStep = 0;
+                      });
+                    } else {
+                      setState(() {
+                        --activeStep;
+                      });
+                    }
+                  },
+                  child: Text(
+                    'Back',
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(fontSize: 17, color: Colors.black),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              //height: height * 0.01,
+              margin: EdgeInsets.only(top: height * 0.031),
+              height: height * 0.12,
+              width: width * 0.50,
+              child: SizedBox(
+                child: FlatButton(
+                  height: 300,
+                  color: myColor,
+                  onPressed: () async {
+                    if (activeStep < upperBound) {
+                      setState(() {
+                        ++activeStep;
+                      });
+                    } else {
+                      activeStep = 0;
+                    }
+
+                    setState(() {
+                      isLoading = !isLoading;
+                    });
+                  },
+                  child: Text(
+                    'Next',
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(fontSize: 17, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ]),
+        ),
+      ),
+      key: _scaffoldKey,
       body: Theme(
         data: ThemeData(colorScheme: ColorScheme.light(primary: Colors.white)),
-        child: IconStepper(
-          activeStepColor: Colors.white,
-          icons: [
-            Icon(FontAwesomeIcons.user, color: myColor),
-            Icon(FontAwesomeIcons.building, color: myColor),
-            Icon(FontAwesomeIcons.cogs, color: myColor),
-            Icon(FontAwesomeIcons.check, color: myColor)
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              height: height * 0.07,
+              color: Color(0xff007bff),
+              child: Container(
+                padding: EdgeInsets.only(left: 10, top: 12),
+                child: Text(
+                  "Managing site visit for : $cust_name ",
+                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.only(top: 15),
+              child: IconStepper(
+                stepPadding: 0,
+                stepColor: Colors.grey.shade400,
+                activeStepColor: myColor,
+                activeStepBorderColor: myColor,
+                activeStepBorderWidth: 1,
+                activeStep: activeStep,
+                icons: [
+                  Icon(FontAwesomeIcons.user, color: Colors.white),
+                  Icon(FontAwesomeIcons.building, color: Colors.white),
+                  Icon(FontAwesomeIcons.userTie, color: Colors.white),
+                  Icon(FontAwesomeIcons.check, color: Colors.white)
+                ],
+                onStepReached: (index) {
+                  setState(() {
+                    activeStep = index;
+                  });
+                },
+              ),
+            ),
+            Divider(color: Colors.grey.shade400, thickness: 1),
+            Container(
+              child: Text('${headerText()}',
+                  style: GoogleFonts.poppins(
+                      fontSize: 18, fontWeight: FontWeight.w500)),
+            ),
+            Divider(color: Colors.grey.shade400, thickness: 1),
+            body()
           ],
         ),
       ),
@@ -818,240 +914,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
 //                   ],
 //                 )
 //               : Text('Work Info', style: GoogleFonts.poppins(fontSize: 15)),
-//           content: StreamBuilder(
-//             stream: _stream_work_info,
-//             builder: (BuildContext context, AsyncSnapshot snapshot) {
-//               switch (snapshot.connectionState) {
-//                 case ConnectionState.none:
-//                   return Text('none');
-//                 case ConnectionState.waiting:
-//                   return Center(child: CircularProgressIndicator());
-//                 case ConnectionState.active:
-//                   return Container(
-//                     height: 290,
-//                     child: Column(
-//                       children: [
-//                         Row(
-//                           children: [
-//                             Text('Occupation : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[0]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Organization : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[1]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Office Location : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[2]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Designation : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[3]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('State : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   controller: state,
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Pincode  : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   controller: pincode,
-//                                   maxLines: null,
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   //initialValue: '${snapshot.data[5]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                       ],
-//                     ),
-//                   );
-//                 case ConnectionState.done:
-//                   return Text('done');
-//               }
-//             },
-//           ),
-//         ),
+//           content:
 //         Step(
 //           isActive: currentStep >= 2,
 //           title: currentStep == 2
@@ -1098,310 +961,776 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
 //                   ],
 //                 )
 //               : Text('Requirements', style: GoogleFonts.poppins(fontSize: 15)),
-//           content: StreamBuilder(
-//             stream: _stream_req,
-//             builder: (BuildContext context, AsyncSnapshot snapshot) {
-//               switch (snapshot.connectionState) {
-//                 case ConnectionState.none:
-//                   return Text('none');
-//                 case ConnectionState.waiting:
-//                   return Center(child: CircularProgressIndicator());
-//                 case ConnectionState.active:
-//                   return Container(
-//                     height: 290,
-//                     child: Column(
-//                       children: [
-//                         Row(
-//                           children: [
-//                             Text('Current Residence Type : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '$current_residence',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Family Type : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   controller: family_type,
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Configuration Required : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   controller: config_req,
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Budget : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[0]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Mode of Funding : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[1]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Purpose of Purchase  : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   maxLines: null,
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[2]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                       ],
-//                     ),
-//                   );
-//                 case ConnectionState.done:
-//                   return Text('done');
-//               }
-//             },
-//           ),
-//         ),
+
 //         Step(
 //           isActive: currentStep >= 3,
 //           title: Text('Check Out', style: GoogleFonts.poppins(fontSize: 15)),
-//           content: Container(
-//             height: 200,
-//             child: Column(
-//               children: [
-//                 Expanded(
-//                   child: TextFormField(
-//                     controller: feedback,
-//                     minLines: 6,
-//                     keyboardType: TextInputType.multiline,
-//                     maxLines: null,
-//                     decoration: InputDecoration(
-//                       border: OutlineInputBorder(
-//                         borderSide: BorderSide(),
-//                       ),
-//                       contentPadding: EdgeInsets.only(
-//                           left: 15, bottom: 11, top: 11, right: 15),
-//                       hintText: 'Provide your Feedback.',
-//                       hintStyle: GoogleFonts.poppins(
-//                           fontSize: 16, color: Colors.black),
-//                     ),
-//                   ),
-//                 ),
-//                 SizedBox(height: 20),
-//                 Container(
-//                   margin: EdgeInsets.only(left: 0, right: 150),
-//                   padding: EdgeInsets.all(5),
-//                   decoration: BoxDecoration(
-//                     borderRadius: BorderRadius.circular(5),
-//                     border: Border(
-//                       bottom: BorderSide(
-//                         color: Colors.grey,
-//                       ),
-//                       top: BorderSide(color: Colors.grey),
-//                       left: BorderSide(color: Colors.grey),
-//                       right: BorderSide(color: Colors.grey),
-//                     ),
-//                   ),
-//                   child: DropdownButton<String>(
-//                     isExpanded: true,
-//                     iconSize: 40,
-//                     iconEnabledColor: Colors.grey,
-//                     icon: Icon(Icons.arrow_drop_down),
-//                     underline: SizedBox(),
-//                     hint: Text(
-//                       " Status",
-//                       style: GoogleFonts.poppins(fontSize: 16),
-//                     ),
-//                     value: valueChoose,
-//                     style: GoogleFonts.poppins(
-//                       textStyle: TextStyle(color: Colors.black, fontSize: 16),
-//                     ),
-//                     items: items.map((valueItem) {
-//                       return DropdownMenuItem(
-//                           value: valueItem, child: Text(valueItem));
-//                     }).toList(),
-//                     onChanged: (newValue) {
-//                       setState(() {
-//                         print('>>>>>>>>>>>>>>..  $valueChoose');
-//                         valueChoose = newValue;
-//                         print('>>>>>>>>>>>>>>..  $valueChoose');
-//                       });
-//                     },
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
+//           content:
 //         ),
 //       ];
+  }
+
+  Widget basic() {
+    return StreamBuilder(
+      stream: _stream_basic_info,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        //print('+++++++++++++++++++++++++++++      ${snapshot.connectionState}');
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return Text('none');
+          case ConnectionState.waiting:
+            return Center(child: CircularProgressIndicator());
+          case ConnectionState.active:
+            return Container(
+              padding: EdgeInsets.only(top: 10, left: 25),
+              height: 350,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text('First Name : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[0]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+                            //enabled: _isEnabled,
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Last Name : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[1]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Email : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[2]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Phone : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[3]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Whatsapp : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[4]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Residential Address  : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            controller: res_add,
+                            maxLines: null,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            //initialValue: '${snapshot.data[5]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              print('>>>>>>>>>>>>>>>>>>>>>>> ${res_add.text}');
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          case ConnectionState.done:
+            return Text('done');
+        }
+      },
+    );
+  }
+
+  Widget work() {
+    return StreamBuilder(
+      stream: _stream_work_info,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return Text('none');
+          case ConnectionState.waiting:
+            return Center(child: CircularProgressIndicator());
+          case ConnectionState.active:
+            return Container(
+              padding: EdgeInsets.only(top: 10, left: 25),
+              height: 350,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text('Occupation : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[0]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Organization : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[1]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Office Location : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[2]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Designation : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[3]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('State : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            controller: state,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Pincode  : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            controller: pincode,
+                            maxLines: null,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            //initialValue: '${snapshot.data[5]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          case ConnectionState.done:
+            return Text('done');
+        }
+      },
+    );
+  }
+
+  Widget req() {
+    return StreamBuilder(
+      stream: _stream_req,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return Text('none');
+          case ConnectionState.waiting:
+            return Center(child: CircularProgressIndicator());
+          case ConnectionState.active:
+            return Container(
+              padding: EdgeInsets.only(top: 10, left: 25),
+              height: 350,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text('Current Residence Type : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '$current_residence',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Family Type : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            controller: family_type,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Configuration Required : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            controller: config_req,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Budget : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[0]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Mode of Funding : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[1]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Purpose of Purchase  : ',
+                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            maxLines: null,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade300),
+                              ),
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[2]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          case ConnectionState.done:
+            return Text('done');
+        }
+      },
+    );
+  }
+
+  Widget checkOut() {
+    return Container(
+      padding: EdgeInsets.only(top: 10, left: 25, right: 20),
+      height: 200,
+      child: Column(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: feedback,
+              minLines: 6,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(),
+                ),
+                contentPadding:
+                    EdgeInsets.only(left: 15, bottom: 11, top: 11, right: 15),
+                hintText: 'Provide your Feedback.',
+                hintStyle:
+                    GoogleFonts.poppins(fontSize: 18, color: Colors.black),
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          Container(
+            //margin: EdgeInsets.only(left: 0, right: 0),
+            padding: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey,
+                ),
+                top: BorderSide(color: Colors.grey),
+                left: BorderSide(color: Colors.grey),
+                right: BorderSide(color: Colors.grey),
+              ),
+            ),
+            child: DropdownButton<String>(
+              isExpanded: true,
+              iconSize: 40,
+              iconEnabledColor: Colors.grey,
+              icon: Icon(Icons.arrow_drop_down),
+              underline: SizedBox(),
+              hint: Text(
+                " Status",
+                style: GoogleFonts.poppins(fontSize: 18),
+              ),
+              value: valueChoose,
+              style: GoogleFonts.poppins(
+                textStyle: TextStyle(color: Colors.black, fontSize: 16),
+              ),
+              items: items.map((valueItem) {
+                return DropdownMenuItem(
+                    value: valueItem, child: Text(valueItem));
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  print('>>>>>>>>>>>>>>..  $valueChoose');
+                  valueChoose = newValue;
+                  print('>>>>>>>>>>>>>>..  $valueChoose');
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget body() {
+    switch (activeStep) {
+      case 0:
+        return basic();
+      case 1:
+        return work();
+      case 2:
+        return req();
+      case 3:
+        return checkOut();
+
+      default:
+        return Text('');
+    }
+  }
+
+  String headerText() {
+    switch (activeStep) {
+      case 0:
+        return 'Basic Information';
+
+      case 1:
+        return 'Work Information';
+
+      case 2:
+        return 'Requirments';
+
+      case 3:
+        return 'Check Out';
+
+      default:
+        return '';
+    }
   }
 }

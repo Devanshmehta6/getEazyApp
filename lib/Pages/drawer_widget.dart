@@ -86,7 +86,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
     final imgResponse = jsonDecode(response.body);
     ima = imgResponse['developer_logo'];
     return ima;
-    print('-----------IMMMMAAA  ---------------$ima');
+   
   }
 
   Future<List<User>> getProjName() async {

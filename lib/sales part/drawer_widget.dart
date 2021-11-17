@@ -60,8 +60,14 @@ class _DrawerWidgetState extends State<DrawerWidget> {
         HttpHeaders.cookieHeader: setcookie,
       });
       final jsonData = jsonDecode(response.body);
-      print('>>>>>>>>> $jsonData');
+      print('RESSSSSSSSSSSSSSSSSS >>>>> $jsonData');
+      image = jsonData[0]['developer_logo'];
+      final session = FlutterSession();
+      session.set('img', image);
+      print('IMG --------- ${image.toString()}');
+
       final projectData = jsonData[0]['project'];
+
       print('ppppppppppppppppppp $projectData');
       for (var u in projectData) {
         ProjectName pname = ProjectName(u["project_name"], u["project_url"]);
@@ -82,6 +88,39 @@ class _DrawerWidgetState extends State<DrawerWidget> {
   }
 
   String? image;
+  fetchImage() async {
+    final pref = await SharedPreferences.getInstance();
+    final cust_url = pref.getString('customer_url');
+    final project_url = pref.getString('project_url');
+    Uri url = Uri.parse('https://geteazyapp.com/api/developer-logo-sales');
+    print('------------------url----------------$url');
+    String sessionId = await FlutterSession().get('session');
+
+    String csrf = await FlutterSession().get('csrf');
+    print('==================== C S R F  VISITS =       $csrf');
+    final sp = await SharedPreferences.getInstance();
+    String? authorization = sp.getString('token');
+    String? tokenn = authorization;
+    final cookie = sp.getString('cookie');
+    final token = await AuthService.getToken();
+    final settoken = 'Token ${token['token']}';
+    final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
+
+    http.Response response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': settoken,
+        HttpHeaders.cookieHeader: setcookie,
+      },
+    );
+    print('>>>> RESPPPPPPPPPPP >>>>>> ${response.body}');
+    final imgResponse = jsonDecode(response.body);
+    image = imgResponse['developer_logo'];
+    return image;
+  }
+
   @override
   Widget build(BuildContext context) {
     // String img = '';
@@ -96,28 +135,17 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
 
-    fetchImage() async {
-      final SESSION = FlutterSession();
-
-      image = await SESSION.get('image');
-
-      print('>>>>>>>>>>>>>>>>>>>>>>>>$image');
-      return image;
-    }
-
     return Drawer(
       child: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              // decoration: BoxDecoration(
-              // image: DecorationImage(image: NetworkImage('$image'))),
-              height: height * 0.17,
-              padding: EdgeInsets.only(top: height * 0.01),
+              height: height * 0.2,
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
               child: FutureBuilder(
                   future: fetchImage(),
-                  builder: (context, snapshot) {
-                    print('>>>>>>>>>......${snapshot.data}');
+                  builder: (context, AsyncSnapshot snapshot) {
+                    print('>>>>>>>>>......$image');
                     switch (snapshot.connectionState) {
                       case ConnectionState.none:
                         return Text('none');
@@ -128,7 +156,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                           child: CircularProgressIndicator(),
                         );
                       case ConnectionState.done:
-                        return Image.network(image.toString());
+                        return Image.network('$image');
                     }
                   }),
             ),

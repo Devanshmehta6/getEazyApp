@@ -45,6 +45,11 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
   int currentStep = 0;
   bool _isEnabled = false;
   TextEditingController res_add = TextEditingController();
+  TextEditingController fname = TextEditingController(text: 'header');
+  TextEditingController lname = TextEditingController();
+  TextEditingController email = TextEditingController();
+  TextEditingController phone = TextEditingController();
+  TextEditingController whatsapp = TextEditingController();
   TextEditingController state = TextEditingController();
   TextEditingController pincode = TextEditingController();
   TextEditingController curr_resi = TextEditingController();
@@ -107,6 +112,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
     } else {
       print('Logged out ');
     }
+    return cust_name;
   }
 
   getData() async {
@@ -177,7 +183,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
     }
   }
 
-  putBasic(String resi_add) async {
+  putBasic() async {
     final pref = await SharedPreferences.getInstance();
 
     final isLoggedIn = pref.getBool('log');
@@ -189,8 +195,8 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
       final settoken = 'Token ${token['token']}';
 
       Uri url = Uri.parse(
-          'https://geteazyapp.com/projects/$project_url/$cust_url/api');
-
+          'https://geteazyapp.com/api-checkout/$project_url/$cust_url/personal_info_api');
+      print('>>>>>>> url <>>>>>>>> $url');
       String sessionId = await FlutterSession().get('session');
 
       String csrf = await FlutterSession().get('csrf');
@@ -211,8 +217,10 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         'mobile': mobile,
         'project': project,
         'project_name': project_name,
-        'residence_address': resi_add,
+        'whatsapp_no': whatsapp.text,
+        'residence_address': res_add.text,
       });
+      print('>>>>>>>> response >>>>>>>>. ${response.body}');
     } else {
       print('Logged out ');
     }
@@ -230,7 +238,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
       final settoken = 'Token ${token['token']}';
 
       Uri url = Uri.parse(
-          'https://geteazyapp.com/projects/$project_url/workinfo_api');
+          'https://geteazyapp.com/api-checkout/$project_url/workinfo_api');
 
       String sessionId = await FlutterSession().get('session');
 
@@ -273,7 +281,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
       final settoken = 'Token ${token['token']}';
 
       Uri url = Uri.parse(
-          'https://geteazyapp.com/projects/$project_url/requirements_api');
+          'https://geteazyapp.com/api-checkout/$project_url/requirement_api');
 
       String sessionId = await FlutterSession().get('session');
 
@@ -284,7 +292,9 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
       //final finalToken = 'Token ${token[token]}';
 
       final cookie = sp.getString('cookie');
-
+      print('?>>>>>>>>>>>>>>>>>>>>>>>>>');
+      print(cust_id.runtimeType);
+      print('?>>>>>>>>>>>>>>>>>>>>>>>>>');
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
       http.Response response = await http.post(url, headers: {
         //'Content-Type': 'application/json',
@@ -292,11 +302,12 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         'Authorization': settoken,
         HttpHeaders.cookieHeader: setcookie,
       }, body: {
-        'mobile': mobile,
-        'project': project,
-        'project_name': project_name,
+        //'mobile': mobile,
+        //'project': project,
+        //'project_name': project_name,
         'customer': cust_id,
         'residence_configuration': config_requi,
+        'family_type': family_type.text,
       });
       print('22222222222222222222 ${response.body}');
     } else {
@@ -338,14 +349,13 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         'mobile': mobile,
         'project': project,
         'project_name': project_name,
-        'family_type': family_type
       });
     } else {
       print('Logged out ');
     }
   }
 
-  checkout() async {
+  checkoutfunc() async {
     final pref = await SharedPreferences.getInstance();
 
     final isLoggedIn = pref.getBool('log');
@@ -369,7 +379,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
       final cookie = sp.getString('cookie');
 
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
-      http.Response response = await http.post(url, headers: {
+      http.Response response = await http.put(url, headers: {
         //'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': settoken,
@@ -379,7 +389,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         'status': valueChoose,
         'customer': cust_id.toString(),
         'date_time': '${DateTime.now()}',
-        'checked_out': 'True'
+        'checked_out': 1,
       });
 
       print(
@@ -403,11 +413,14 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
   }
 
   final items = ['Hot', 'Warm', 'Cold', 'Lost'];
+  final family = ['  Joint Family', '  Nuclear Family'];
   String? valueChoose;
   int activeStep = 0; // Initial step set to 5.
 
   int upperBound = 3;
   bool isLoading = false;
+  bool changed = false;
+  bool changedL = false;
 
   @override
   Widget build(BuildContext context) {
@@ -417,144 +430,191 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
 
-    return Scaffold(
-      appBar: AppBar(
-        //centerTitle : true,
-        iconTheme: IconThemeData(color: myColor),
-        backgroundColor: Colors.white,
-        title: Row(
-          children: <Widget>[
-            SizedBox(width: width * 0.13),
-            Text(
-              'Customer CheckOut',
-              style: GoogleFonts.poppins(
-                textStyle: TextStyle(
-                    color: myColor, fontSize: 16, fontWeight: FontWeight.w600),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          changedL = false;
+          changed = false;
+        });
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          //centerTitle : true,
+          iconTheme: IconThemeData(color: myColor),
+          backgroundColor: Colors.white,
+          title: Row(
+            children: <Widget>[
+              SizedBox(width: width * 0.12),
+              Text(
+                'Customer CheckOut',
+                style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                      color: myColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600),
+                ),
               ),
-            ),
-            SizedBox(width: width * 0.155),
-            Image.asset(
-              'images/eazyapp-logo-blue.png',
-              height: 48,
-              width: 40,
-            ),
-          ],
+              SizedBox(width: width * 0.155),
+              Image.asset(
+                'images/eazyapp-logo-blue.png',
+                height: 48,
+                width: 40,
+              ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: Container(
-        height: height * 0.1,
-        margin: EdgeInsets.only(top: 2),
-        child: SafeArea(
-          child: Row(children: [
-            Container(
-              margin: EdgeInsets.only(top: height * 0.031),
-              width: width * 0.50,
-              child: SizedBox(
-                height: height * 0.06,
-                child: FlatButton(
-                  color: Colors.white,
-                  onPressed: () {
-                    if (activeStep == 0) {
-                      setState(() {
-                        activeStep = 0;
-                      });
-                    } else {
-                      setState(() {
-                        --activeStep;
-                      });
-                    }
-                  },
-                  child: Text(
-                    'Back',
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(fontSize: 17, color: Colors.black),
+        bottomNavigationBar: Container(
+          height: height * 0.1,
+          margin: EdgeInsets.only(top: 2),
+          child: SafeArea(
+            child: Row(children: [
+              Container(
+                margin: EdgeInsets.only(top: height * 0.031),
+                width: width * 0.50,
+                child: SizedBox(
+                  height: height * 0.06,
+                  child: FlatButton(
+                    color: Colors.white,
+                    onPressed: () {
+                      if (activeStep == 0) {
+                        setState(() {
+                          activeStep = 0;
+                        });
+                      } else {
+                        setState(() {
+                          --activeStep;
+                        });
+                      }
+                    },
+                    child: Text(
+                      'Back',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(fontSize: 17, color: Colors.black),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Container(
-              //height: height * 0.01,
-              margin: EdgeInsets.only(top: height * 0.031),
-              height: height * 0.12,
-              width: width * 0.50,
-              child: SizedBox(
-                child: FlatButton(
-                  height: 300,
-                  color: myColor,
-                  onPressed: () async {
-                    if (activeStep < upperBound) {
-                      setState(() {
-                        ++activeStep;
-                      });
-                    } else {
-                      activeStep = 0;
-                    }
+              Container(
+                //height: height * 0.01,
+                margin: EdgeInsets.only(top: height * 0.031),
+                height: height * 0.12,
+                width: width * 0.50,
+                child: SizedBox(
+                  child: FlatButton(
+                    height: 300,
+                    color: myColor,
+                    onPressed: () async {
+                      if (activeStep == 0) {
+                        putBasic();
+                      } else if (activeStep == 1) {
+                        putWork(state.text, pincode.text);
+                      } else if (activeStep == 2) {
+                        //putReq(config_req.text);
+                      } else if (activeStep == 3) {
+                        print('>>>>> test ?>>>>');
+                        checkoutfunc();
+                      } else {
+                        print('>>> else on pressed');
+                      }
 
-                    setState(() {
-                      isLoading = !isLoading;
-                    });
-                  },
-                  child: Text(
-                    'Next',
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(fontSize: 17, color: Colors.white),
+                      if (activeStep < upperBound) {
+                        setState(() {
+                          ++activeStep;
+                        });
+                      } else {
+                        activeStep = 0;
+                      }
+
+                      setState(() {
+                        isLoading = !isLoading;
+                      });
+                    },
+                    child: Text(
+                      'Next',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(fontSize: 17, color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ]),
+            ]),
+          ),
         ),
-      ),
-      key: _scaffoldKey,
-      body: Theme(
-        data: ThemeData(colorScheme: ColorScheme.light(primary: Colors.white)),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              height: height * 0.07,
-              color: Color(0xff007bff),
-              child: Container(
-                padding: EdgeInsets.only(left: 10, top: 12),
-                child: Text(
-                  "Managing site visit for : $cust_name ",
-                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.only(top: 15),
-              child: IconStepper(
-                stepPadding: 0,
-                stepColor: Colors.grey.shade400,
-                activeStepColor: myColor,
-                activeStepBorderColor: myColor,
-                activeStepBorderWidth: 1,
-                activeStep: activeStep,
-                icons: [
-                  Icon(FontAwesomeIcons.user, color: Colors.white),
-                  Icon(FontAwesomeIcons.building, color: Colors.white),
-                  Icon(FontAwesomeIcons.userTie, color: Colors.white),
-                  Icon(FontAwesomeIcons.check, color: Colors.white)
+        key: _scaffoldKey,
+        body: GestureDetector(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Theme(
+              data: ThemeData(
+                  colorScheme: ColorScheme.light(primary: Colors.white)),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: height * 0.07,
+                    color: Color(0xff007bff),
+                    child: Container(
+                      padding: EdgeInsets.only(left: 10, top: 12),
+                      child: FutureBuilder(
+                          future: getUrl(),
+                          builder: (context, snapshot) {
+                            switch (snapshot.connectionState) {
+                              case ConnectionState.none:
+                                return Text('none');
+                              case ConnectionState.active:
+                                return Text('active');
+                              case ConnectionState.waiting:
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              case ConnectionState.done:
+                                return Text(
+                                  "Managing site visit for : ${snapshot.data} ",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 16, color: Colors.white),
+                                ); //Image.network('${snapshot.data}');
+                            }
+                          }),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.only(top: 15),
+                    child: IconStepper(
+                      stepPadding: 0,
+                      stepColor: Colors.grey.shade400,
+                      activeStepColor: myColor,
+                      activeStepBorderColor: myColor,
+                      activeStepBorderWidth: 1,
+                      activeStep: activeStep,
+                      icons: [
+                        Icon(FontAwesomeIcons.user, color: Colors.white),
+                        Icon(FontAwesomeIcons.building, color: Colors.white),
+                        Icon(FontAwesomeIcons.userTie, color: Colors.white),
+                        Icon(FontAwesomeIcons.check, color: Colors.white)
+                      ],
+                      onStepReached: (index) {
+                        setState(() {
+                          activeStep = index;
+                        });
+                      },
+                    ),
+                  ),
+                  Divider(color: Colors.grey.shade400, thickness: 1),
+                  Container(
+                    child: Text('${headerText()}',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.w500)),
+                  ),
+                  Divider(color: Colors.grey.shade400, thickness: 1),
+                  body()
                 ],
-                onStepReached: (index) {
-                  setState(() {
-                    activeStep = index;
-                  });
-                },
               ),
             ),
-            Divider(color: Colors.grey.shade400, thickness: 1),
-            Container(
-              child: Text('${headerText()}',
-                  style: GoogleFonts.poppins(
-                      fontSize: 18, fontWeight: FontWeight.w500)),
-            ),
-            Divider(color: Colors.grey.shade400, thickness: 1),
-            body()
-          ],
+          ),
         ),
       ),
     );
@@ -975,6 +1035,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
       stream: _stream_basic_info,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         //print('+++++++++++++++++++++++++++++      ${snapshot.connectionState}');
+
         switch (snapshot.connectionState) {
           case ConnectionState.none:
             return Text('none');
@@ -993,6 +1054,8 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                       Expanded(
                         flex: 1,
                         child: TextFormField(
+                            readOnly: true,
+                            //controller: fname..text = ftext,
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -1011,9 +1074,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                             //enabled: _isEnabled,
                             textInputAction: TextInputAction.done,
                             onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
+                              setState(() {});
                             }),
                       ),
                     ],
@@ -1025,6 +1086,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                       Expanded(
                         flex: 1,
                         child: TextFormField(
+                            readOnly: true,
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -1044,7 +1106,8 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                             textInputAction: TextInputAction.done,
                             onEditingComplete: () {
                               setState(() => {
-                                    _isEnabled = false,
+                                    print('change in  second   $changed'),
+                                    changedL = !changedL,
                                   });
                             }),
                       ),
@@ -1057,6 +1120,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                       Expanded(
                         flex: 1,
                         child: TextFormField(
+                            readOnly: true,
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -1076,7 +1140,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                             textInputAction: TextInputAction.done,
                             onEditingComplete: () {
                               setState(() => {
-                                    _isEnabled = false,
+                                    changed = !changed,
                                   });
                             }),
                       ),
@@ -1089,6 +1153,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                       Expanded(
                         flex: 1,
                         child: TextFormField(
+                            readOnly: true,
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -1108,7 +1173,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                             textInputAction: TextInputAction.done,
                             onEditingComplete: () {
                               setState(() => {
-                                    _isEnabled = false,
+                                    changed = !changed,
                                   });
                             }),
                       ),
@@ -1133,14 +1198,13 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
-                            initialValue: '${snapshot.data[4]}',
+                            //initialValue: '${snapshot.data[4]}',
                             style: GoogleFonts.poppins(
                                 fontSize: 18), // GIVE THE NAME HERE
 
-                            textInputAction: TextInputAction.done,
                             onEditingComplete: () {
                               setState(() => {
-                                    _isEnabled = false,
+                                    changed = !changed,
                                   });
                             }),
                       ),
@@ -1171,12 +1235,8 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                             style: GoogleFonts.poppins(
                                 fontSize: 18), // GIVE THE NAME HERE
 
-                            textInputAction: TextInputAction.done,
                             onEditingComplete: () {
                               print('>>>>>>>>>>>>>>>>>>>>>>> ${res_add.text}');
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
                             }),
                       ),
                     ],
@@ -1432,6 +1492,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                       Expanded(
                         flex: 1,
                         child: TextFormField(
+                            controller: curr_resi,
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -1444,7 +1505,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
-                            initialValue: '$current_residence',
+                            //initialValue: '$current_residence',
                             style: GoogleFonts.poppins(
                                 fontSize: 18), // GIVE THE NAME HERE
 
@@ -1463,29 +1524,48 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                           style: GoogleFonts.poppins(fontSize: 18)),
                       Expanded(
                         flex: 1,
-                        child: TextFormField(
-                            controller: family_type,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
+                        child: Container(
+                          //margin: EdgeInsets.only(left: 0, right: 0),
+                          margin: EdgeInsets.only(left: 20, right: 20),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Colors.grey,
                               ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
+                              top: BorderSide(color: Colors.grey),
+                              left: BorderSide(color: Colors.grey),
+                              right: BorderSide(color: Colors.grey),
                             ),
+                          ),
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            iconSize: 40,
+                            iconEnabledColor: Colors.grey,
+                            icon: Icon(Icons.arrow_drop_down),
+                            underline: SizedBox(),
+                            hint: Text(
+                              "  Family Type",
+                              style: GoogleFonts.poppins(fontSize: 18),
+                            ),
+                            value: valueChoose,
                             style: GoogleFonts.poppins(
-                                fontSize: 18), // GIVE THE NAME HERE
-
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
+                              textStyle:
+                                  TextStyle(color: Colors.black, fontSize: 16),
+                            ),
+                            items: family.map((valueItem) {
+                              return DropdownMenuItem(
+                                  value: valueItem, child: Text(valueItem));
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                print('>>>>>>>>>>>>>>..  $valueChoose');
+                                valueChoose = newValue;
+                                print('>>>>>>>>>>>>>>..  $valueChoose');
+                              });
+                            },
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -1636,11 +1716,15 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         children: [
           Expanded(
             child: TextFormField(
+              style: GoogleFonts.poppins(fontSize: 18, color: Colors.black),
               controller: feedback,
               minLines: 6,
               keyboardType: TextInputType.multiline,
               maxLines: null,
               decoration: InputDecoration(
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
                 border: OutlineInputBorder(
                   borderSide: BorderSide(),
                 ),

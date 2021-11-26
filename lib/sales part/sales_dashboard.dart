@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:eazy_app/Services/auth_service.dart';
 import 'package:eazy_app/sales%20part/drawer_widget.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -21,7 +22,6 @@ class Sales_Dashboard extends StatefulWidget {
 
 class _Sales_DashboardState extends State<Sales_Dashboard> {
   List dashboard_response = [];
-  
 
   Future getData() async {
     final pref = await SharedPreferences.getInstance();
@@ -60,17 +60,23 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
       dashboard_response = jsonDecode(response.body);
       print('>>>>>>>>>>....$dashboard_response');
       final image = dashboard_response[0]['developer_logo'];
-      
-      
     } else {
       print('Logged out ');
     }
   }
 
-  
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    
+  }
 
   @override
   Widget build(BuildContext context) {
+    FirebaseAnalytics().setCurrentScreen(
+        screenName: 'Sales Manager Dashboard',
+        screenClassOverride: 'Sales Manager Dashboard');
     final bool snack = ModalRoute.of(context)!.settings.arguments as bool;
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
@@ -79,7 +85,6 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
     Color myColor = Color(0xff4044fc);
 
     return Scaffold(
-      
       endDrawer: DrawerWidget(),
       appBar: AppBar(
         automaticallyImplyLeading: false,

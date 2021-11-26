@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "546876481726",
+    "project_id": "eazyapp-d0b94",
+    "storage_bucket": "eazyapp-d0b94.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:546876481726:android:c93bd31480e867c7befeef",
+        "android_client_info": {
+          "package_name": "com.example.eazy_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "546876481726-e86fut6cch869uju37l5oclkgon3dsah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZP9i87ctMQohuK6pTUjdGg86VVCwOovA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "546876481726-e86fut6cch869uju37l5oclkgon3dsah.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

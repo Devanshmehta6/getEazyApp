@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:intl/intl.dart';
@@ -28,6 +29,7 @@ class _SecondPageState extends State<SecondPage> {
   List recievedItems = [];
   String? data;
   bool isLoading = false;
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   fetchItem() async {
     final pref = await SharedPreferences.getInstance();
@@ -44,14 +46,14 @@ class _SecondPageState extends State<SecondPage> {
     final project_url = pref.getString('project_url');
 
     final cust_mobile =
-        wNumber.text == null ? wNumber.text : pref.getString('mobile') ;
-        print('>>>>>>>>>>>> MOBILE >>>>>>>>> $cust_mobile');
+        wNumber.text == null ? wNumber.text : pref.getString('mobile');
+    print('>>>>>>>>>>>> MOBILE >>>>>>>>> $cust_mobile');
 
     final cust_url = pref.getString('customer_url');
 
     Uri url =
         Uri.parse('https://geteazyapp.com/projects/$project_url/$cust_url/api');
-        print('>>>>>>>>>>>>>url>>>>>>>>>.. $url');
+    print('>>>>>>>>>>>>>url>>>>>>>>>.. $url');
 
     String sessionId = await FlutterSession().get('session');
 
@@ -86,7 +88,7 @@ class _SecondPageState extends State<SecondPage> {
           },
         ));
 
-        print('===========SECOND========${response.body}');
+    print('===========SECOND========${response.body}');
   }
 
   String? valueChoose;
@@ -100,8 +102,25 @@ class _SecondPageState extends State<SecondPage> {
   final TextEditingController wNumber = TextEditingController();
   final TextEditingController email = TextEditingController();
 
+  moveTopreviousScreen() {
+    print('----------- is called-----------');
+    Navigator.pop(
+      context,
+    );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    FirebaseAnalytics().setCurrentScreen(
+      screenName: 'Customer Check In Page 2',
+      screenClassOverride: 'Customer Check In Page 2',
+    );
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -438,318 +457,408 @@ class _SecondPageState extends State<SecondPage> {
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          resizeToAvoidBottomInset: false,
-          bottomNavigationBar: Container(
-            height: height * 0.1,
-            margin: EdgeInsets.only(top: 2),
-            child: SafeArea(
-              child: Row(children: [
-                Container(
-                  margin: EdgeInsets.only(top: height * 0.031),
-                  width: width * 0.50,
-                  child: SizedBox(
-                    height: height * 0.06,
-                    child: FlatButton(
-                      color: Colors.white,
-                      onPressed: () {
-                        Navigator.pop(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => FirstPage(),
-                                maintainState: true));
-                      },
-                      child: isLoading
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: 24),
-                                Text(
-                                  'Please Wait',
-                                  style: GoogleFonts.poppins(
-                                    textStyle: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            )
-                          : Text(
-                              'Back',
-                              style: GoogleFonts.poppins(
-                                textStyle:
-                                    TextStyle(fontSize: 17, color: Colors.black),
-                              ),
-                            ),
-                    ),
-                  ),
-                ),
-                Container(
-                  //height: height * 0.01,
-                  margin: EdgeInsets.only(top: height * 0.031),
-                  height: height * 0.12,
-                  width: width * 0.50,
-                  child: SizedBox(
-                    child: FlatButton(
-                      height: 300,
-                      color: myColor,
-                      onPressed: () {
-                        postData().whenComplete(() => Navigator.push(
+      child: WillPopScope(
+        onWillPop: () {
+          return moveTopreviousScreen();
+        },
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            resizeToAvoidBottomInset: false,
+            bottomNavigationBar: Container(
+              height: height * 0.1,
+              margin: EdgeInsets.only(top: 2),
+              child: SafeArea(
+                child: Row(children: [
+                  Container(
+                    margin: EdgeInsets.only(top: height * 0.031),
+                    width: width * 0.50,
+                    child: SizedBox(
+                      height: height * 0.06,
+                      child: FlatButton(
+                        color: Colors.white,
+                        onPressed: () {
+                          Navigator.pop(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ThirdPage(),
-                                  maintainState: true),
-                            ));
-                      },
-                      child: isLoading
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: 24),
-                                Text(
-                                  'Please Wait',
-                                  style: GoogleFonts.poppins(
-                                    textStyle: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                  builder: (context) => FirstPage(),
+                                  maintainState: true));
+                        },
+                        child: isLoading
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    color: Colors.white,
                                   ),
-                                )
-                              ],
-                            )
-                          : Text(
-                              'Next',
-                              style: GoogleFonts.poppins(
-                                textStyle:
-                                    TextStyle(fontSize: 17, color: Colors.white),
-                              ),
-                            ),
-                    ),
-                  ),
-                ),
-              ]),
-            ),
-          ),
-          body: SingleChildScrollView(
-            child: Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(height: 70),
-                  Container(
-                    height: height * 0.1,
-                    margin: EdgeInsets.only(top: height * 0.02),
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('images/eazyapp-logo-blue.png'),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: height * 0.04),
-                  Container(
-                    margin: EdgeInsets.only(right: width * 0.33),
-                    child: Container(
-                      //padding: EdgeInsets.only(right: width * 0.38),
-                      child: Text(
-                        'Basic Information',
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.075, right: width * 0.075),
-                    padding: EdgeInsets.all(5),
-                    child: TextFormField(
-                      controller: fname,
-                      autofocus: true,
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      ),
-                      autovalidate: true,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: myColor),
-                        ),
-                        suffixIcon: Icon(FontAwesomeIcons.userAlt,
-                            color: myColor, size: 18),
-                        border: InputBorder.none,
-                        hintText: 'First Name',
-                        hintStyle: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              fontSize: 16, color: Colors.grey.shade700),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.075, right: width * 0.075),
-                    padding: EdgeInsets.all(5),
-                    child: TextFormField(
-                      controller: lname,
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      ),
-                      autovalidate: true,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: myColor),
-                        ),
-                        suffixIcon: Icon(FontAwesomeIcons.userAlt,
-                            color: myColor, size: 18),
-                        border: InputBorder.none,
-                        hintText: 'Last Name',
-                        hintStyle: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              fontSize: 16, color: Colors.grey.shade700),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.075, right: width * 0.075),
-                    padding: EdgeInsets.all(5),
-                    child: TextFormField(
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      ),
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        suffixIcon: Icon(Icons.phone, color: myColor, size: 18),
-                        border: InputBorder.none,
-                        hintText: data,
-                        hintStyle: GoogleFonts.poppins(
-                          textStyle:
-                              TextStyle(fontSize: 16, color: Colors.black54),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                      top: height * 0.02,
-                      left: width * 0.053,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.only(
-                              right: width * 0.03, left: width * 0.03),
-                          child: Text(
-                            'Is this your Whatsapp Number?',
-                            style: GoogleFonts.poppins(
-                              textStyle: TextStyle(fontSize: 16),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          child: Transform.scale(
-                            scale: 1,
-                            child: Switch.adaptive(
-                              activeColor: myColor,
-                              value: value,
-                              onChanged: (value) => setState(() {
-                                this.value = value;
-                              }),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    child: value == false
-                        ? Container(
-                            margin: EdgeInsets.only(
-                                left: width * 0.075, right: width * 0.075),
-                            padding: EdgeInsets.all(5),
-                            child: TextFormField(
-                              controller: wNumber,
-                              style: GoogleFonts.poppins(
-                                textStyle:
-                                    TextStyle(color: Colors.black, fontSize: 16),
-                              ),
-                              autovalidate: true,
-                              decoration: InputDecoration(
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: myColor),
-                                ),
-                                suffixIcon: Icon(FontAwesomeIcons.whatsapp,
-                                    color: myColor, size: 18),
-                                border: InputBorder.none,
-                                hintText: 'Whatsapp Number',
-                                hintStyle: GoogleFonts.poppins(
+                                  SizedBox(width: 24),
+                                  Text(
+                                    'Please Wait',
+                                    style: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              )
+                            : Text(
+                                'Back',
+                                style: GoogleFonts.poppins(
                                   textStyle: TextStyle(
-                                      fontSize: 16, color: Colors.grey.shade700),
+                                      fontSize: 17, color: Colors.black),
                                 ),
                               ),
-                            ),
-                          )
-                        : Container(),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.075, right: width * 0.075),
-                    padding: EdgeInsets.all(5),
-                    child: TextFormField(
-                      controller: email,
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      ),
-                      autovalidate: true,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: myColor),
-                        ),
-                        suffixIcon: Icon(Icons.mail, color: myColor, size: 18),
-                        border: InputBorder.none,
-                        hintText: 'Email',
-                        hintStyle: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              fontSize: 16, color: Colors.grey.shade700),
-                        ),
                       ),
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.075, right: width * 0.075),
-                    child: Container(
+                    //height: height * 0.01,
+                    margin: EdgeInsets.only(top: height * 0.031),
+                    height: height * 0.12,
+                    width: width * 0.50,
+                    child: SizedBox(
+                      child: FlatButton(
+                        height: 300,
+                        color: myColor,
+                        onPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            postData().whenComplete(() => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ThirdPage(),
+                                      maintainState: true),
+                                ));
+                          }
+                        },
+                        child: isLoading
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 24),
+                                  Text(
+                                    'Please Wait',
+                                    style: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              )
+                            : Text(
+                                'Next',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                      fontSize: 17, color: Colors.white),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+            body: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(height: 70),
+                    Container(
+                      height: height * 0.1,
+                      margin: EdgeInsets.only(top: height * 0.02),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('images/eazyapp-logo-blue.png'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: height * 0.04),
+                    Container(
+                      margin: EdgeInsets.only(right: width * 0.33),
+                      child: Container(
+                        //padding: EdgeInsets.only(right: width * 0.38),
+                        child: Text(
+                          'Basic Information',
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.075, right: width * 0.075),
+                      padding: EdgeInsets.all(5),
+                      child: TextFormField(
+                        controller: fname,
+                        autofocus: true,
+                        style: GoogleFonts.poppins(
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: RequiredValidator(
+                            errorText: 'This field is required'),
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          errorStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              fontSize: 15,
+                            ),
+                          ),
+                          errorBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.red.shade500, width: 0.8),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: myColor),
+                          ),
+                          suffixIcon: Icon(FontAwesomeIcons.userAlt,
+                              color: myColor, size: 18),
+                          border: InputBorder.none,
+                          hintText: 'First Name',
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                                fontSize: 16, color: Colors.grey.shade700),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.075, right: width * 0.075),
+                      padding: EdgeInsets.all(5),
+                      child: TextFormField(
+                        controller: lname,
+                        style: GoogleFonts.poppins(
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: RequiredValidator(
+                            errorText: 'This field is required'),
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          errorStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              fontSize: 15,
+                            ),
+                          ),
+                          errorBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.red.shade500, width: 0.8),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: myColor),
+                          ),
+                          suffixIcon: Icon(FontAwesomeIcons.userAlt,
+                              color: myColor, size: 18),
+                          border: InputBorder.none,
+                          hintText: 'Last Name',
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                                fontSize: 16, color: Colors.grey.shade700),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.075, right: width * 0.075),
+                      padding: EdgeInsets.all(5),
+                      child: TextFormField(
+                        style: GoogleFonts.poppins(
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          suffixIcon:
+                              Icon(Icons.phone, color: myColor, size: 18),
+                          border: InputBorder.none,
+                          hintText: data,
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle:
+                                TextStyle(fontSize: 16, color: Colors.black54),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                        top: height * 0.02,
+                        left: width * 0.053,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.only(
+                                right: width * 0.03, left: width * 0.03),
+                            child: Text(
+                              'Is this your Whatsapp Number?',
+                              style: GoogleFonts.poppins(
+                                textStyle: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            child: Transform.scale(
+                              scale: 1,
+                              child: Switch.adaptive(
+                                activeColor: myColor,
+                                value: value,
+                                onChanged: (value) => setState(() {
+                                  this.value = value;
+                                }),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      child: value == false
+                          ? Container(
+                              margin: EdgeInsets.only(
+                                  left: width * 0.075, right: width * 0.075),
+                              padding: EdgeInsets.all(5),
+                              child: TextFormField(
+                                controller: wNumber,
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                      color: Colors.black, fontSize: 16),
+                                ),
+                                autovalidate: true,
+                                decoration: InputDecoration(
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: myColor),
+                                  ),
+                                  suffixIcon: Icon(FontAwesomeIcons.whatsapp,
+                                      color: myColor, size: 18),
+                                  border: InputBorder.none,
+                                  hintText: 'Whatsapp Number',
+                                  hintStyle: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey.shade700),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Container(),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.075, right: width * 0.075),
+                      padding: EdgeInsets.all(5),
+                      child: TextFormField(
+                        controller: email,
+                        style: GoogleFonts.poppins(
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: MultiValidator([
+                          RequiredValidator(
+                              errorText: 'This field is required'),
+                          EmailValidator(
+                              errorText: 'Please enter a valid Email')
+                        ]),
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          errorStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              fontSize: 15,
+                            ),
+                          ),
+                          errorBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.red.shade500, width: 0.8),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: myColor),
+                          ),
+                          suffixIcon:
+                              Icon(Icons.mail, color: myColor, size: 18),
+                          border: InputBorder.none,
+                          hintText: 'Email',
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                                fontSize: 16, color: Colors.grey.shade700),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.075, right: width * 0.075),
+                      child: Container(
+                        padding: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(color: Colors.grey),
+                          ),
+                        ),
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          iconSize: 46,
+                          iconDisabledColor: myColor,
+                          iconEnabledColor: myColor,
+                          icon: Icon(Icons.arrow_drop_down),
+                          underline: SizedBox(),
+                          hint: Text(
+                            "Select your Residential Location",
+                            style: GoogleFonts.poppins(fontSize: 16),
+                          ),
+                          value: valueChooseForLocation,
+                          style: GoogleFonts.poppins(
+                            textStyle:
+                                TextStyle(color: Colors.black, fontSize: 16),
+                          ),
+                          items: locationList.map((valueItem) {
+                            return DropdownMenuItem(
+                                value: valueItem, child: Text(valueItem));
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              valueChooseForLocation = newValue;
+                              print(
+                                  '------------------$valueChooseForLocation');
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: width * 0.075, right: width * 0.075),
                       padding: EdgeInsets.all(5),
                       decoration: BoxDecoration(
                         border: Border(
@@ -758,70 +867,35 @@ class _SecondPageState extends State<SecondPage> {
                       ),
                       child: DropdownButton<String>(
                         isExpanded: true,
-                        iconSize: 46,
+                        iconSize: 40,
                         iconDisabledColor: myColor,
                         iconEnabledColor: myColor,
                         icon: Icon(Icons.arrow_drop_down),
                         underline: SizedBox(),
                         hint: Text(
-                          "Select your Residential Location",
+                          "Where did you heard about us",
                           style: GoogleFonts.poppins(fontSize: 16),
                         ),
-                        value: valueChooseForLocation,
+                        value: valueChoose,
                         style: GoogleFonts.poppins(
-                          textStyle: TextStyle(color: Colors.black, fontSize: 16),
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
                         ),
-                        items: locationList.map((valueItem) {
+                        items: items.map((valueItem) {
                           return DropdownMenuItem(
                               value: valueItem, child: Text(valueItem));
                         }).toList(),
                         onChanged: (newValue) {
                           setState(() {
-                            valueChooseForLocation = newValue;
-                            print('------------------$valueChooseForLocation');
+                            valueChoose = newValue;
                           });
                         },
                       ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: width * 0.075, right: width * 0.075),
-                    padding: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey),
-                      ),
-                    ),
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      iconSize: 40,
-                      iconDisabledColor: myColor,
-                      iconEnabledColor: myColor,
-                      icon: Icon(Icons.arrow_drop_down),
-                      underline: SizedBox(),
-                      hint: Text(
-                        "Where did you heard about us",
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                      value: valueChoose,
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      ),
-                      items: items.map((valueItem) {
-                        return DropdownMenuItem(
-                            value: valueItem, child: Text(valueItem));
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          valueChoose = newValue;
-                        });
-                      },
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+                //color: Colors.grey.shade200,
               ),
-              //color: Colors.grey.shade200,
             ),
           ),
         ),

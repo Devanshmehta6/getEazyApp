@@ -14,12 +14,37 @@ class Detailspage extends StatefulWidget {
 class _DetailspageState extends State<Detailspage> {
   String cust_name = '';
   bool _isEnabled = false;
+  bool _isEditingText = false;
+  late TextEditingController emailController;
+  late TextEditingController nameController;
+
+  String initialName = '';
+  String initialEmail = '';
+  String initialPhone = '';
+  String initialWhatsapp = '';
+  String initialLocation = '';
+  String initialResidence = '';
 
   getName() async {
     final pref = await SharedPreferences.getInstance();
     setState(() {
       cust_name = pref.getString('cust_name');
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    //nameController = TextEditingController();
+    emailController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    super.dispose();
   }
 
   @override
@@ -30,28 +55,38 @@ class _DetailspageState extends State<Detailspage> {
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
+    nameController = TextEditingController(text: initialName)
+      ..addListener(
+        () {
+          setState(() {});
+        },
+      );
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        resizeToAvoidBottomInset : false,
         appBar: AppBar(
           bottom: const TabBar(
             tabs: [
               Tab(
                 child: Text(
                   'Profile',
-                  style: TextStyle(color: Colors.black, fontFamily: 'Poppins'),
+                  style: TextStyle(
+                      fontSize: 16, color: Colors.black, fontFamily: 'Poppins'),
                 ),
               ),
               Tab(
                 child: Text(
                   'History',
-                  style: TextStyle(color: Colors.black, fontFamily: 'Poppins'),
+                  style: TextStyle(
+                      fontSize: 16, color: Colors.black, fontFamily: 'Poppins'),
                 ),
               ),
               Tab(
                 child: Text(
                   'Follow Ups',
-                  style: TextStyle(color: Colors.black, fontFamily: 'Poppins'),
+                  style: TextStyle(
+                      fontSize: 16, color: Colors.black, fontFamily: 'Poppins'),
                 ),
               ),
             ],
@@ -61,8 +96,6 @@ class _DetailspageState extends State<Detailspage> {
             onPressed: () {
               Navigator.pop(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => EazyCustomers(), maintainState: true),
               );
             },
           ),
@@ -70,7 +103,7 @@ class _DetailspageState extends State<Detailspage> {
           backgroundColor: Colors.white,
           title: Row(
             children: <Widget>[
-              SizedBox(width: width * 0.19),
+              SizedBox(width: width * 0.18),
               // Text(
               //   cust_name == '' ? 'Loading...' : cust_name,
               //   style: GoogleFonts.poppins(
@@ -95,207 +128,362 @@ class _DetailspageState extends State<Detailspage> {
             Column(
               children: [
                 Container(
-                  height: height * 0.25,
-                  width: double.infinity,
-                  child: Card(
-                    child: Column(
-                      children: [
-                        Container(
-                          height: height * 0.07,
-                          width: double.infinity,
-                          child: Card(
-                            color: Colors.blue.shade200,
-                            child: Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 8.2),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                    //height: height * 0.2,
+                    width: double.infinity,
+                    child: Container(
+                      margin : EdgeInsets.symmetric(horizontal: 4),
+                      child: ExpansionTile(
+                        textColor: Colors.black,
+                        collapsedIconColor: Colors.grey,
+                        collapsedTextColor: Colors.grey,
+                        iconColor: Colors.black,
+                        initiallyExpanded: true,
+                        //tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                        //collapsedBackgroundColor: Color(0xff007bff),
+                        title: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Text(
+                            'Basic Information',
+                            style: GoogleFonts.poppins(
+                                fontSize: 16, color: Colors.black),
+                          ),
+                        ),
+                        children: [
+                          Container(
+                            height: height * 0.42,
+                            width: double.infinity,
+                            child: Card(
+                              child: Column(
                                 children: [
-                                  Expanded(
-                                    flex: 4,
-                                    child: Text(
-                                      'Basic Info',
-                                      style: GoogleFonts.poppins(fontSize: 16),
-                                    ),
-                                  ),
-                                  SizedBox(width: 200),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      margin: EdgeInsets.only(bottom: 18),
-                                      child: IconButton(
-                                        padding: EdgeInsets.zero,
-                                        icon: Icon(FontAwesomeIcons.edit,
-                                            size: 20),
-                                        onPressed: () {
-                                          print('executed edit');
-                                          setState(() {
-                                            _isEnabled = true;
-                                          });
-                                        },
+                                  Row(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.all(8),
+                                        child: Text(
+                                          'Name:',
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Container(
-                                      margin: EdgeInsets.only(bottom: 18),
-                                      child: IconButton(
+                                      Container(
+                                        width: width * 0.7,
                                         padding: EdgeInsets.zero,
-                                        icon: Icon(FontAwesomeIcons.save,
-                                            size: 20),
-                                        onPressed: () {
-                                          print('executed');
-                                          setState(() {
-                                            _isEnabled = !_isEnabled;
-                                          });
-                                        },
+                                        //margin: EdgeInsets.only(left: 8),
+                                        //padding: EdgeInsets.only(right  : 30),
+                                        child: TextFormField(
+                                          //scrollPadding: EdgeInsets.zero,
+                                          keyboardType: TextInputType.name,
+                                          onFieldSubmitted: (value) {
+                                            initialName =
+                                                value; //snapshot.data = value
+                                          },
+                                          initialValue:
+                                              '$initialName', //snapshot.data
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                          //controller: nameController,
+                                          decoration: InputDecoration(
+                                            floatingLabelBehavior:
+                                                FloatingLabelBehavior.always,
+
+                                            contentPadding: EdgeInsets.zero,
+                                            border: InputBorder.none,
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide:
+                                                  BorderSide(color: myColor),
+                                            ),
+                                            //helperText: 'Helper Text',
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.all(8),
+                                        child: Text(
+                                          'Email:',
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: width * 0.7,
+                                        padding: EdgeInsets.zero,
+                                        //margin: EdgeInsets.only(left: 8),
+                                        //padding: EdgeInsets.only(right  : 30),
+                                        child: TextFormField(
+                                          //scrollPadding: EdgeInsets.zero,
+                                          keyboardType: TextInputType.name,
+                                          onFieldSubmitted: (value) {
+                                            initialEmail =
+                                                value; //snapshot.data = value
+                                          },
+                                          initialValue:
+                                              '$initialEmail', //snapshot.data
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                          //controller: nameController,
+                                          decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.zero,
+                                            border: InputBorder.none,
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide:
+                                                  BorderSide(color: myColor),
+                                            ),
+                                            //helperText: 'Helper Text',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.all(8),
+                                        child: Text(
+                                          'Phone:',
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: width * 0.7,
+                                        padding: EdgeInsets.zero,
+                                        //margin: EdgeInsets.only(left: 8),
+                                        //padding: EdgeInsets.only(right  : 30),
+                                        child: TextFormField(
+                                          //scrollPadding: EdgeInsets.zero,
+                                          keyboardType: TextInputType.name,
+                                          onFieldSubmitted: (value) {
+                                            initialPhone =
+                                                value; //snapshot.data = value
+                                          },
+                                          initialValue:
+                                              '$initialPhone', //snapshot.data
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                          //controller: nameController,
+                                          decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.zero,
+                                            border: InputBorder.none,
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide:
+                                                  BorderSide(color: myColor),
+                                            ),
+                                            //helperText: 'Helper Text',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.all(8),
+                                        child: Text(
+                                          'Whatsapp:',
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: width * 0.65,
+                                        padding: EdgeInsets.zero,
+                                        //margin: EdgeInsets.only(left: 8),
+                                        //padding: EdgeInsets.only(right  : 30),
+                                        child: TextFormField(
+                                          //scrollPadding: EdgeInsets.zero,
+                                          keyboardType: TextInputType.name,
+                                          onFieldSubmitted: (value) {
+                                            initialWhatsapp =
+                                                value; //snapshot.data = value
+                                          },
+                                          initialValue:
+                                              '$initialWhatsapp', //snapshot.data
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                          //controller: nameController,
+                                          decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.zero,
+                                            border: InputBorder.none,
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide:
+                                                  BorderSide(color: myColor),
+                                            ),
+                                            //helperText: 'Helper Text',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.all(8),
+                                        child: Text(
+                                          'Location:',
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: width * 0.7,
+                                        padding: EdgeInsets.zero,
+                                        //margin: EdgeInsets.only(left: 8),
+                                        //padding: EdgeInsets.only(right  : 30),
+                                        child: TextFormField(
+                                          //scrollPadding: EdgeInsets.zero,
+                                          keyboardType: TextInputType.name,
+                                          onFieldSubmitted: (value) {
+                                            initialLocation =
+                                                value; //snapshot.data = value
+                                          },
+                                          initialValue:
+                                              '$initialLocation', //snapshot.data
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                          //controller: nameController,
+                                          decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.zero,
+                                            border: InputBorder.none,
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide:
+                                                  BorderSide(color: myColor),
+                                            ),
+                                            //helperText: 'Helper Text',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.all(8),
+                                        child: Text(
+                                          'Residence:',
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: width * 0.65,
+                                        padding: EdgeInsets.zero,
+                                        //margin: EdgeInsets.only(left: 8),
+                                        //padding: EdgeInsets.only(right  : 30),
+                                        child: TextFormField(
+                                          //scrollPadding: EdgeInsets.zero,
+                                          keyboardType: TextInputType.name,
+                                          onFieldSubmitted: (value) {
+                                            initialResidence =
+                                                value; //snapshot.data = value
+                                          },
+                                          initialValue:
+                                              '$initialResidence', //snapshot.data
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 16),
+                                          //controller: nameController,
+                                          decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.zero,
+                                            border: InputBorder.none,
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide:
+                                                  BorderSide(color: myColor),
+                                            ),
+                                            //helperText: 'Helper Text',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                        TextFormField(
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
-                            ),
-                            initialValue: 'Name', // GIVE THE NAME HERE
-                            enabled: _isEnabled,
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
-                            TextFormField(
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
-                            ),
-                            initialValue: 'Email', // GIVE THE NAME HERE
-                            enabled: _isEnabled,
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
-                            TextFormField(
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
-                            ),
-                            initialValue: 'Phone', // GIVE THE NAME HERE
-                            enabled: _isEnabled,
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
-                            TextFormField(
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
-                            ),
-                            initialValue: 'Whatsapp', // GIVE THE NAME HERE
-                            enabled: _isEnabled,
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
-                            TextFormField(
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
-                            ),
-                            initialValue: 'Location', // GIVE THE NAME HERE
-                            enabled: _isEnabled,
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
-                            TextFormField(
-                              scrollPadding: EdgeInsets.zero,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
-                            ),
-                            initialValue: 'Resident', // GIVE THE NAME HERE
-                            enabled: _isEnabled,
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
-                      ],
-                    ),
-                  ),
-                ),
+                        ],
+                      ),
+                    )),
 
+                Container(
+                    //height: height * 0.2,
+                    width: double.infinity,
+                    child: ExpansionTile(
+                      collapsedBackgroundColor: Colors.white,
+                      title: Text('Work Info' , style : GoogleFonts.poppins(fontSize : 16)),
+                      children: [],
+                    )),
                 //NAME FROM JSON
               ],
             ),
             Text(''),
             Text('')
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget name() {
+    if (_isEditingText)
+      return Center(
+        child: TextFormField(
+          onFieldSubmitted: (newValue) {
+            setState(() {
+              initialName = newValue;
+              _isEditingText = false;
+            });
+          },
+          autofocus: true,
+          controller: nameController,
+        ),
+      );
+    return InkWell(
+      onFocusChange: (value) => setState(() {
+        initialName = initialName;
+      }),
+      onTap: () {
+        setState(() {
+          _isEditingText = true;
+        });
+      },
+      child: Text(
+        initialName,
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 18.0,
+        ),
+      ),
+    );
+  }
+
+  Widget email() {
+    if (_isEditingText)
+      return Center(
+        child: TextField(
+          onSubmitted: (newValue) {
+            setState(() {
+              initialEmail = newValue;
+              _isEditingText = false;
+            });
+          },
+          autofocus: true,
+          controller: emailController,
+        ),
+      );
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _isEditingText = true;
+        });
+      },
+      child: Text(
+        initialEmail,
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 18.0,
         ),
       ),
     );

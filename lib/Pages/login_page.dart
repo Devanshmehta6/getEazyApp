@@ -4,6 +4,7 @@ import 'package:eazy_app/Pages/customer_check.dart/fifth.dart';
 import 'package:eazy_app/Pages/customer_check.dart/fourth.dart';
 import 'package:eazy_app/Services/auth_service.dart';
 import 'package:eazy_app/sales%20part/assigned_customer.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,6 +18,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:eazy_app/sales part/sales_dashboard.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'customer_check.dart/third.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -39,7 +42,17 @@ class LoginPageState extends State<LoginPage> {
   var _text = '';
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    FirebaseAnalytics().setCurrentScreen(
+      screenName: 'Login Page',
+      screenClassOverride: 'Login Page',
+    );
     final height =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
     final width = MediaQuery.of(context).size.width;
@@ -126,7 +139,7 @@ class LoginPageState extends State<LoginPage> {
                 ? Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AssginedCustomer(),
+                      builder: (context) => AssignedCustomer(),
                     ),
                   )
                 : Navigator.push(
@@ -180,7 +193,7 @@ class LoginPageState extends State<LoginPage> {
                         child: Image.asset('images/eazyapp-logo-blue.png',
                             height: height * 0.1)),
                     Container(
-                      margin: EdgeInsets.only(top: 50, right: 140),
+                      margin: EdgeInsets.only(top: 50, right: width * 0.33),
                       // color: Colors.red,
                       child: Text(
                         'Welcome back!',
@@ -194,7 +207,7 @@ class LoginPageState extends State<LoginPage> {
                     ),
                     SizedBox(height: height * 0.001),
                     Container(
-                      margin: EdgeInsets.only(top: 2, right: 138),
+                      margin: EdgeInsets.only(top: 2, right: width * 0.315),
                       child: Text(
                         'Please Login to continue',
                         style: GoogleFonts.poppins(
@@ -230,7 +243,6 @@ class LoginPageState extends State<LoginPage> {
                             padding: EdgeInsets.all(5),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: Column(
                               children: <Widget>[
@@ -246,9 +258,16 @@ class LoginPageState extends State<LoginPage> {
                                       fontSize: 16,
                                     )),
                                     controller: emailController,
-                                    validator: (val) => val!.length == 0
-                                        ? "Cannot be empty"
-                                        : null,
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                    validator: MultiValidator(
+                                      [
+                                        EmailValidator(
+                                            errorText: 'Enter a valid email'),
+                                        RequiredValidator(
+                                            errorText: 'Cannot be empty'),
+                                      ],
+                                    ),
                                     keyboardType: TextInputType.emailAddress,
                                     decoration: InputDecoration(
                                       errorStyle: GoogleFonts.poppins(
@@ -258,7 +277,8 @@ class LoginPageState extends State<LoginPage> {
                                       ),
                                       errorBorder: UnderlineInputBorder(
                                         borderSide: BorderSide(
-                                            color: Colors.red.shade200),
+                                            color: Colors.red.shade500,
+                                            width: 0.8),
                                       ),
                                       enabledBorder: UnderlineInputBorder(
                                         borderSide: BorderSide(
@@ -268,11 +288,7 @@ class LoginPageState extends State<LoginPage> {
                                         borderSide: BorderSide(color: myColor),
                                       ),
                                       suffixIcon: Icon(Icons.email,
-                                          color: emailController.text != null
-                                              ? myColor
-                                              : Colors.grey.shade300,
-                                          size: 20),
-                                      border: InputBorder.none,
+                                          color: myColor, size: 20),
                                       hintText: 'Email',
                                       hintStyle: GoogleFonts.poppins(
                                         textStyle: TextStyle(
@@ -293,9 +309,14 @@ class LoginPageState extends State<LoginPage> {
                                       fontSize: 16,
                                     )),
                                     controller: passController,
-                                    validator: (val) => val!.length == 0
-                                        ? "Cannot be empty"
-                                        : null,
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                    validator: MultiValidator(
+                                      [
+                                        RequiredValidator(
+                                            errorText: 'Cannot be empty'),
+                                      ],
+                                    ),
                                     obscureText: isHiddenPassword,
                                     decoration: InputDecoration(
                                       errorStyle: GoogleFonts.poppins(
@@ -305,11 +326,12 @@ class LoginPageState extends State<LoginPage> {
                                       ),
                                       errorBorder: UnderlineInputBorder(
                                         borderSide: BorderSide(
-                                            color: Colors.red.shade200),
+                                            color: Colors.red.shade500,
+                                            width: 0.8),
                                       ),
                                       enabledBorder: UnderlineInputBorder(
                                         borderSide: BorderSide(
-                                            color: Colors.grey.shade300),
+                                            color: Colors.grey.shade400),
                                       ),
                                       focusedBorder: UnderlineInputBorder(
                                         borderSide: BorderSide(color: myColor),
@@ -323,7 +345,6 @@ class LoginPageState extends State<LoginPage> {
                                             color: myColor,
                                             size: 20),
                                       ),
-                                      border: InputBorder.none,
                                       hintText: 'Password',
                                       hintStyle: GoogleFonts.poppins(
                                         textStyle: TextStyle(
@@ -336,7 +357,7 @@ class LoginPageState extends State<LoginPage> {
                                 ),
                                 SizedBox(height: height * 0.001),
                                 Container(
-                                  margin: EdgeInsets.only(left: width * 0.40),
+                                  margin: EdgeInsets.only(left: width * 0.37),
                                   child: OutlinedButton(
                                     style: OutlinedButton.styleFrom(
                                       side: BorderSide(
@@ -400,15 +421,17 @@ class LoginPageState extends State<LoginPage> {
                                             ),
                                           ),
                                     onPressed: () {
-                                      setState(
-                                        () => isLoading = !isLoading,
-                                      );
-                                      validateSave();
-                                      login(context).whenComplete(() {
+                                      if (formKey.currentState!.validate()) {
                                         setState(
                                           () => isLoading = !isLoading,
                                         );
-                                      });
+                                        validateSave();
+                                        login(context).whenComplete(() {
+                                          setState(
+                                            () => isLoading = !isLoading,
+                                          );
+                                        });
+                                      }
                                     },
                                   ),
                                 ),

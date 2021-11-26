@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:eazy_app/sales%20part/customers.dart';
 import 'package:eazy_app/sales%20part/view_details.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +19,7 @@ import 'package:im_stepper/main.dart';
 import 'package:im_stepper/stepper.dart';
 import 'package:cupertino_stepper/cupertino_stepper.dart';
 import 'package:rxdart/rxdart.dart';
+import 'dart:core';
 
 class BasicInfo {
   late String first_name;
@@ -30,14 +33,21 @@ class BasicInfo {
       this.whatsapp_no, this.residence_address);
 }
 
-class AssginedCustomer extends StatefulWidget {
-  const AssginedCustomer({Key? key}) : super(key: key);
+class Config {
+  late String name;
+  late int rera_carpet;
 
-  @override
-  _AssginedCustomerState createState() => _AssginedCustomerState();
+  Config(this.name, this.rera_carpet);
 }
 
-class _AssginedCustomerState extends State<AssginedCustomer> {
+class AssignedCustomer extends StatefulWidget {
+  const AssignedCustomer({Key? key}) : super(key: key);
+
+  @override
+  _AssignedState createState() => _AssignedState();
+}
+
+class _AssignedState extends State<AssignedCustomer> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? cust_name;
   String? cust_url;
@@ -70,6 +80,11 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
   late final project;
   late final current_residence;
   late final cust_id;
+  List<Config> configurations = [];
+  late final assign_to;
+  late final was_assign;
+
+  List<bool?> checkedValue = [];
 
   Future getUrl() async {
     final pref = await SharedPreferences.getInstance();
@@ -150,15 +165,21 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         },
       );
       //print(response.body);
-      print('>>>>>>>>>>>>>>>>>>>. ${response.body}');
+      print('>>>>GET RESSSSS ????????????    >. ${response.body}');
       final jsonData = jsonDecode(response.body);
+      print('>>>>>>>>>>>>>>>>......... ${jsonData[0]['requirement']}');
       project_url = jsonData[0]['project'][0]['project_url'];
+      pref.setString('project_url', project_url);
       mobile = jsonData[0]['customers'][0]['mobile'];
       project = jsonData[0]['customers'][0]['project'].toString();
       project_name = jsonData[0]['project'][0]['project_name'];
+      pref.setString('project_name', project_name);
       current_residence = jsonData[0]['customers'][0]['current_residence'];
       cust_id = jsonData[0]['workinfo'][0][0]['customer'];
-
+      assign_to = jsonData[0]['customers'][0]['assign_to'];
+      was_assign = jsonData[0]['customers'][0]['was_assign'];
+      print('?????????????? $was_assign');
+      print('?????????????? $assign_to');
       _streamController_basic_info.add([
         jsonData[0]['customers'][0]['first_name'],
         jsonData[0]['customers'][0]['last_name'],
@@ -174,6 +195,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         jsonData[0]['workinfo'][0][0]['designtion']
       ]);
       _streamController_req.add([
+        jsonData[0]['requirement'][0][0]['residence_configuration'],
         jsonData[0]['requirement'][0][0]['budget'],
         jsonData[0]['requirement'][0][0]['funding_mode'],
         jsonData[0]['requirement'][0][0]['purpose_of_purchase']
@@ -281,7 +303,8 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
       final settoken = 'Token ${token['token']}';
 
       Uri url = Uri.parse(
-          'https://geteazyapp.com/api-checkout/$project_url/requirement_api');
+          'https://geteazyapp.com/api/checkout/$project_url/$cust_url/requirement_info_api');
+      print('>>>>>>>>>>> url put >>>>>>>>> $url');
 
       String sessionId = await FlutterSession().get('session');
 
@@ -294,9 +317,10 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
       final cookie = sp.getString('cookie');
       print('?>>>>>>>>>>>>>>>>>>>>>>>>>');
       print(cust_id.runtimeType);
+      print(cust_id);
       print('?>>>>>>>>>>>>>>>>>>>>>>>>>');
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
-      http.Response response = await http.post(url, headers: {
+      http.Response response = await http.put(url, headers: {
         //'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': settoken,
@@ -305,9 +329,10 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         //'mobile': mobile,
         //'project': project,
         //'project_name': project_name,
-        'customer': cust_id,
-        'residence_configuration': config_requi,
-        'family_type': family_type.text,
+        'customer': cust_id.toString(),
+
+        'family_type': _value,
+        'current_residence': _value1,
       });
       print('22222222222222222222 ${response.body}');
     } else {
@@ -389,7 +414,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         'status': valueChoose,
         'customer': cust_id.toString(),
         'date_time': '${DateTime.now()}',
-        'checked_out': 1,
+        //'customer_checked_out': 1.toString(),
       });
 
       print(
@@ -399,6 +424,53 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
     }
   }
 
+  checked_out() async {
+    final pref = await SharedPreferences.getInstance();
+
+    final isLoggedIn = pref.getBool('log');
+    print('Logged in dashboard : $isLoggedIn');
+
+    if (isLoggedIn == true) {
+      final token = await AuthService.getToken();
+      //print('TOKENENNENEN :$token');
+      final settoken = 'Token ${token['token']}';
+
+      Uri url = Uri.parse(
+          'https://geteazyapp.com/api-checkout/$project_url/$cust_url/personal_info_api');
+      print('>>>>>>> url <>>>>>>>> $url');
+      String sessionId = await FlutterSession().get('session');
+
+      String csrf = await FlutterSession().get('csrf');
+
+      final sp = await SharedPreferences.getInstance();
+      print('>>>>>>>>>>>> >>>>>>>>. ${assign_to.runtimeType}');
+      //final finalToken = 'Token ${token[token]}';
+
+      final cookie = sp.getString('cookie');
+      print('?????????????? 4444444 $was_assign');
+      final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
+      http.Response response = await http.put(url, headers: {
+        //'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': settoken,
+        HttpHeaders.cookieHeader: setcookie,
+      }, body: {
+        'mobile': mobile,
+        'assign_to' : assign_to.toString(),
+        'project': project.toString(),
+        'project_name': project_name,
+        'checked_out': 'true',
+        //'assign_to': assign_to,
+        'was_assign': assign_to.toString(),
+      });
+      print('>>>>>>>> checkout response >>>>>>>>. ${response.body}');
+    } else {
+      print('Logged out ');
+    }
+  }
+
+  //checkedValue = List<bool?>.filled(configurations.length, false);
+
   void initState() {
     super.initState();
     _streamController_basic_info = BehaviorSubject();
@@ -407,23 +479,36 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
     _stream_work_info = _streamController_work_info.stream;
     _streamController_req = BehaviorSubject();
     _stream_req = _streamController_req.stream;
+
     getUrl().whenComplete(() {
       getData();
     });
+
+    //getConfig();
+    // getConfig().whenComplete(
+    //  () => checkedValue = List<bool?>.filled(configurations.length, false),
+    //);
   }
 
   final items = ['Hot', 'Warm', 'Cold', 'Lost'];
   final family = ['  Joint Family', '  Nuclear Family'];
   String? valueChoose;
+  String? valueChoose2;
   int activeStep = 0; // Initial step set to 5.
 
   int upperBound = 3;
   bool isLoading = false;
   bool changed = false;
   bool changedL = false;
+  String _value = "";
+  String _value1 = "";
+  String _value2 = "";
 
   @override
   Widget build(BuildContext context) {
+    FirebaseAnalytics().setCurrentScreen(
+        screenName: 'Assigned Customer Page',
+        screenClassOverride: 'Assigned Customer Page');
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -512,10 +597,11 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                       } else if (activeStep == 1) {
                         putWork(state.text, pincode.text);
                       } else if (activeStep == 2) {
-                        //putReq(config_req.text);
+                        putReq(config_req.text);
                       } else if (activeStep == 3) {
                         print('>>>>> test ?>>>>');
                         checkoutfunc();
+                        checked_out();
                       } else {
                         print('>>> else on pressed');
                       }
@@ -524,8 +610,18 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                         setState(() {
                           ++activeStep;
                         });
+                        if (activeStep == 1) {
+                          //getConfig();
+                          //checkedValue = List<bool?>.filled(configurations.length, false);
+
+                        }
                       } else {
-                        activeStep = 0;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EazyCustomers(),
+                          ),
+                        );
                       }
 
                       setState(() {
@@ -584,6 +680,8 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   Container(
                     padding: const EdgeInsets.only(top: 15),
                     child: IconStepper(
+                      enableNextPreviousButtons: false,
+                      enableStepTapping: false,
                       stepPadding: 0,
                       stepColor: Colors.grey.shade400,
                       activeStepColor: myColor,
@@ -593,7 +691,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                       icons: [
                         Icon(FontAwesomeIcons.user, color: Colors.white),
                         Icon(FontAwesomeIcons.building, color: Colors.white),
-                        Icon(FontAwesomeIcons.userTie, color: Colors.white),
+                        Icon(FontAwesomeIcons.briefcase, color: Colors.white),
                         Icon(FontAwesomeIcons.check, color: Colors.white)
                       ],
                       onStepReached: (index) {
@@ -607,7 +705,7 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   Container(
                     child: Text('${headerText()}',
                         style: GoogleFonts.poppins(
-                            fontSize: 18, fontWeight: FontWeight.w500)),
+                            fontSize: 18, fontWeight: FontWeight.w600)),
                   ),
                   Divider(color: Colors.grey.shade400, thickness: 1),
                   body()
@@ -618,416 +716,6 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
         ),
       ),
     );
-
-//       body: Theme(
-//         data: ThemeData(
-//             colorScheme: ColorScheme.light(primary: Color(0xff17a2b8))),
-//         child: Stepper(
-//           elevation: 0,
-//           type: StepperType.vertical,
-//           steps: steps(),
-//           currentStep: currentStep,
-//           onStepContinue: () {
-//             final isLastStep = currentStep == steps().length - 1;
-//             if (isLastStep) {
-//               checkout();
-//             } else {
-//               setState(() {
-//                 currentStep += 1;
-//               });
-//             }
-//           },
-//           onStepCancel: currentStep == 0
-//               ? null
-//               : () => setState(() {
-//                     currentStep -= 1;
-//                   }),
-//         ),
-//       ),
-//     );
-//   }
-
-//   List<Step> steps() => [
-//         Step(
-//           isActive: currentStep >= 0,
-//           title: currentStep == 0
-//               ? Row(
-//                   children: [
-//                     Text('Basic Info',
-//                         style: GoogleFonts.poppins(fontSize: 15)),
-//                     SizedBox(width: 200),
-//                     Expanded(
-//                       flex: 2,
-//                       child: Container(
-//                         //margin: EdgeInsets.only(bottom: 18),
-//                         child: IconButton(
-//                           padding: EdgeInsets.zero,
-//                           icon: Icon(FontAwesomeIcons.edit,
-//                               size: 20, color: Color(0xff17a2b8)),
-//                           onPressed: () {
-//                             print('executed edit');
-//                             setState(() {
-//                               _isEnabled = true;
-//                             });
-//                           },
-//                         ),
-//                       ),
-//                     ),
-//                     Expanded(
-//                       flex: 1,
-//                       child: Container(
-//                         child: IconButton(
-//                           padding: EdgeInsets.zero,
-//                           icon: Icon(FontAwesomeIcons.save,
-//                               size: 20, color: Color(0xff17a2b8)),
-//                           onPressed: () async {
-//                             putBasic(res_add.text);
-//                             print('executed');
-//                             setState(() {
-//                               _isEnabled = !_isEnabled;
-//                             });
-//                           },
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 )
-//               : Text('Basic Info', style: GoogleFonts.poppins(fontSize: 15)),
-//           content: StreamBuilder(
-//             stream: _stream_basic_info,
-//             builder: (BuildContext context, AsyncSnapshot snapshot) {
-//               //print('+++++++++++++++++++++++++++++      ${snapshot.connectionState}');
-//               switch (snapshot.connectionState) {
-//                 case ConnectionState.none:
-//                   return Text('none');
-//                 case ConnectionState.waiting:
-//                   return Center(child: CircularProgressIndicator());
-//                 case ConnectionState.active:
-//                   return Container(
-//                     height: 290,
-//                     child: Column(
-//                       children: [
-//                         Row(
-//                           children: [
-//                             Text('First Name : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[0]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Last Name : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[1]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Email : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[2]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Phone : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[3]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Whatsapp : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   initialValue: '${snapshot.data[4]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           children: [
-//                             Text('Residential Address  : ',
-//                                 style: GoogleFonts.poppins(fontSize: 15)),
-//                             Expanded(
-//                               flex: 1,
-//                               child: TextFormField(
-//                                   controller: res_add,
-//                                   maxLines: null,
-//                                   decoration: InputDecoration(
-//                                     border: InputBorder.none,
-//                                     focusedBorder: InputBorder.none,
-//                                     enabledBorder: UnderlineInputBorder(
-//                                       borderSide: BorderSide(
-//                                           color: Colors.grey.shade300),
-//                                     ),
-//                                     errorBorder: InputBorder.none,
-//                                     disabledBorder: InputBorder.none,
-//                                     contentPadding: EdgeInsets.only(
-//                                         left: 15,
-//                                         bottom: 11,
-//                                         top: 11,
-//                                         right: 15),
-//                                   ),
-//                                   //initialValue: '${snapshot.data[5]}',
-//                                   style: GoogleFonts.poppins(
-//                                       fontSize: 15), // GIVE THE NAME HERE
-//                                   enabled: _isEnabled,
-//                                   textInputAction: TextInputAction.done,
-//                                   onEditingComplete: () {
-//                                     print(
-//                                         '>>>>>>>>>>>>>>>>>>>>>>> ${res_add.text}');
-//                                     setState(() => {
-//                                           _isEnabled = false,
-//                                         });
-//                                   }),
-//                             ),
-//                           ],
-//                         ),
-//                       ],
-//                     ),
-//                   );
-//                 case ConnectionState.done:
-//                   return Text('done');
-//               }
-//             },
-//           ),
-//         ),
-//         Step(
-//           isActive: currentStep >= 1,
-//           title: currentStep == 1
-//               ? Row(
-//                   children: [
-//                     Text('Work Info', style: GoogleFonts.poppins(fontSize: 15)),
-//                     SizedBox(width: 200),
-//                     Expanded(
-//                       flex: 2,
-//                       child: Container(
-//                         //margin: EdgeInsets.only(bottom: 18),
-//                         child: IconButton(
-//                           padding: EdgeInsets.zero,
-//                           icon: Icon(FontAwesomeIcons.edit,
-//                               size: 20, color: Color(0xff17a2b8)),
-//                           onPressed: () {
-//                             print('executed edit');
-//                             setState(() {
-//                               _isEnabled = true;
-//                             });
-//                           },
-//                         ),
-//                       ),
-//                     ),
-//                     Expanded(
-//                       flex: 1,
-//                       child: Container(
-//                         child: IconButton(
-//                           padding: EdgeInsets.zero,
-//                           icon: Icon(FontAwesomeIcons.save,
-//                               size: 20, color: Color(0xff17a2b8)),
-//                           onPressed: () {
-//                             putWork(state.text, pincode.text);
-//                             print('executed');
-//                             setState(() {
-//                               _isEnabled = !_isEnabled;
-//                             });
-//                           },
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 )
-//               : Text('Work Info', style: GoogleFonts.poppins(fontSize: 15)),
-//           content:
-//         Step(
-//           isActive: currentStep >= 2,
-//           title: currentStep == 2
-//               ? Row(
-//                   children: [
-//                     Text('Requirements',
-//                         style: GoogleFonts.poppins(fontSize: 15)),
-//                     SizedBox(width: 165),
-//                     Expanded(
-//                       flex: 2,
-//                       child: Container(
-//                         //margin: EdgeInsets.only(bottom: 18),
-//                         child: IconButton(
-//                           padding: EdgeInsets.zero,
-//                           icon: Icon(FontAwesomeIcons.edit,
-//                               size: 20, color: Color(0xff17a2b8)),
-//                           onPressed: () {
-//                             print('executed edit');
-//                             setState(() {
-//                               _isEnabled = true;
-//                             });
-//                           },
-//                         ),
-//                       ),
-//                     ),
-//                     Expanded(
-//                       flex: 1,
-//                       child: Container(
-//                         child: IconButton(
-//                           padding: EdgeInsets.zero,
-//                           icon: Icon(FontAwesomeIcons.save,
-//                               size: 20, color: Color(0xff17a2b8)),
-//                           onPressed: () async {
-//                             putReq(config_req.text);
-//                             putReq1(family_type.text);
-//                             print('executed');
-//                             setState(() {
-//                               _isEnabled = !_isEnabled;
-//                             });
-//                           },
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 )
-//               : Text('Requirements', style: GoogleFonts.poppins(fontSize: 15)),
-
-//         Step(
-//           isActive: currentStep >= 3,
-//           title: Text('Check Out', style: GoogleFonts.poppins(fontSize: 15)),
-//           content:
-//         ),
-//       ];
   }
 
   Widget basic() {
@@ -1044,13 +732,16 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
           case ConnectionState.active:
             return Container(
               padding: EdgeInsets.only(top: 10, left: 25),
-              height: 350,
+              height: 380,
               child: Column(
                 children: [
                   Row(
                     children: [
-                      Text('First Name : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text(
+                        'First Name: ',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
@@ -1058,13 +749,6 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                             //controller: fname..text = ftext,
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
@@ -1081,21 +765,15 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Last Name : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text('Last Name: ',
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
                             readOnly: true,
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
@@ -1115,21 +793,15 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Email : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text('Email: ',
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
                             readOnly: true,
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
@@ -1148,21 +820,15 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Phone : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text('Phone: ',
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
                             readOnly: true,
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
@@ -1181,8 +847,9 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Whatsapp : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text('Whatsapp: ',
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
@@ -1210,36 +877,43 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Text('Residential Address  : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
-                      Expanded(
-                        flex: 1,
-                        child: TextFormField(
-                            controller: res_add,
-                            maxLines: null,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
+                  Container(
+                    margin: EdgeInsets.only(top: 10, right: 197, bottom: 10),
+                    child: Text(
+                      'Residential Address: ',
+                      style: GoogleFonts.poppins(
+                          fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      margin: EdgeInsets.only(right: 10),
+                      child: TextFormField(
+                          controller: res_add,
+                          minLines: 6,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black),
                             ),
-                            //initialValue: '${snapshot.data[5]}',
-                            style: GoogleFonts.poppins(
-                                fontSize: 18), // GIVE THE NAME HERE
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey.shade500),
+                            ),
+                            errorBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            contentPadding: EdgeInsets.only(
+                                left: 15, bottom: 11, top: 11, right: 15),
+                          ),
+                          //initialValue: '${snapshot.data[5]}',
+                          style: GoogleFonts.poppins(
+                              fontSize: 18), // GIVE THE NAME HERE
 
-                            onEditingComplete: () {
-                              print('>>>>>>>>>>>>>>>>>>>>>>> ${res_add.text}');
-                            }),
-                      ),
-                    ],
+                          onEditingComplete: () {
+                            print('>>>>>>>>>>>>>>>>>>>>>>> ${res_add.text}');
+                          }),
+                    ),
                   ),
                 ],
               ),
@@ -1268,20 +942,14 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                 children: [
                   Row(
                     children: [
-                      Text('Occupation : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text('Occupation: ',
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
@@ -1300,20 +968,16 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Organization : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text(
+                        'Organization: ',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
@@ -1332,20 +996,14 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Office Location : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text('Office Location: ',
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
@@ -1364,20 +1022,16 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Designation : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text(
+                        'Designation: ',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
@@ -1396,8 +1050,11 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('State : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text(
+                        'State: ',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
@@ -1428,8 +1085,11 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Pincode  : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text(
+                        'Pincode: ',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
@@ -1471,6 +1131,8 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
   }
 
   Widget req() {
+    //getConfig();
+
     return StreamBuilder(
       stream: _stream_req,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -1482,88 +1144,101 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
           case ConnectionState.active:
             return Container(
               padding: EdgeInsets.only(top: 10, left: 25),
-              height: 350,
+              height: 380,
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Text('Current Residence Type : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
-                      Expanded(
-                        flex: 1,
-                        child: TextFormField(
-                            controller: curr_resi,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
-                            ),
-                            //initialValue: '$current_residence',
-                            style: GoogleFonts.poppins(
-                                fontSize: 18), // GIVE THE NAME HERE
-
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
-                      ),
-                    ],
+                  Container(
+                    margin: EdgeInsets.only(top: 10, right: 210),
+                    child: Text(
+                      'Current Residence:',
+                      style: GoogleFonts.poppins(
+                          fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
                   ),
                   Row(
                     children: [
-                      Text('Family Type : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Expanded(
+                        flex: 1,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Radio(
+                                value: "Self Owned",
+                                groupValue: _value1,
+                                activeColor: myColor,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _value1 = value.toString();
+                                  });
+                                }),
+                            Text(
+                              'Self Owned',
+                              style: GoogleFonts.poppins(fontSize: 18),
+                            ),
+                            SizedBox(width: 20),
+                            Radio(
+                                value: "Leased",
+                                groupValue: _value,
+                                activeColor: myColor,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _value = value.toString();
+                                  });
+                                }),
+                            Text(
+                              'Leased',
+                              style: GoogleFonts.poppins(fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(right: 270),
+                    child: Text(
+                      'Family Type:',
+                      style: GoogleFonts.poppins(
+                          fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  Row(
+                    children: [
                       Expanded(
                         flex: 1,
                         child: Container(
                           //margin: EdgeInsets.only(left: 0, right: 0),
-                          margin: EdgeInsets.only(left: 20, right: 20),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border(
-                              bottom: BorderSide(
-                                color: Colors.grey,
+
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Radio(
+                                  value: "Joint Family",
+                                  groupValue: _value,
+                                  activeColor: myColor,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _value = value.toString();
+                                    });
+                                  }),
+                              Text(
+                                'Joint Family',
+                                style: GoogleFonts.poppins(fontSize: 16),
                               ),
-                              top: BorderSide(color: Colors.grey),
-                              left: BorderSide(color: Colors.grey),
-                              right: BorderSide(color: Colors.grey),
-                            ),
-                          ),
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            iconSize: 40,
-                            iconEnabledColor: Colors.grey,
-                            icon: Icon(Icons.arrow_drop_down),
-                            underline: SizedBox(),
-                            hint: Text(
-                              "  Family Type",
-                              style: GoogleFonts.poppins(fontSize: 18),
-                            ),
-                            value: valueChoose,
-                            style: GoogleFonts.poppins(
-                              textStyle:
-                                  TextStyle(color: Colors.black, fontSize: 16),
-                            ),
-                            items: family.map((valueItem) {
-                              return DropdownMenuItem(
-                                  value: valueItem, child: Text(valueItem));
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                print('>>>>>>>>>>>>>>..  $valueChoose');
-                                valueChoose = newValue;
-                                print('>>>>>>>>>>>>>>..  $valueChoose');
-                              });
-                            },
+                              Radio(
+                                  value: "Nuclear Family",
+                                  groupValue: _value,
+                                  activeColor: myColor,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _value = value.toString();
+                                    });
+                                  }),
+                              Text(
+                                'Nuclear Family',
+                                style: GoogleFonts.poppins(fontSize: 16),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -1571,72 +1246,27 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Configuration Required : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
-                      Expanded(
-                        flex: 1,
-                        child: TextFormField(
-                            controller: config_req,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
-                            ),
-                            style: GoogleFonts.poppins(
-                                fontSize: 18), // GIVE THE NAME HERE
-
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
+                      Container(
+                        margin: EdgeInsets.only(top: 6, bottom: 10, right: 8),
+                        child: Text(
+                          'Configuration Required: ',
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      Text(
+                        '${snapshot.data[0]}',
+                        style: GoogleFonts.poppins(fontSize: 18),
                       ),
                     ],
                   ),
                   Row(
                     children: [
-                      Text('Budget : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
-                      Expanded(
-                        flex: 1,
-                        child: TextFormField(
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                              ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.only(
-                                  left: 15, bottom: 11, top: 11, right: 15),
-                            ),
-                            initialValue: '${snapshot.data[0]}',
-                            style: GoogleFonts.poppins(
-                                fontSize: 18), // GIVE THE NAME HERE
-
-                            textInputAction: TextInputAction.done,
-                            onEditingComplete: () {
-                              setState(() => {
-                                    _isEnabled = false,
-                                  });
-                            }),
+                      Text(
+                        'Budget: ',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.w500),
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text('Mode of Funding : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
@@ -1644,11 +1274,8 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
+                                borderSide: BorderSide.none,
                               ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
@@ -1667,8 +1294,43 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                   ),
                   Row(
                     children: [
-                      Text('Purpose of Purchase  : ',
-                          style: GoogleFonts.poppins(fontSize: 18)),
+                      Text(
+                        'Mode of Funding: ',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: EdgeInsets.only(
+                                  left: 15, bottom: 11, top: 11, right: 15),
+                            ),
+                            initialValue: '${snapshot.data[2]}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18), // GIVE THE NAME HERE
+
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: () {
+                              setState(() => {
+                                    _isEnabled = false,
+                                  });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        'Purpose of Purchase: ',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
                       Expanded(
                         flex: 1,
                         child: TextFormField(
@@ -1677,15 +1339,12 @@ class _AssginedCustomerState extends State<AssginedCustomer> {
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
+                                borderSide: BorderSide.none,
                               ),
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(
                                   left: 15, bottom: 11, top: 11, right: 15),
                             ),
-                            initialValue: '${snapshot.data[2]}',
+                            initialValue: '${snapshot.data[3]}',
                             style: GoogleFonts.poppins(
                                 fontSize: 18), // GIVE THE NAME HERE
 

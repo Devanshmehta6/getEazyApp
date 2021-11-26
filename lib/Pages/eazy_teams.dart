@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:eazy_app/Services/auth_service.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -168,13 +169,21 @@ class _EazyTeamsState extends State<EazyTeams> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getName();
+
     getteams = getTeams();
-    
+  }
+
+  moveTopreviousScreen() {
+    print('----------- is called-----------');
+    Navigator.pop(
+      context,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    FirebaseAnalytics().setCurrentScreen(
+        screenName: 'EazyTeams', screenClassOverride: 'EazyTeams');
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -182,270 +191,334 @@ class _EazyTeamsState extends State<EazyTeams> {
     Color myColor = Color(0xff4044fc);
 
     String? formattedDate; //DateFormat('kk:mm:ss').format(now);
-    return Scaffold(
-      backgroundColor: Colors.grey.shade300,
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.blue.shade800),
-        backgroundColor: Colors.white,
-        title: Row(
-          children: <Widget>[
-            SizedBox(width: 280),
-            Image.asset(
-              'images/eazyapp-logo-blue.png',
-              height: 48,
-              width: 40,
-            ),
-          ],
-        ),
-      ),
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 70,
-              width: double.infinity,
-              child: Card(
-                child: Container(
-                  padding: EdgeInsets.only(top: 6),
-                  child: Column(
-                    children: <Widget>[
-                      project_name == null
-                          ? Text(
-                              '  Team Members - Loading...',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            )
-                          : Text(
-                              '  Team Members - ${project_name}',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ),
-                      Container(
-                        child: Text(
-                          DateFormat("dd-MM-yyyy").format(
-                            DateTime.now(),
-                          ),
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+    return WillPopScope(
+      onWillPop: () {
+        return moveTopreviousScreen();
+      },
+      child: MaterialApp(
+        home: Scaffold(
+          backgroundColor: Colors.grey.shade300,
+          appBar: AppBar(
+            iconTheme: IconThemeData(color: Colors.blue.shade800),
+            backgroundColor: Colors.white,
+            title: Row(
+              children: <Widget>[
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back),
+                ),
+                SizedBox(width: width * 0.25),
+                Text(
+                  'EazyTeams',
+                  style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                        color: myColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
-              ),
+                SizedBox(width: width * 0.2),
+                Image.asset(
+                  'images/eazyapp-logo-blue.png',
+                  height: 48,
+                  width: 40,
+                ),
+              ],
             ),
-            Expanded(
-              child: FutureBuilder(
-                  future: getteams,
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    final height = MediaQuery.of(context).size.height -
-                        MediaQuery.of(context).padding.top -
-                        kToolbarHeight;
-                    final width = MediaQuery.of(context).size.width;
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                        return Text('none');
-                      case ConnectionState.waiting:
-                        return Center(child: CircularProgressIndicator());
-                      case ConnectionState.active:
-                        return Text('active');
-                      case ConnectionState.done:
-                        return ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Container(
+          ),
+          body: Container(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  height: 70,
+                  width: double.infinity,
+                  child: FutureBuilder(
+                      future: getName(),
+                      builder: (context, AsyncSnapshot snapshot) {
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.none:
+                            return Text('ERROR');
+                          case ConnectionState.waiting:
+                            return Center(child: CircularProgressIndicator());
+                          case ConnectionState.active:
+                            return Text('ERROR');
+                          case ConnectionState.done:
+                            return Card(
+                              child: Container(
+                                padding: EdgeInsets.only(top: 6),
                                 child: Column(
-                                  children: [
-                                    Card(
-                                      margin:
-                                          EdgeInsets.only(left: 10, right: 10),
-                                      child: Container(
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              children: <Widget>[
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: 8,
-                                                      left: 8,
-                                                      right: 8),
-                                                  child: Image.asset(
-                                                      'images/user_image.png',
-                                                      height: 100,
-                                                      width: 100),
-                                                ),
-                                                VerticalDivider(
-                                                  color: Colors.grey,
-                                                  thickness: 1.5,
-                                                ),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
+                                  children: <Widget>[
+                                    project_name == null
+                                        ? Text(
+                                            '  Team Members - Loading...',
+                                            style: GoogleFonts.poppins(
+                                              textStyle: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          )
+                                        : Text(
+                                            '  Team Members - ${snapshot.data}',
+                                            style: GoogleFonts.poppins(
+                                              textStyle: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ),
+                                    Container(
+                                      child: Text(
+                                        DateFormat("dd-MM-yyyy").format(
+                                          DateTime.now(),
+                                        ),
+                                        style: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                        }
+                      }),
+                ),
+                Expanded(
+                  child: FutureBuilder(
+                      future: getteams,
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        final height = MediaQuery.of(context).size.height -
+                            MediaQuery.of(context).padding.top -
+                            kToolbarHeight;
+                        final width = MediaQuery.of(context).size.width;
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.none:
+                            return Text('none');
+                          case ConnectionState.waiting:
+                            return Center(child: CircularProgressIndicator());
+                          case ConnectionState.active:
+                            return Text('active');
+                          case ConnectionState.done:
+                            return ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: snapshot.data.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Container(
+                                    child: Column(
+                                      children: [
+                                        Card(
+                                          margin: EdgeInsets.only(
+                                              left: 10, right: 10),
+                                          child: Container(
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: <Widget>[
+                                                    Padding(
                                                       padding: EdgeInsets.only(
-                                                          top: 9),
-                                                      child: Text(
-                                                        'Name : ${snapshot.data[index].name}',
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                          textStyle: TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
+                                                          top: 8,
+                                                          left: 8,
+                                                          right: 8),
+                                                      child: Image.asset(
+                                                          'images/user_image.png',
+                                                          height: 100,
+                                                          width: 100),
                                                     ),
-                                                    Container(
-                                                      padding: EdgeInsets.only(
-                                                          top: 9),
-                                                      child: checkintime == null
-                                                          ? Text(
-                                                              'Check In Time : -', //'Phone : ${snapshot.data[index].phone}',
-                                                              style: GoogleFonts
-                                                                  .poppins(
-                                                                textStyle:
-                                                                    TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                            )
-                                                          : Text(
-                                                              'Check In Time : $checkintime', //'Phone : ${snapshot.data[index].phone}',
-                                                              style: GoogleFonts
-                                                                  .poppins(
-                                                                textStyle:
-                                                                    TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
+                                                    VerticalDivider(
+                                                      color: Colors.grey,
+                                                      thickness: 1.5,
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Container(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  top: 9),
+                                                          child: Text(
+                                                            'Name : ${snapshot.data[index].name}',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              textStyle:
+                                                                  TextStyle(
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
                                                               ),
                                                             ),
-                                                    ),
-                                                    Container(
-                                                      padding: EdgeInsets.only(
-                                                          top: 9),
-                                                      child: Text(
-                                                        'Check Out Time : $checkouttime', //'Allocated To : ${snapshot.data[index].assign_to}',
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                          textStyle: TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.w500,
                                                           ),
                                                         ),
-                                                      ),
+                                                        Container(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  top: 9),
+                                                          child:
+                                                              checkintime ==
+                                                                      null
+                                                                  ? Text(
+                                                                      'Check In Time : -', //'Phone : ${snapshot.data[index].phone}',
+                                                                      style: GoogleFonts
+                                                                          .poppins(
+                                                                        textStyle:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              14,
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
+                                                                        ),
+                                                                      ),
+                                                                    )
+                                                                  : Text(
+                                                                      'Check In Time : $checkintime', //'Phone : ${snapshot.data[index].phone}',
+                                                                      style: GoogleFonts
+                                                                          .poppins(
+                                                                        textStyle:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              14,
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                        ),
+                                                        Container(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  top: 9),
+                                                          child:
+                                                              checkouttime ==
+                                                                      null
+                                                                  ? Text(
+                                                                      'Check Out Time : -', //'Phone : ${snapshot.data[index].phone}',
+                                                                      style: GoogleFonts
+                                                                          .poppins(
+                                                                        textStyle:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              14,
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
+                                                                        ),
+                                                                      ),
+                                                                    )
+                                                                  : Text(
+                                                                      'Check Out Time : $checkouttime', //'Allocated To : ${snapshot.data[index].assign_to}',
+                                                                      style: GoogleFonts
+                                                                          .poppins(
+                                                                        textStyle:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              14,
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ],
                                                 ),
                                               ],
                                             ),
-                                          ],
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    SafeArea(
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: height * 0.05,
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        child: Container(
-                                          color: Colors.white,
-                                          child: check
-                                              ? OutlinedButton(
-                                                  //color: myColor,
-                                                  style:
-                                                      OutlinedButton.styleFrom(
-                                                    side: BorderSide(
-                                                        color: myColor,
-                                                        width: 1.5),
-                                                  ),
+                                        SafeArea(
+                                          child: Container(
+                                            width: double.infinity,
+                                            height: height * 0.05,
+                                            padding: EdgeInsets.only(
+                                                left: 10, right: 10),
+                                            child: Container(
+                                              color: Colors.white,
+                                              child: check
+                                                  ? OutlinedButton(
+                                                      //color: myColor,
+                                                      style: OutlinedButton
+                                                          .styleFrom(
+                                                        side: BorderSide(
+                                                            color: myColor,
+                                                            width: 1.5),
+                                                      ),
 
-                                                  child: Text(
-                                                    'CHECK IN',
-                                                    style: GoogleFonts.poppins(
-                                                        fontSize: 16,
-                                                        color: myColor),
-                                                  ),
+                                                      child: Text(
+                                                        'CHECK IN',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16,
+                                                                color: myColor),
+                                                      ),
 
-                                                  onPressed: () async {
-                                                    final pref =
-                                                        await SharedPreferences
-                                                            .getInstance();
-                                                    pref.setInt(
-                                                        'sales_man_id',
-                                                        snapshot
-                                                            .data[index].id);
-                                                    postCheckin();
-                                                    setState(() {
-                                                      check = !check;
-                                                    });
-                                                  },
-                                                )
-                                              : OutlinedButton(
-                                                  //color: myColor,
-                                                  style:
-                                                      OutlinedButton.styleFrom(
-                                                    side: BorderSide(
-                                                        color: myColor,
-                                                        width: 1.5),
-                                                  ),
+                                                      onPressed: () async {
+                                                        final pref =
+                                                            await SharedPreferences
+                                                                .getInstance();
+                                                        pref.setInt(
+                                                            'sales_man_id',
+                                                            snapshot.data[index]
+                                                                .id);
+                                                        postCheckin();
+                                                        setState(() {
+                                                          check = !check;
+                                                        });
+                                                      },
+                                                    )
+                                                  : OutlinedButton(
+                                                      //color: myColor,
+                                                      style: OutlinedButton
+                                                          .styleFrom(
+                                                        side: BorderSide(
+                                                            color: myColor,
+                                                            width: 1.5),
+                                                      ),
 
-                                                  child: Text(
-                                                    'CHECK OUT',
-                                                    style: GoogleFonts.poppins(
-                                                        fontSize: 16,
-                                                        color: myColor),
-                                                  ),
-                                                  onPressed: () async {
-                                                    final pref =
-                                                        await SharedPreferences
-                                                            .getInstance();
-                                                    pref.setInt(
-                                                        'sales_man_id',
-                                                        snapshot
-                                                            .data[index].id);
-                                                    postCheckout();
-                                                    setState(() {
-                                                      check = !check;
-                                                    });
-                                                  },
-                                                ),
+                                                      child: Text(
+                                                        'CHECK OUT',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16,
+                                                                color: myColor),
+                                                      ),
+                                                      onPressed: () async {
+                                                        final pref =
+                                                            await SharedPreferences
+                                                                .getInstance();
+                                                        pref.setInt(
+                                                            'sales_man_id',
+                                                            snapshot.data[index]
+                                                                .id);
+                                                        postCheckout();
+                                                        setState(() {
+                                                          check = !check;
+                                                        });
+                                                      },
+                                                    ),
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        SizedBox(
+                                          height: 10,
+                                        )
+                                      ],
                                     ),
-                                    SizedBox(
-                                      height: 10,
-                                    )
-                                  ],
-                                ),
-                              ); //Text(snapshot.data[index].Name),
-                            });
-                    }
-                  }),
-            )
-          ],
+                                  ); //Text(snapshot.data[index].Name),
+                                });
+                        }
+                      }),
+                )
+              ],
+            ),
+          ),
         ),
       ),
     );

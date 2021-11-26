@@ -60,13 +60,11 @@ class _FifthPageState extends State<FifthPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    CameraCamera(onFile: (file){
-      
-    }); 
-    
+    CameraCamera(onFile: (file) {});
   }
 
   bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height -
@@ -75,19 +73,26 @@ class _FifthPageState extends State<FifthPage> {
 
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
+    moveTopreviousScreen() {
+      print('----------- is called-----------');
+      Navigator.pop(
+        context,
+      );
+    }
 
     void openCamera() {
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (_) => CameraCamera(
-                    onFile: (file) {
-                      photos.add(file);
-                      Navigator.pop(context);
-                      setState(() {});
-                    },
-                  ),),
-                  );
+        context,
+        MaterialPageRoute(
+          builder: (_) => CameraCamera(
+            onFile: (file) {
+              photos.add(file);
+              Navigator.pop(context);
+              setState(() {});
+            },
+          ),
+        ),
+      );
     }
 
     return MaterialApp(

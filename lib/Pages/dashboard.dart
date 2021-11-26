@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 import 'package:eazy_app/Pages/drawer_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -83,20 +85,25 @@ class _DashboardState extends State<Dashboard> {
     getallData = getUser();
   }
 
+  //FirebaseAnalytics analytics = FirebaseAnalytics();
+
   @override
   Widget build(BuildContext context) {
+    FirebaseAnalytics().setCurrentScreen(
+      screenName: 'Visit Manager Dashboard',
+      screenClassOverride: 'Visit Manager Dashboard',
+    );
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: WillPopScope(
-        onWillPop: () async {
-          return true;
-        },
-        child: Scaffold(
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: MaterialApp(
+        //navigatorObservers: [FirebaseAnalyticsObserver(analytics: analytics)],
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
           endDrawer: NavigationDrawerWidget(),
           appBar: AppBar(
             //centerTitle : true,
@@ -218,7 +225,7 @@ class _DashboardState extends State<Dashboard> {
                       : CircularProgressIndicator()
                 ],
               ),
-              SizedBox(width: width * 0.08),
+              SizedBox(width: width * 0.03),
               Container(
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),
@@ -293,7 +300,7 @@ class _DashboardState extends State<Dashboard> {
                       : CircularProgressIndicator()
                 ],
               ),
-              SizedBox(width: width * 0.165),
+              SizedBox(width: width * 0.11),
               Container(
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),
@@ -359,8 +366,7 @@ class _DashboardState extends State<Dashboard> {
                   SizedBox(height: height * 0.02),
                   mapResponse != null
                       ? Text(
-                          mapResponse['dashboard_statistics']
-                                  ['cp_customers']
+                          mapResponse['dashboard_statistics']['cp_customers']
                               .toString(), //"$total_customers",
                           style: GoogleFonts.poppins(
                             textStyle: TextStyle(
@@ -371,7 +377,7 @@ class _DashboardState extends State<Dashboard> {
                       : CircularProgressIndicator()
                 ],
               ),
-              SizedBox(width: width * 0.155),
+              SizedBox(width: width * 0.11),
               Container(
                 // padding : EdgeInsets.only(bottom: 20),
                 margin: EdgeInsets.only(bottom: 25),

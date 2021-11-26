@@ -3,6 +3,10 @@ import 'package:eazy_app/Pages/customer_check.dart/cp_first.dart';
 import 'package:eazy_app/Pages/customer_check.dart/fifth.dart';
 import 'package:eazy_app/Pages/customer_check.dart/first.dart';
 import 'package:eazy_app/Pages/customer_check.dart/first.dart';
+import 'package:eazy_app/Pages/customer_check.dart/fourth.dart';
+import 'package:eazy_app/Pages/customer_check.dart/second.dart';
+import 'package:eazy_app/Pages/customer_check.dart/third.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -33,8 +37,9 @@ class User2 {
   late String name;
   late String phone;
   late String was_assign;
+  late String customer_pic;
 
-  User2(this.name, this.phone, this.was_assign);
+  User2(this.name, this.phone, this.was_assign, this.customer_pic);
 }
 
 class Sales {
@@ -75,6 +80,9 @@ class _EazyVisitsState extends State<EazyVisits> {
   late StreamController _streamController;
   late Stream _stream;
   int len = 0;
+  bool cancel = true;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      new GlobalKey<RefreshIndicatorState>();
 
   ongoingclass() async {
     final pref = await SharedPreferences.getInstance();
@@ -169,7 +177,8 @@ class _EazyVisitsState extends State<EazyVisits> {
       print('yqyqyqyqyq :: $entireJson2');
 
       for (var u in completeddata) {
-        User2 user2 = User2(u['name'], u['phone'], u['was_assign']);
+        User2 user2 =
+            User2(u['name'], u['phone'], u['was_assign'], u['customer_pic']);
 
         users2.add(user2);
       }
@@ -213,7 +222,11 @@ class _EazyVisitsState extends State<EazyVisits> {
     final settoken = 'Token ${token['token']}';
     final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
     final cust_id = sp.getInt('cust_id');
-    final mobile = sp.getString('mobile');
+
+    final pref1 = await SharedPreferences.getInstance();
+
+    String mobile = pref1.getString('mobile');
+    print('> mobile get>>>>>>>>>>. $mobile');
     final project_id = pref.getString('project_id');
 
     http.Response response = await http.put(url,
@@ -252,8 +265,7 @@ class _EazyVisitsState extends State<EazyVisits> {
             FutureBuilder(
               future: managerClass(),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
-                //print(
-                // '>>>>>>>>>>>> SNAPSHOT >>>>>>>>>>> ${snapshot.data.length}');
+                print('?????????????????????? ${snapshot.data}');
                 final height = MediaQuery.of(context).size.height -
                     MediaQuery.of(context).padding.top -
                     kToolbarHeight;
@@ -268,45 +280,55 @@ class _EazyVisitsState extends State<EazyVisits> {
                   case ConnectionState.active:
                     return Text('active');
                   case ConnectionState.done:
-                    return DropdownButton<String>(
-                      isExpanded: true,
-                      underline: SizedBox(),
-                      icon: Icon(Icons.arrow_drop_down),
-                      iconSize: 27,
-                      iconDisabledColor: Colors.grey,
-                      iconEnabledColor: myColor,
-                      hint: Text('Assign a sales manager    ',
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            color: Colors.black,
-                          )),
-                      // selectedItemBuilder: (BuildContext context) {
-                      //   return snapshot.data.map<Widget>((Sales item) {
-                      //     return Text(item.name);
-                      //   }).toList();
-                      // },
-                      items:
-                          snapshot.data.map<DropdownMenuItem<String>>((item) {
-                        return DropdownMenuItem<String>(
-                          value: item.id.toString(),
-                          //value = string
-                          child: Text(
-                            item.name,
-                            style: GoogleFonts.poppins(fontSize: 14),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) async {
-                        setState(() {
-                          dropDownValue = value;
-                        });
+                    if (snapshot.data.isNotEmpty) {
+                      return DropdownButton<String>(
+                        isExpanded: true,
+                        underline: SizedBox(),
+                        icon: Icon(Icons.arrow_drop_down),
+                        iconSize: 27,
+                        iconDisabledColor: Colors.grey,
+                        iconEnabledColor: myColor,
+                        hint: Text('Assign a sales manager    ',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: Colors.black,
+                            )),
+                        // selectedItemBuilder: (BuildContext context) {
+                        //   return snapshot.data.map<Widget>((Sales item) {
+                        //     return Text(item.name);
+                        //   }).toList();
+                        // },
+                        items:
+                            snapshot.data.map<DropdownMenuItem<String>>((item) {
+                          return DropdownMenuItem<String>(
+                            value: item.id.toString(),
+                            //value = string
+                            child: Text(
+                              item.name,
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) async {
+                          setState(() {
+                            dropDownValue = value;
+                          });
 
-                        postManager(context, dropDownValue.toString())
-                            .whenComplete(() => managers.clear());
-                        Navigator.pop(context);
-                        setState(() {});
-                      },
-                    );
+                          postManager(context, dropDownValue.toString())
+                              .whenComplete(() => managers.clear());
+                          Navigator.pop(context);
+                          setState(() {});
+                        },
+                      );
+                    } else {
+                      return Container(
+                        margin: EdgeInsets.all(8),
+                        child: Text(
+                          'No Sales Manager Currently',
+                          style: GoogleFonts.poppins(fontSize: 16),
+                        ),
+                      );
+                    }
                 }
               },
             ),
@@ -320,16 +342,21 @@ class _EazyVisitsState extends State<EazyVisits> {
                         height: height * 0.05,
                         width: width * 0.35,
                         child: FlatButton(
-                          color: Colors.grey,
-                          onPressed: () {
-                            Navigator.of(context, rootNavigator: true).pop();
-                          },
-                          child: Text(
-                            'Cancel',
-                            style: GoogleFonts.poppins(
-                                fontSize: 14, color: Colors.black),
-                          ),
-                        ),
+                            color: Colors.grey,
+                            onPressed: () {
+                              Navigator.of(context, rootNavigator: true).pop();
+                            },
+                            child: cancel
+                                ? Text(
+                                    'Cancel',
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 14, color: Colors.black),
+                                  )
+                                : Text(
+                                    'Ok',
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 14, color: Colors.black),
+                                  )),
                       ),
                     ],
                   ),
@@ -360,8 +387,15 @@ class _EazyVisitsState extends State<EazyVisits> {
     _stream = _streamController.stream;
   }
 
+  moveTopreviousScreen() {
+    print('----------- is called-----------');
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    FirebaseAnalytics().setCurrentScreen(
+        screenName: 'EazyVisits', screenClassOverride: 'EazyVisits');
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -693,7 +727,8 @@ class _EazyVisitsState extends State<EazyVisits> {
                             child: Column(
                               children: [
                                 Card(
-                                  margin: EdgeInsets.only(left: 10, right: 10),
+                                  margin: EdgeInsets.only(
+                                      left: 10, right: 10, top: 10),
                                   child: Container(
                                     child: Column(
                                       children: [
@@ -702,8 +737,8 @@ class _EazyVisitsState extends State<EazyVisits> {
                                             Padding(
                                               padding: EdgeInsets.only(
                                                   top: 8, left: 8, right: 8),
-                                              child: Image.asset(
-                                                  'images/user_image.png',
+                                              child: Image.network(
+                                                  '${snapshot.data[index].customer_pic.toString()}',
                                                   height: 100,
                                                   width: 100),
                                             ),
@@ -748,7 +783,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                                                       EdgeInsets.only(top: 9),
                                                   child: snapshot.data[index]
                                                               .was_assign ==
-                                                          null
+                                                          'None'
                                                       ? Text(
                                                           'Allocated To : -',
                                                           style: GoogleFonts

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:eazy_app/Pages/customer_check.dart/first.dart';
+import 'package:eazy_app/Pages/customer_check.dart/third.dart';
 import 'package:eazy_app/Services/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
@@ -17,7 +18,6 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 
 // import 'package:dio/dio.dart' as http;
 import 'package:eazy_app/Services/teams_json.dart';
@@ -86,7 +86,6 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
     final imgResponse = jsonDecode(response.body);
     ima = imgResponse['developer_logo'];
     return ima;
-   
   }
 
   Future<List<User>> getProjName() async {
@@ -240,6 +239,8 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                           await SharedPreferences.getInstance();
                                       pref.setString('project_url',
                                           snapshot.data[index].project_url);
+                                      print(
+                                          '>>>>>>>>>> prrrrrrrr >>>>>>   ${snapshot.data[index].project_url}');
                                       pref.setString('project_name',
                                           snapshot.data[index].project_name);
 
@@ -247,6 +248,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => EazyVisits(),
+                                          settings: RouteSettings(name : 'EazyVisits'),
                                         ),
                                       );
                                     },

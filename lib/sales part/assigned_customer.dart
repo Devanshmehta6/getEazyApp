@@ -318,7 +318,7 @@ class _AssignedState extends State<AssignedCustomer> {
       print('?>>>>>>>>>>>>>>>>>>>>>>>>>');
       print(cust_id.runtimeType);
       print(cust_id);
-      print('?>>>>>>>>>>>>>>>>>>>>>>>>>');
+      print('============$_value');
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
       http.Response response = await http.put(url, headers: {
         //'Content-Type': 'application/json',
@@ -331,8 +331,8 @@ class _AssignedState extends State<AssignedCustomer> {
         //'project_name': project_name,
         'customer': cust_id.toString(),
 
-        'family_type': _value,
-        'current_residence': _value1,
+       
+        
       });
       print('22222222222222222222 ${response.body}');
     } else {
@@ -340,7 +340,7 @@ class _AssignedState extends State<AssignedCustomer> {
     }
   }
 
-  putReq1(String family_type) async {
+  putReq1() async {
     final pref = await SharedPreferences.getInstance();
 
     final isLoggedIn = pref.getBool('log');
@@ -352,7 +352,7 @@ class _AssignedState extends State<AssignedCustomer> {
       final settoken = 'Token ${token['token']}';
 
       Uri url = Uri.parse(
-          'https://geteazyapp.com/projects/$project_url/$cust_url/api');
+          'https://geteazyapp.com/api-checkout/$project_url/$cust_url/personal_info_api');
 
       String sessionId = await FlutterSession().get('session');
 
@@ -365,7 +365,7 @@ class _AssignedState extends State<AssignedCustomer> {
       final cookie = sp.getString('cookie');
 
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
-      http.Response response = await http.post(url, headers: {
+      http.Response response = await http.put(url, headers: {
         //'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': settoken,
@@ -374,7 +374,10 @@ class _AssignedState extends State<AssignedCustomer> {
         'mobile': mobile,
         'project': project,
         'project_name': project_name,
+        'family_type': _value,
+        'current_residence': _value1,
       });
+      print('>>>>> response > ${response.body}');
     } else {
       print('Logged out ');
     }
@@ -411,7 +414,7 @@ class _AssignedState extends State<AssignedCustomer> {
         HttpHeaders.cookieHeader: setcookie,
       }, body: {
         'feedback': feedback.text,
-        'status': valueChoose,
+        'status': valueChoose!.toLowerCase(),
         'customer': cust_id.toString(),
         'date_time': '${DateTime.now()}',
         //'customer_checked_out': 1.toString(),
@@ -443,11 +446,11 @@ class _AssignedState extends State<AssignedCustomer> {
       String csrf = await FlutterSession().get('csrf');
 
       final sp = await SharedPreferences.getInstance();
-      print('>>>>>>>>>>>> >>>>>>>>. ${assign_to.runtimeType}');
+      //print('>>>>>>>>>>>> >>>>>>>>. ${assign_to.runtimeType}');
       //final finalToken = 'Token ${token[token]}';
 
       final cookie = sp.getString('cookie');
-      print('?????????????? 4444444 $was_assign');
+      //print('?????????????? 4444444 $was_assign');
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
       http.Response response = await http.put(url, headers: {
         //'Content-Type': 'application/json',
@@ -597,7 +600,8 @@ class _AssignedState extends State<AssignedCustomer> {
                       } else if (activeStep == 1) {
                         putWork(state.text, pincode.text);
                       } else if (activeStep == 2) {
-                        putReq(config_req.text);
+                        //putReq(config_req.text);
+                        putReq1();
                       } else if (activeStep == 3) {
                         print('>>>>> test ?>>>>');
                         checkoutfunc();
@@ -620,6 +624,7 @@ class _AssignedState extends State<AssignedCustomer> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => EazyCustomers(),
+                            settings : RouteSettings(arguments: project_name),
                           ),
                         );
                       }
@@ -1219,6 +1224,7 @@ class _AssignedState extends State<AssignedCustomer> {
                                   onChanged: (value) {
                                     setState(() {
                                       _value = value.toString();
+                                      print('>>>>>>> _value -------- $_value');
                                     });
                                   }),
                               Text(
@@ -1430,9 +1436,9 @@ class _AssignedState extends State<AssignedCustomer> {
               }).toList(),
               onChanged: (newValue) {
                 setState(() {
-                  print('>>>>>>>>>>>>>>..  $valueChoose');
+                  //print('>>>>>>>>>>>>>>..  ${valueChoose!.toLowerCase()}');
                   valueChoose = newValue;
-                  print('>>>>>>>>>>>>>>..  $valueChoose');
+                  //print('>>>>>>>>>>>>>>..  ${valueChoose!.toLowerCase()}');
                 });
               },
             ),

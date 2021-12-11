@@ -400,6 +400,7 @@ class _FourthPageState extends State<FourthPage> {
       final cust_id = sp.getInt('cust_id');
       print('--------third--------$cust_id');
       final project_id = pref.getString('project_id');
+      print('>>>>>>>>>> design ========== ${designation.text}');
       http.Response response = await http.post(
         url,
         headers: {

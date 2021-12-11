@@ -31,6 +31,7 @@ class _ThirdPageState extends State<ThirdPage> {
   String _value = "";
   String _value2 = "";
   bool isLoading = false;
+  late Future con ;
   final budgetList = [
     '50L - 75L',
     '75L - 1CR',
@@ -86,7 +87,7 @@ class _ThirdPageState extends State<ThirdPage> {
           'budget': valueChoose,
           'purpose_of_purchase': _value,
           'funding_mode': _value2,
-          'residence_configuration': '1bhk 2bhk',
+          'residence_configuration': config,
         },
       ),
     );
@@ -130,7 +131,7 @@ class _ThirdPageState extends State<ThirdPage> {
           HttpHeaders.cookieHeader: setcookie,
         },
       );
-      print('>>>>>>>>>>>>>>>. GET RESPONSE >>>>>>>>>>>.. ${response.body}');
+      print('>>>>>>>> called get config>>>>>>>>>>>..');
       final jsonData = jsonDecode(response.body);
       final config_rcvd = jsonData['project_configuration'][0];
       configurations.clear();
@@ -156,6 +157,7 @@ class _ThirdPageState extends State<ThirdPage> {
       checkedValue = List<bool?>.filled(configurations.length, false);
       print('>>>>>>>>>>>     vallllllllue init >>>>.. $checkedValue');
     });
+    con = getConfig();
   }
 
   @override
@@ -182,7 +184,7 @@ class _ThirdPageState extends State<ThirdPage> {
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
-    Future con = getConfig();
+    
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: WillPopScope(
@@ -355,7 +357,7 @@ class _ThirdPageState extends State<ThirdPage> {
                                 case ConnectionState.done:
                                   return Container(
                                     padding: EdgeInsets.only(
-                                        left: width * 0.15,
+                                        left: width * 0.1,
                                         right: width * 0.15,
                                         top: height * 0.02),
                                     child: GridView.builder(
@@ -408,7 +410,7 @@ class _ThirdPageState extends State<ThirdPage> {
                         SizedBox(height: height * 0.01),
                         Container(
                           margin: EdgeInsets.only(
-                              left: width * 0.075, right: width * 0.075),
+                              left: width * 0.12 , right: 50),
                           padding: EdgeInsets.all(5),
                           decoration: BoxDecoration(
                             border: Border(

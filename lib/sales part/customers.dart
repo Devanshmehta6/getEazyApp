@@ -17,8 +17,10 @@ class getDetails {
   late String mobile;
   late String last_check_in;
   late String status;
+  late String customer_url;
 
-  getDetails(this.name, this.mobile, this.last_check_in, this.status);
+  getDetails(this.name, this.mobile, this.last_check_in, this.status,
+      this.customer_url);
 }
 
 class EazyCustomers extends StatefulWidget {
@@ -69,10 +71,10 @@ class _EazyCustomersState extends State<EazyCustomers> {
       print('>>>>>>>>>>>> RESPONSE >>>>>>>>> ${response.body}');
       final jsonData = jsonDecode(response.body);
       final cust_data = jsonData[0]['customers'];
-
+      cust_details.clear();
       for (var i in cust_data) {
-        getDetails gd =
-            getDetails(i['name'], i['mobile'], i['last_check_in'], i['status']);
+        getDetails gd = getDetails(i['name'], i['mobile'], i['last_check_in'],
+            i['status'], i['customer_url']);
         cust_details.add(gd);
       }
     } else {
@@ -154,21 +156,20 @@ class _EazyCustomersState extends State<EazyCustomers> {
                   ),
                 ),
               ),
-              FutureBuilder(
-                  future: getCustomersFuture,
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                        return Text('none');
-                      case ConnectionState.waiting:
-                        return Center(child: CircularProgressIndicator());
-                      case ConnectionState.active:
-                        return Text('active');
-                      case ConnectionState.done:
-                        return SingleChildScrollView(
-                          child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
+
+              Expanded(
+                child: FutureBuilder(
+                    future: getCustomersFuture,
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                          return Text('none');
+                        case ConnectionState.waiting:
+                          return Center(child: CircularProgressIndicator());
+                        case ConnectionState.active:
+                          return Text('active');
+                        case ConnectionState.done:
+                          return ListView.builder(
                               itemCount: snapshot.data.length,
                               itemBuilder: (BuildContext context, int index) {
                                 String date = DateFormat("MMM dd, yyyy hh:mm a")
@@ -178,7 +179,7 @@ class _EazyCustomersState extends State<EazyCustomers> {
                                   child: Column(
                                     children: [
                                       Card(
-                                        child: Expanded(
+                                        child: Container(
                                           child: Column(
                                             children: [
                                               Row(
@@ -199,64 +200,77 @@ class _EazyCustomersState extends State<EazyCustomers> {
                                                   ),
                                                   Column(
                                                     crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Container(
-                                                        padding: EdgeInsets.only(
-                                                            top: 9),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 9),
                                                         child: Text(
                                                           'Name : ${snapshot.data[index].name}',
-                                                          style:
-                                                              GoogleFonts.poppins(
-                                                            textStyle: TextStyle(
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                            textStyle:
+                                                                TextStyle(
                                                               fontSize: 14,
                                                               fontWeight:
-                                                                  FontWeight.w500,
+                                                                  FontWeight
+                                                                      .w500,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
                                                       Container(
-                                                        padding: EdgeInsets.only(
-                                                            top: 9),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 9),
                                                         child: Text(
                                                           'Phone : ${snapshot.data[index].mobile}',
-                                                          style:
-                                                              GoogleFonts.poppins(
-                                                            textStyle: TextStyle(
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                            textStyle:
+                                                                TextStyle(
                                                               fontSize: 14,
                                                               fontWeight:
-                                                                  FontWeight.w500,
+                                                                  FontWeight
+                                                                      .w500,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
                                                       Container(
-                                                        padding: EdgeInsets.only(
-                                                            top: 9),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 9),
                                                         child: Text(
                                                           'Status : ${snapshot.data[index].status}',
-                                                          style:
-                                                              GoogleFonts.poppins(
-                                                            textStyle: TextStyle(
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                            textStyle:
+                                                                TextStyle(
                                                               fontSize: 14,
                                                               fontWeight:
-                                                                  FontWeight.w500,
+                                                                  FontWeight
+                                                                      .w500,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
                                                       Container(
-                                                        padding: EdgeInsets.only(
-                                                            top: 9),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 9),
                                                         child: Text(
                                                           'Last CheckIn : $date ',
-                                                          style:
-                                                              GoogleFonts.poppins(
-                                                            textStyle: TextStyle(
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                            textStyle:
+                                                                TextStyle(
                                                               fontSize: 14,
                                                               fontWeight:
-                                                                  FontWeight.w500,
+                                                                  FontWeight
+                                                                      .w500,
                                                             ),
                                                           ),
                                                         ),
@@ -270,7 +284,7 @@ class _EazyCustomersState extends State<EazyCustomers> {
                                         ),
                                       ),
                                       Container(
-                                        //margin: EdgeInsets.only(bottom : 0),
+                                        margin: EdgeInsets.only(bottom: 0),
                                         width: double.infinity,
                                         height: height * 0.05,
                                         padding:
@@ -283,10 +297,15 @@ class _EazyCustomersState extends State<EazyCustomers> {
                                                   color: myColor, width: 1.5),
                                             ),
                                             onPressed: () async {
-                                              final pref = await SharedPreferences
-                                                  .getInstance();
+                                              final pref =
+                                                  await SharedPreferences
+                                                      .getInstance();
                                               pref.setString('cust_name',
                                                   snapshot.data[index].name);
+                                              pref.setString(
+                                                  'cust_url',
+                                                  snapshot.data[index]
+                                                      .customer_url);
 
                                               Navigator.push(
                                                 context,
@@ -308,10 +327,188 @@ class _EazyCustomersState extends State<EazyCustomers> {
                                     ],
                                   ),
                                 );
-                              }),
-                        );
-                    }
-                  }),
+                              });
+                      }
+                    }),
+              ),
+              // ListView(
+              //   shrinkWrap: true,
+              //   children: [
+              //     FutureBuilder(
+              //         future: getCustomersFuture,
+              //         builder: (BuildContext context, AsyncSnapshot snapshot) {
+              //           switch (snapshot.connectionState) {
+              //             case ConnectionState.none:
+              //               return Text('none');
+              //             case ConnectionState.waiting:
+              //               return Center(child: CircularProgressIndicator());
+              //             case ConnectionState.active:
+              //               return Text('active');
+              //             case ConnectionState.done:
+              //               return SingleChildScrollView(
+              //                 child: ListView.builder(
+              //                     shrinkWrap: true,
+              //                     itemCount: snapshot.data.length,
+              //                     itemBuilder: (BuildContext context, int index) {
+              //                       String date = DateFormat(
+              //                               "MMM dd, yyyy hh:mm a")
+              //                           .format(DateTime.parse(
+              //                               snapshot.data[index].last_check_in));
+              //                       return Container(
+              //                         child: Column(
+              //                           children: [
+              //                             Card(
+              //                               child: Expanded(
+              //                                 child: Column(
+              //                                   children: [
+              //                                     Row(
+              //                                       children: <Widget>[
+              //                                         Padding(
+              //                                           padding: EdgeInsets.only(
+              //                                               top: 8,
+              //                                               left: 8,
+              //                                               right: 8),
+              //                                           child: Image.asset(
+              //                                               'images/user_image.png',
+              //                                               height: 100,
+              //                                               width: 100),
+              //                                         ),
+              //                                         VerticalDivider(
+              //                                           color: Colors.grey,
+              //                                           thickness: 1.5,
+              //                                         ),
+              //                                         Column(
+              //                                           crossAxisAlignment:
+              //                                               CrossAxisAlignment
+              //                                                   .start,
+              //                                           children: [
+              //                                             Container(
+              //                                               padding:
+              //                                                   EdgeInsets.only(
+              //                                                       top: 9),
+              //                                               child: Text(
+              //                                                 'Name : ${snapshot.data[index].name}',
+              //                                                 style: GoogleFonts
+              //                                                     .poppins(
+              //                                                   textStyle:
+              //                                                       TextStyle(
+              //                                                     fontSize: 14,
+              //                                                     fontWeight:
+              //                                                         FontWeight
+              //                                                             .w500,
+              //                                                   ),
+              //                                                 ),
+              //                                               ),
+              //                                             ),
+              //                                             Container(
+              //                                               padding:
+              //                                                   EdgeInsets.only(
+              //                                                       top: 9),
+              //                                               child: Text(
+              //                                                 'Phone : ${snapshot.data[index].mobile}',
+              //                                                 style: GoogleFonts
+              //                                                     .poppins(
+              //                                                   textStyle:
+              //                                                       TextStyle(
+              //                                                     fontSize: 14,
+              //                                                     fontWeight:
+              //                                                         FontWeight
+              //                                                             .w500,
+              //                                                   ),
+              //                                                 ),
+              //                                               ),
+              //                                             ),
+              //                                             Container(
+              //                                               padding:
+              //                                                   EdgeInsets.only(
+              //                                                       top: 9),
+              //                                               child: Text(
+              //                                                 'Status : ${snapshot.data[index].status}',
+              //                                                 style: GoogleFonts
+              //                                                     .poppins(
+              //                                                   textStyle:
+              //                                                       TextStyle(
+              //                                                     fontSize: 14,
+              //                                                     fontWeight:
+              //                                                         FontWeight
+              //                                                             .w500,
+              //                                                   ),
+              //                                                 ),
+              //                                               ),
+              //                                             ),
+              //                                             Container(
+              //                                               padding:
+              //                                                   EdgeInsets.only(
+              //                                                       top: 9),
+              //                                               child: Text(
+              //                                                 'Last CheckIn : $date ',
+              //                                                 style: GoogleFonts
+              //                                                     .poppins(
+              //                                                   textStyle:
+              //                                                       TextStyle(
+              //                                                     fontSize: 14,
+              //                                                     fontWeight:
+              //                                                         FontWeight
+              //                                                             .w500,
+              //                                                   ),
+              //                                                 ),
+              //                                               ),
+              //                                             ),
+              //                                           ],
+              //                                         ),
+              //                                       ],
+              //                                     ),
+              //                                   ],
+              //                                 ),
+              //                               ),
+              //                             ),
+              //                             Container(
+              //                               margin: EdgeInsets.only(bottom : 0),
+              //                               width: double.infinity,
+              //                               height: height * 0.05,
+              //                               padding: EdgeInsets.symmetric(
+              //                                   horizontal: 5),
+              //                               child: Container(
+              //                                 color: Colors.white,
+              //                                 child: OutlinedButton(
+              //                                   style: OutlinedButton.styleFrom(
+              //                                     side: BorderSide(
+              //                                         color: myColor, width: 1.5),
+              //                                   ),
+              //                                   onPressed: () async {
+              //                                     final pref =
+              //                                         await SharedPreferences
+              //                                             .getInstance();
+              //                                     pref.setString('cust_name',
+              //                                         snapshot.data[index].name);
+
+              //                                     Navigator.push(
+              //                                       context,
+              //                                       MaterialPageRoute(
+              //                                         builder: (context) =>
+              //                                             Detailspage(),
+              //                                       ),
+              //                                     );
+              //                                   },
+              //                                   child: Text(
+              //                                     'View',
+              //                                     style: GoogleFonts.poppins(
+              //                                         fontSize: 16,
+              //                                         color: myColor),
+              //                                   ),
+              //                                 ),
+              //                               ),
+              //                             ),
+              //                             SizedBox(height: height * 0.01),
+              //                           ],
+              //                         ),
+              //                       );
+              //                     }),
+              //               );
+              //           }
+              //         }),
+              //   ],
+              // ),
             ],
           ),
         ),

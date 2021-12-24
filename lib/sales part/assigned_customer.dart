@@ -330,9 +330,6 @@ class _AssignedState extends State<AssignedCustomer> {
         //'project': project,
         //'project_name': project_name,
         'customer': cust_id.toString(),
-
-       
-        
       });
       print('22222222222222222222 ${response.body}');
     } else {
@@ -372,7 +369,7 @@ class _AssignedState extends State<AssignedCustomer> {
         HttpHeaders.cookieHeader: setcookie,
       }, body: {
         'mobile': mobile,
-        'project': project,
+        'project': project.toString(),
         'project_name': project_name,
         'family_type': _value,
         'current_residence': _value1,
@@ -459,7 +456,7 @@ class _AssignedState extends State<AssignedCustomer> {
         HttpHeaders.cookieHeader: setcookie,
       }, body: {
         'mobile': mobile,
-        'assign_to' : assign_to.toString(),
+        'assign_to': assign_to.toString(),
         'project': project.toString(),
         'project_name': project_name,
         'checked_out': 'true',
@@ -624,7 +621,7 @@ class _AssignedState extends State<AssignedCustomer> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => EazyCustomers(),
-                            settings : RouteSettings(arguments: project_name),
+                            settings: RouteSettings(arguments: project_name),
                           ),
                         );
                       }
@@ -882,18 +879,22 @@ class _AssignedState extends State<AssignedCustomer> {
                       ),
                     ],
                   ),
-                  Container(
-                    margin: EdgeInsets.only(top: 10, right: 197, bottom: 10),
-                    child: Text(
-                      'Residential Address: ',
-                      style: GoogleFonts.poppins(
-                          fontSize: 18, fontWeight: FontWeight.w500),
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 10),
+                        child: Text(
+                          'Residential Address: ',
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ],
                   ),
                   Expanded(
                     flex: 1,
                     child: Container(
-                      margin: EdgeInsets.only(right: 10),
+                      margin: EdgeInsets.only(right: 10 , top : 5),
                       child: TextFormField(
                           controller: res_add,
                           minLines: 6,

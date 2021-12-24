@@ -199,7 +199,7 @@ class _SixthPageState extends State<SixthPage> {
             //margin: EdgeInsets.only(top: height * 0.01),
             padding: EdgeInsets.only(top: height * 0.07),
             height: height * 2.2,
-            width: width,
+            width: double.infinity,
             child: Image.file(
               File(displayImage.path),
             ),

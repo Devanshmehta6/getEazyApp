@@ -48,7 +48,6 @@ class _EazyAppState extends State<EazyApp> {
               return CircularProgressIndicator();
             } else if (snapshot.hasData) {
               clearData();
-
               return LoginPage(); //SplashScreen();
             } else {
               return LoginPage(); //SplashScreen();
@@ -57,3 +56,7 @@ class _EazyAppState extends State<EazyApp> {
     );
   }
 }
+
+ 
+
+                                                          

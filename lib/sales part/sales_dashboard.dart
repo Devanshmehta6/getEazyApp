@@ -167,8 +167,8 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
                                           right: width * 0.33,
                                           top: height * 0.008),
                                       child: Text(
-                                        dashboard_response[0]['total_customers']
-                                            .toString(),
+                                        ' ${dashboard_response[0]['total_customers']
+                                            .toString()}',
                                         style:
                                             GoogleFonts.poppins(fontSize: 50),
                                       ),
@@ -229,8 +229,8 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
                                           right: width * 0.3,
                                           top: height * 0.008),
                                       child: Text(
-                                        dashboard_response[0]['hot_customers']
-                                            .toString(),
+                                        '${dashboard_response[0]['hot_customers']
+                                            .toString()}',
                                         style:
                                             GoogleFonts.poppins(fontSize: 50),
                                       ),
@@ -290,8 +290,8 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
                                           right: width * 0.35,
                                           top: height * 0.008),
                                       child: Text(
-                                        dashboard_response[0]['warm_customers']
-                                            .toString(),
+                                        '${dashboard_response[0]['warm_customers']
+                                            .toString()}',
                                         style:
                                             GoogleFonts.poppins(fontSize: 50),
                                       ),
@@ -356,9 +356,9 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
                                           right: width * 0.3,
                                           top: height * 0.008),
                                       child: Text(
-                                        dashboard_response[0]
+                                        '${dashboard_response[0]
                                                 ['follow_ups_customers']
-                                            .toString(),
+                                            .toString()}',
                                         style:
                                             GoogleFonts.poppins(fontSize: 50),
                                       ),

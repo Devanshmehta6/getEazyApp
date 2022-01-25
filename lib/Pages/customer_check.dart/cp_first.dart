@@ -33,6 +33,57 @@ class _CPState extends State<CP> {
     print('heeeeeeeeeeeeeeeee $project_name');
   }
 
+  postData() async {
+    var curr_date = DateFormat("yyyy-MM-dd").format(
+      DateTime.now(),
+    );
+    final pref = await SharedPreferences.getInstance();
+    final project_url = pref.getString('project_url');
+    Uri url = Uri.parse(
+        'https://geteazyapp.com/projects/$project_url/cp-check-in_api');
+    String sessionId = await FlutterSession().get('session');
+
+    String csrf = await FlutterSession().get('csrf');
+    final sp = await SharedPreferences.getInstance();
+    String? authorization = sp.getString('token');
+    String? tokenn = authorization;
+    final cookie = sp.getString('cookie');
+    final token = await AuthService.getToken();
+    final settoken = 'Token ${token['token']}';
+    final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
+
+    print('--------set cookie--------$setcookie');
+    final project_id = pref.getString('pro_id');
+    print('================== pro =============== $project_id');
+    http.Response response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': settoken,
+        HttpHeaders.cookieHeader: setcookie,
+      },
+      body: jsonEncode(
+        {
+          'project': project_id,
+          'rera_no': reg_num.text,
+          'cp_mobile': cp_mobile.text,
+          'mobile': cust_mobile.text,
+          'last_visited': curr_date,
+          'through': 'Channel Partner',
+        },
+      ),
+    );
+    final cp_data = jsonDecode(response.body);
+    final cust_url = cp_data['customer_data']['customer_url'];
+
+    pref.setString('customer_url', cust_url);
+    final cust_id = cp_data['customer_data']['id'];
+    pref.setInt('cust_id', cust_id);
+    pref.setString('mobile', cust_mobile.text);
+    print('RESPONSE BODY ------------------------  ${response.body}');
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -42,55 +93,6 @@ class _CPState extends State<CP> {
 
   @override
   Widget build(BuildContext context) {
-    postData() async {
-      var curr_date = DateFormat("yyyy-MM-dd").format(
-        DateTime.now(),
-      );
-      final pref = await SharedPreferences.getInstance();
-      final project_url = pref.getString('project_url');
-      Uri url = Uri.parse(
-          'https://geteazyapp.com/projects/$project_url/cp-check-in_api');
-      String sessionId = await FlutterSession().get('session');
-
-      String csrf = await FlutterSession().get('csrf');
-      final sp = await SharedPreferences.getInstance();
-      String? authorization = sp.getString('token');
-      String? tokenn = authorization;
-      final cookie = sp.getString('cookie');
-      final token = await AuthService.getToken();
-      final settoken = 'Token ${token['token']}';
-      final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
-
-      print('--------set cookie--------$setcookie');
-      final project_id = pref.getString('project_id');
-      http.Response response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': settoken,
-          HttpHeaders.cookieHeader: setcookie,
-        },
-        body: jsonEncode(
-          {
-            'project': project_id,
-            'rera_no': reg_num.text,
-            'cp_mobile': cp_mobile.text,
-            'mobile': cust_mobile.text,
-            'last_visited': curr_date
-          },
-        ),
-      );
-      final cp_data = jsonDecode(response.body);
-      final cust_url = cp_data['customer_data']['customer_url'];
-
-      pref.setString('customer_url', cust_url);
-      final cust_id = cp_data['customer_data']['id'];
-      pref.setInt('cust_id', cust_id);
-      pref.setString('mobile', cust_mobile.text);
-      print('RESPONSE BODY ------------------------  ${response.body}');
-    }
-
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
@@ -145,9 +147,8 @@ class _CPState extends State<CP> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => SecondPage(),
-                              maintainState: true
-                            ),
+                                builder: (context) => SecondPage(),
+                                maintainState: true),
                           );
                         },
                         child: Text(
@@ -201,9 +202,10 @@ class _CPState extends State<CP> {
                         autofocus: true,
                         controller: reg_num,
                         style: GoogleFonts.poppins(
-                          textStyle: TextStyle(color: Colors.black, fontSize: 16),
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
                         ),
-                        autovalidate: true,
+                        //autovalidate: true,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           enabledBorder: UnderlineInputBorder(
@@ -232,9 +234,10 @@ class _CPState extends State<CP> {
                       child: TextFormField(
                         controller: cp_name,
                         style: GoogleFonts.poppins(
-                          textStyle: TextStyle(color: Colors.black, fontSize: 16),
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
                         ),
-                        autovalidate: true,
+                        //autovalidate: true,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           enabledBorder: UnderlineInputBorder(
@@ -263,9 +266,10 @@ class _CPState extends State<CP> {
                       child: TextFormField(
                         controller: cp_mobile,
                         style: GoogleFonts.poppins(
-                          textStyle: TextStyle(color: Colors.black, fontSize: 16),
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
                         ),
-                        autovalidate: true,
+                        //autovalidate: true,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           enabledBorder: UnderlineInputBorder(
@@ -274,7 +278,8 @@ class _CPState extends State<CP> {
                           focusedBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: myColor),
                           ),
-                          suffixIcon: Icon(Icons.phone, color: myColor, size: 20),
+                          suffixIcon:
+                              Icon(Icons.phone, color: myColor, size: 20),
                           border: InputBorder.none,
                           hintText: 'Enter CP Mobile Number',
                           hintStyle: GoogleFonts.poppins(
@@ -293,9 +298,10 @@ class _CPState extends State<CP> {
                       child: TextFormField(
                         controller: cust_mobile,
                         style: GoogleFonts.poppins(
-                          textStyle: TextStyle(color: Colors.black, fontSize: 16),
+                          textStyle:
+                              TextStyle(color: Colors.black, fontSize: 16),
                         ),
-                        autovalidate: true,
+                        //autovalidate: true,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           enabledBorder: UnderlineInputBorder(
@@ -304,7 +310,8 @@ class _CPState extends State<CP> {
                           focusedBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: myColor),
                           ),
-                          suffixIcon: Icon(Icons.phone, color: myColor, size: 20),
+                          suffixIcon:
+                              Icon(Icons.phone, color: myColor, size: 20),
                           border: InputBorder.none,
                           hintText: 'Enter Customer Mobile Number',
                           hintStyle: GoogleFonts.poppins(

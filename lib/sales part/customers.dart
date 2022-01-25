@@ -11,7 +11,9 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
-
+// import 'package:flutter_pagination_helper/pagination_helper/event_model.dart';
+// import 'package:flutter_pagination_helper/pagination_helper/item_list_callback.dart';
+// import 'package:flutter_pagination_helper/pagination_helper/list_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class getDetails {
@@ -36,10 +38,11 @@ class _EazyCustomersState extends State<EazyCustomers> {
   List<getDetails> cust_details = [];
   List<dynamic> demo = [];
   ScrollController _scrollController = ScrollController();
-  int currentMax = 4;
+  int currentMax = 0;
   String project_name = '';
   String new_project = '';
   int data_length = 0;
+  late Future getCust;
 
   Future<List<getDetails>> getCustomers() async {
     print('-------------------- EXECUTED ------------------------');
@@ -84,24 +87,15 @@ class _EazyCustomersState extends State<EazyCustomers> {
             i['status'], i['customer_url']);
         demo.add(gd);
 
-        print('------------demo------------${demo.length}');
+        //print('------------demo------------${demo.length}');
         //cust_details.add(gd);
       }
       data_length = demo.length;
-      if (demo.length > 4) {
-        if (cust_details.length == 0) {
-          for (int i = 0; i < 4; i++) {
-            cust_details.addAll(
-              [
-                demo[i],
-              ],
-            );
-          }
-        }
-      } else if (demo.length < 4) {
-        for (var i in demo) {
-          cust_details.add(demo[i]);
-        }
+      if (demo.length > 10) {
+        getMore();
+      } else if (demo.length < 10) {
+        print('------- else if------- ');
+        getMore();
       } else {}
     } else {
       print('Logged out');
@@ -131,14 +125,17 @@ class _EazyCustomersState extends State<EazyCustomers> {
         getMore();
       }
     });
+    getCust = getCustomers();
   }
 
   getMore() {
-    if (currentMax <= data_length) {
-      for (int i = currentMax; i <= currentMax + 4; i++) {
+    print("==================== data_length = $data_length");
+    print("==================== currentMax = $currentMax");
+    if (currentMax <= demo.length) {
+      for (int i = currentMax; (i <= currentMax + 10 && i < demo.length); i++) {
         cust_details.add(demo[i]);
       }
-      currentMax = currentMax + 4;
+      currentMax = currentMax + 10;
       setState(() {});
     } else {
       return;
@@ -154,7 +151,7 @@ class _EazyCustomersState extends State<EazyCustomers> {
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
-    Future getCustomersFuture = getCustomers();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -220,211 +217,198 @@ class _EazyCustomersState extends State<EazyCustomers> {
               ),
               Expanded(
                 child: FutureBuilder(
-                    future: getCustomersFuture,
+                    future: getCust,
                     builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.none:
-                          return Text('none');
-                        case ConnectionState.waiting:
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [CupertinoActivityIndicator()],
-                          );
-                        case ConnectionState.active:
-                          return Text('active');
-                        case ConnectionState.done:
-                          return ListView.builder(
-                              controller: _scrollController,
-                              itemCount: snapshot.data.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                String date = DateFormat("MMM dd, yyyy hh:mm a")
-                                    .format(DateTime.parse(
-                                        snapshot.data[index].last_check_in));
-                                if (index == snapshot.data.length) {
-                                  return CupertinoActivityIndicator();
-                                }
-                                return Container(
-                                  child: Column(
-                                    children: [
-                                      Card(
-                                        child: Container(
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                children: <Widget>[
-                                                  Padding(
-                                                    padding: EdgeInsets.only(
-                                                        top: 8,
-                                                        left: 8,
-                                                        right: 8),
-                                                    child: Image.asset(
-                                                        'images/user_image.png',
-                                                        height: 100,
-                                                        width: 100),
-                                                  ),
-                                                  VerticalDivider(
-                                                    color: Colors.grey,
-                                                    thickness: 1.5,
-                                                  ),
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Container(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                top: 9),
-                                                        child: Text(
-                                                          'Name : ${snapshot.data[index].name}',
-                                                          style: GoogleFonts
-                                                              .poppins(
-                                                            textStyle:
-                                                                TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Container(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                top: 9),
-                                                        child: Text(
-                                                          'Phone : ${snapshot.data[index].mobile}',
-                                                          style: GoogleFonts
-                                                              .poppins(
-                                                            textStyle:
-                                                                TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Row(
-                                                        children: [
-                                                          Container(
-                                                            padding:
-                                                                EdgeInsets.only(
-                                                                    top: 9),
-                                                            child: Text(
-                                                              'Status: ',
-                                                              style: GoogleFonts
-                                                                  .poppins(
-                                                                textStyle:
-                                                                    TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          Container(
-                                                            height: 30,
-                                                            width: 90,
-                                                            child: FlatButton(
-                                                              color: color(
-                                                                  snapshot
-                                                                      .data[
-                                                                          index]
-                                                                      .status),
-                                                              onPressed: () {},
-                                                              child: Text(
-                                                                '${snapshot.data[index].status.toUpperCase()}',
-                                                                style:
-                                                                    GoogleFonts
-                                                                        .poppins(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Container(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                top: 9),
-                                                        child: Text(
-                                                          'Last CheckIn : $date ',
-                                                          style: GoogleFonts
-                                                              .poppins(
-                                                            textStyle:
-                                                                TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        margin: EdgeInsets.only(bottom: 0),
-                                        width: double.infinity,
-                                        height: height * 0.05,
-                                        padding:
-                                            EdgeInsets.symmetric(horizontal: 5),
-                                        child: Container(
-                                          color: Colors.white,
-                                          child: OutlinedButton(
-                                            style: OutlinedButton.styleFrom(
-                                              side: BorderSide(
-                                                  color: myColor, width: 1.5),
-                                            ),
-                                            onPressed: () async {
-                                              final pref =
-                                                  await SharedPreferences
-                                                      .getInstance();
-                                              pref.setString('cust_name',
-                                                  snapshot.data[index].name);
-                                              pref.setString(
-                                                  'cust_url',
-                                                  snapshot.data[index]
-                                                      .customer_url);
-
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      Detailspage(),
-                                                ),
-                                              );
-                                            },
-                                            child: Text(
-                                              'View',
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 16, color: myColor),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: height * 0.01),
-                                    ],
+                      if (!snapshot.hasData) {
+                        return CupertinoActivityIndicator();
+                      } else {
+                        return ListView.builder(
+                            controller: _scrollController,
+                            itemCount: snapshot.data.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              String date = DateFormat("MMM dd, yyyy hh:mm a")
+                                  .format(DateTime.parse(
+                                      snapshot.data[index].last_check_in));
+                              if (index == snapshot.data.length) {
+                                return CupertinoActivityIndicator();
+                              }
+                              if (snapshot.data.length == 0) {
+                                return Center(
+                                  child: Text(
+                                    'No customers.',
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 16, color: Colors.black),
                                   ),
                                 );
-                              });
+                              }
+                              return Container(
+                                child: Column(
+                                  children: [
+                                    Card(
+                                      child: Container(
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      top: 8,
+                                                      left: 8,
+                                                      right: 8),
+                                                  child: Image.asset(
+                                                      'images/user_image.png',
+                                                      height: 100,
+                                                      width: 100),
+                                                ),
+                                                VerticalDivider(
+                                                  color: Colors.grey,
+                                                  thickness: 1.5,
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Container(
+                                                      padding: EdgeInsets.only(
+                                                          top: 9),
+                                                      child: Text(
+                                                        'Name: ${snapshot.data[index].name}',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                          textStyle: TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      padding: EdgeInsets.only(
+                                                          top: 9),
+                                                      child: Text(
+                                                        'Phone: ${snapshot.data[index].mobile}',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                          textStyle: TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  top: 9),
+                                                          child: Text(
+                                                            'Status: ',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              textStyle:
+                                                                  TextStyle(
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          height: 30,
+                                                          width: 90,
+                                                          child: FlatButton(
+                                                            color: color(
+                                                                snapshot
+                                                                    .data[index]
+                                                                    .status),
+                                                            onPressed: () {},
+                                                            child: Text(
+                                                              '${snapshot.data[index].status.toUpperCase()}',
+                                                              style: GoogleFonts
+                                                                  .poppins(
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Container(
+                                                      padding: EdgeInsets.only(
+                                                          top: 9),
+                                                      child: Text(
+                                                        'Last CheckIn : $date ',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                          textStyle: TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(bottom: 0),
+                                      width: double.infinity,
+                                      height: height * 0.05,
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 5),
+                                      child: Container(
+                                        color: Colors.white,
+                                        child: OutlinedButton(
+                                          style: OutlinedButton.styleFrom(
+                                            side: BorderSide(
+                                                color: myColor, width: 1.5),
+                                          ),
+                                          onPressed: () async {
+                                            final pref = await SharedPreferences
+                                                .getInstance();
+                                            pref.setString('cust_name',
+                                                snapshot.data[index].name);
+                                              print('----------- SET ----------- ${snapshot.data[index].customer_url}');
+                                            pref.setString(
+                                                'cust_url',
+                                                snapshot
+                                                    .data[index].customer_url);
+
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    Detailspage(),
+                                              ),
+                                            );
+                                          },
+                                          child: Text(
+                                            'View',
+                                            style: GoogleFonts.poppins(
+                                                fontSize: 16, color: myColor),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: height * 0.01),
+                                  ],
+                                ),
+                              );
+                            });
                       }
                     }),
               ),

@@ -66,7 +66,7 @@ class _SecondPageState extends State<SecondPage> {
     final settoken = 'Token ${token['token']}';
     final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
     final cust_id = sp.getInt('cust_id');
-    final project_id = pref.getString('project_id');
+    final project_id = pref.getString('pro_id');
     http.Response response = await http.put(url,
         headers: {
           'Content-Type': 'application/json',
@@ -568,7 +568,8 @@ class _SecondPageState extends State<SecondPage> {
               child: Form(
                 key: formKey,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     SizedBox(height: 70),
                     Container(
@@ -582,15 +583,14 @@ class _SecondPageState extends State<SecondPage> {
                     ),
                     SizedBox(height: height * 0.04),
                     Container(
-                      margin: EdgeInsets.only(right: width * 0.33),
-                      child: Container(
-                        //padding: EdgeInsets.only(right: width * 0.38),
-                        child: Text(
-                          'Basic Information',
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
+                      margin: EdgeInsets.only(left: width * 0.085),
+
+                      //padding: EdgeInsets.only(right: width * 0.38),
+                      child: Text(
+                        'Basic Information',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -708,13 +708,13 @@ class _SecondPageState extends State<SecondPage> {
                     Container(
                       margin: EdgeInsets.only(
                         top: height * 0.02,
-                        left: width * 0.053,
+                        left: width * 0.03,
                       ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisSize: MainAxisSize.max,
                         children: [
                           Container(
-                            padding: EdgeInsets.only(
-                                right: width * 0.03, left: width * 0.03),
                             child: Text(
                               'Is this your Whatsapp Number?',
                               style: GoogleFonts.poppins(
@@ -749,7 +749,7 @@ class _SecondPageState extends State<SecondPage> {
                                   textStyle: TextStyle(
                                       color: Colors.black, fontSize: 16),
                                 ),
-                                autovalidate: true,
+                               // autovalidate: true,
                                 decoration: InputDecoration(
                                   enabledBorder: UnderlineInputBorder(
                                     borderSide: BorderSide(color: Colors.grey),

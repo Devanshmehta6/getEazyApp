@@ -13,7 +13,7 @@ class AuthService {
         'username': email,
         'password': password,
       });
-
+      print('----------- LOGIN RESP -------------- ${res.body}');
       return res;
     } finally {
       //nothing
@@ -22,7 +22,16 @@ class AuthService {
 
   static setToken(String token) async {
     AuthData data = AuthData(token);
+    print('--------- SET TOKEN -----------$data');
     return await SESSION.set('tokens', data);
+  }
+
+  static setExpiry(String expiry) async {
+    return await SESSION.set('expiry', expiry);
+  }
+
+  static getExpiry() async {
+    return await SESSION.get('expiry');
   }
 
   static Future<Map<String, dynamic>> getToken() async {

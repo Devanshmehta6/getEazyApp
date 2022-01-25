@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:eazy_app/Services/auth_service.dart';
@@ -5,6 +6,7 @@ import 'package:eazy_app/sales%20part/customers.dart';
 import 'package:eazy_app/sales%20part/log_call.dart';
 import 'package:eazy_app/sales%20part/log_revisit.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -49,6 +51,7 @@ class FollowUp {
 
 class _DetailspageState extends State<Detailspage> {
   String cust_name = '';
+  late Future for_name;
   late TextEditingController emailController;
   late TextEditingController nameController;
 
@@ -66,6 +69,13 @@ class _DetailspageState extends State<Detailspage> {
   String? valueChooseForLocationForWorkInfo;
   String? valueChooseForBudget;
   String? valueChooseForOutcome;
+
+  late StreamController _streamController_basic_info;
+  late Stream _stream_basic_info;
+  late StreamController _streamController_work_info;
+  late Stream _stream_work_info;
+  late StreamController _streamController_req;
+  late Stream _stream_req;
 
   List<History> history = [];
 
@@ -437,12 +447,13 @@ class _DetailspageState extends State<Detailspage> {
   List selectedValue = [];
   List<bool?> isChecked = [];
   bool? test = true;
+  String snp = '';
 
   late Future cust;
   getName() async {
     setState(() {});
-    final snp = '$initialFirstName $initialLastName';
-    //final name = '${snp.substring(0, 12)}' + '...';
+    snp = '$initialFirstName $initialLastName';
+    print('------------ snp ================== $snp');
     return snp;
   }
 
@@ -660,24 +671,27 @@ class _DetailspageState extends State<Detailspage> {
       });
 
       print('>>>>>>>>>>>> RESPONSE >>>>>>>>> ${response.body}');
-      print('>>>>>>>>. ${response.statusCode}');
+      //print('>>>>>>>>. ${response.statusCode}');
       final jsonData = jsonDecode(response.body);
-      print('-----------------------${jsonData['customers']}');
+      //print('-----------------------${jsonData['customer']}');
 
-      final work_info = jsonData['workinfo_ser'];
-      final req = jsonData['requiremnt_ser'];
+      final work_info = jsonData['workinfo'];
+      final req = jsonData['requiremnt'];
+      //print('------- REQ ------------ $req');
       final sales_manager_name = jsonData['sales_manager'][0];
-      print('----------------- sales ------------ $sales_manager_name');
+      //print('----------------- sales ------------ $sales_manager_name');
       pref.setString('sales_man_name', sales_manager_name);
-      final cust_data = jsonData['customers_ser'];
+      final cust_data = jsonData['customer'];
+
+      image = cust_data['pic'];
+      project_id = cust_data['project'];
+      print('--------9999999999          ----$project_id');
+      cust_id = jsonData['customer']['id'];
+      pref.setInt('cust_id', cust_id);
+      //fname = new TextEditingController(text: 'Test');
       setState(() {
-        image = cust_data['pic'];
-        project_id = cust_data['project'];
-        print('--------9999999999          ----$project_id');
-        cust_id = jsonData['customers_ser']['id'];
-        pref.setInt('cust_id', cust_id);
-        //fname = new TextEditingController(text: 'Test');
         fname = TextEditingController(text: cust_data['first_name']);
+
         email = new TextEditingController(text: cust_data['email']);
         initialFirstName = '${cust_data['first_name']}';
         initialLastName = '${cust_data['last_name']}';
@@ -700,7 +714,7 @@ class _DetailspageState extends State<Detailspage> {
         initialConfigReq = req['residence_configuration'];
         valueChooseForBudget = req['budget'];
         _value2 = req['funding_mode'];
-        _value3 = req['purpose_of_purchase'];
+        _value3 = req['purpose_of_purchase'][0];
 
         selectedConfigs = initialConfigReq.split(',');
 
@@ -855,9 +869,10 @@ class _DetailspageState extends State<Detailspage> {
       });
       final jsonData = jsonDecode(response.body);
       print(
-          '============= ------- LOG ------- ============= ${jsonData['call_logs']}');
-      final follow_from_json = jsonData['call_logs'];
+          '============= ------- LOG ------- ============= ${jsonData['call_logs'][0]}');
+      final follow_from_json = jsonData['call_logs'][0];
       follow_ups_list.clear();
+
       for (var i in follow_from_json) {
         FollowUp fu = FollowUp(
             i['to'], i['out_come'], i['date'], i['time'], i['call_desc']);
@@ -874,23 +889,23 @@ class _DetailspageState extends State<Detailspage> {
     // TODO: implement initState
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
-    cust = getCustomers();
-
+    //cust = getCustomers();
+    cust = getCustomers().whenComplete(() {
+      for_name = getName();
+    });
+    print('------------- custtttttttt ------------- $cust');
     con = getData().whenComplete(() {});
   }
   //getCustomers();
 
   @override
   Widget build(BuildContext context) {
-    FirebaseAnalytics().setCurrentScreen(
-      screenName: 'Customer Details Page',
-      screenClassOverride: 'Customer Details Page',
-    );
     final height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
+    print('------------- ----------------- ${fname.text}');
     return DefaultTabController(
       length: 3,
       child: GestureDetector(
@@ -910,7 +925,9 @@ class _DetailspageState extends State<Detailspage> {
                         height: 55,
                         width: double.infinity,
                         child: FutureBuilder(
-                            future: getName(),
+                            future: Future.delayed(
+                              Duration(milliseconds: 10),
+                            ),
                             builder: (context, AsyncSnapshot snapshot) {
                               switch (snapshot.connectionState) {
                                 case ConnectionState.active:
@@ -998,1160 +1015,1355 @@ class _DetailspageState extends State<Detailspage> {
             backgroundColor: Colors.grey.shade300,
             body: TabBarView(
               children: [
-                Theme(
-                  data: Theme.of(context)
-                      .copyWith(dividerColor: Colors.transparent),
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 4),
-                          child: Container(
-                            margin: EdgeInsets.only(top: 8, left: 4, right: 4),
-                            //color: Colors.pink,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: ExpansionTile(
-                              initiallyExpanded: true,
-                              //collapsedBackgroundColor: Colors.red,
-                              textColor: Colors.black,
-                              collapsedIconColor: Colors.black,
-                              collapsedTextColor: Colors.black,
-                              iconColor: Colors.black,
+                FutureBuilder(
+                    future: cust,
+                    builder: (context, AsyncSnapshot snapshot) {
+                      print(
+                          '--------- snapppppppp =============== ${snapshot.data}');
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.active:
+                          return Text('active');
 
-                              title: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Text(
-                                  'Basic Information',
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 16, color: Colors.black),
-                                ),
-                              ),
+                        case ConnectionState.waiting:
+                          return CupertinoActivityIndicator();
+                        case ConnectionState.none:
+                          return Text('none');
+                        case ConnectionState.done:
+                          return Theme(
+                            data: Theme.of(context)
+                                .copyWith(dividerColor: Colors.transparent),
+                            child: ListView(
+                              shrinkWrap: true,
                               children: [
                                 Container(
-                                  margin: EdgeInsets.only(
-                                      bottom: 8, left: 5, right: 5),
-                                  //height: height * 0.42,
-
                                   width: double.infinity,
-
                                   child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: Colors.black),
-                                      color: Colors.white,
+                                    margin: EdgeInsets.symmetric(horizontal: 4),
+                                    child: Container(
+                                      margin: EdgeInsets.only(
+                                          top: 8, left: 4, right: 4),
+                                      //color: Colors.pink,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: ExpansionTile(
+                                        initiallyExpanded: true,
+                                        //collapsedBackgroundColor: Colors.red,
+                                        textColor: Colors.black,
+                                        collapsedIconColor: Colors.black,
+                                        collapsedTextColor: Colors.black,
+                                        iconColor: Colors.black,
+
+                                        title: Container(
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: Text(
+                                            'Basic Information',
+                                            style: GoogleFonts.poppins(
+                                                fontSize: 16,
+                                                color: Colors.black),
+                                          ),
+                                        ),
+                                        children: [
+                                          Container(
+                                            margin: EdgeInsets.only(
+                                                bottom: 8, left: 5, right: 5),
+                                            //height: height * 0.42,
+
+                                            width: double.infinity,
+
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                border: Border.all(
+                                                    color: Colors.black),
+                                                color: Colors.white,
+                                              ),
+                                              child: Column(
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        margin:
+                                                            EdgeInsets.all(10),
+                                                        child: Text(
+                                                          'First Name:',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        width: width * 0.65,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        //margin: EdgeInsets.only(left: 8),
+                                                        //padding: EdgeInsets.only(right  : 30),
+                                                        child: TextFormField(
+                                                          controller: fname,
+                                                          //autofocus: true,
+
+                                                          onEditingComplete:
+                                                              () {},
+                                                          //scrollPadding: EdgeInsets.zero,
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .name,
+
+                                                          // initialValue:
+                                                          // '$initialFirstName', //snapshot.data
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                          //controller: nameController,
+                                                          decoration:
+                                                              InputDecoration(
+                                                            floatingLabelBehavior:
+                                                                FloatingLabelBehavior
+                                                                    .always,
+
+                                                            contentPadding:
+                                                                EdgeInsets.zero,
+                                                            border: InputBorder
+                                                                .none,
+                                                            focusedBorder:
+                                                                UnderlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                  color: Color(
+                                                                      0xff4044fc)),
+                                                            ),
+                                                            //helperText: 'Helper Text',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        margin:
+                                                            EdgeInsets.all(10),
+                                                        child: Text(
+                                                          'Last Name:',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        width: width * 0.65,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        //margin: EdgeInsets.only(left: 8),
+                                                        //padding: EdgeInsets.only(right  : 30),
+                                                        child: TextFormField(
+                                                          //scrollPadding: EdgeInsets.zero,
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .name,
+                                                          controller: lname,
+
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                          //controller: nameController,
+                                                          decoration:
+                                                              InputDecoration(
+                                                            floatingLabelBehavior:
+                                                                FloatingLabelBehavior
+                                                                    .always,
+
+                                                            contentPadding:
+                                                                EdgeInsets.zero,
+                                                            border: InputBorder
+                                                                .none,
+                                                            focusedBorder:
+                                                                UnderlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                  color: Color(
+                                                                      0xff4044fc)),
+                                                            ),
+                                                            //helperText: 'Helper Text',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        margin:
+                                                            EdgeInsets.all(10),
+                                                        child: Text(
+                                                          'Email:',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        width: width * 0.7,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        //margin: EdgeInsets.only(left: 8),
+                                                        //padding: EdgeInsets.only(right  : 30),
+                                                        child: TextFormField(
+                                                          //scrollPadding: EdgeInsets.zero,
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .name,
+                                                          controller: email,
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                          //controller: nameController,
+                                                          decoration:
+                                                              InputDecoration(
+                                                            contentPadding:
+                                                                EdgeInsets.zero,
+                                                            border: InputBorder
+                                                                .none,
+                                                            focusedBorder:
+                                                                UnderlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                  color: Color(
+                                                                      0xff4044fc)),
+                                                            ),
+                                                            //helperText: 'Helper Text',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        margin:
+                                                            EdgeInsets.all(10),
+                                                        child: Text(
+                                                          'Phone:',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        width: width * 0.7,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        //margin: EdgeInsets.only(left: 8),
+                                                        //padding: EdgeInsets.only(right  : 30),
+                                                        child: TextFormField(
+                                                          //scrollPadding: EdgeInsets.zero,
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .name,
+                                                          controller: phone,
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                          //controller: nameController,
+                                                          decoration:
+                                                              InputDecoration(
+                                                            contentPadding:
+                                                                EdgeInsets.zero,
+                                                            border: InputBorder
+                                                                .none,
+                                                            focusedBorder:
+                                                                UnderlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                  color: Color(
+                                                                      0xff4044fc)),
+                                                            ),
+                                                            //helperText: 'Helper Text',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        margin:
+                                                            EdgeInsets.all(10),
+                                                        child: Text(
+                                                          'Whatsapp:',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        width: width * 0.65,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        //margin: EdgeInsets.only(left: 8),
+                                                        //padding: EdgeInsets.only(right  : 30),
+                                                        child: TextFormField(
+                                                          //scrollPadding: EdgeInsets.zero,
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .name,
+                                                          controller:
+                                                              whatsapp, //snapshot.data
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                          //controller: nameController,
+                                                          decoration:
+                                                              InputDecoration(
+                                                            contentPadding:
+                                                                EdgeInsets.zero,
+                                                            border: InputBorder
+                                                                .none,
+                                                            focusedBorder:
+                                                                UnderlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                  color: Color(
+                                                                      0xff4044fc)),
+                                                            ),
+                                                            //helperText: 'Helper Text',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        margin:
+                                                            EdgeInsets.all(10),
+                                                        child: Text(
+                                                          'Location:',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        width: width * 0.65,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        //margin: EdgeInsets.only(left: 8),
+                                                        //padding: EdgeInsets.only(right  : 30),
+
+                                                        child: DropdownButton<
+                                                            String>(
+                                                          isExpanded: true,
+                                                          iconSize: 40,
+                                                          iconEnabledColor:
+                                                              Color(0xff4044fc),
+                                                          icon: Icon(Icons
+                                                              .arrow_drop_down),
+                                                          underline: SizedBox(),
+                                                          value:
+                                                              valueChooseForLocationForBasicInfo,
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                            textStyle: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 16),
+                                                          ),
+                                                          items: locationList
+                                                              .map((valueItem) {
+                                                            return DropdownMenuItem(
+                                                                value:
+                                                                    valueItem,
+                                                                child: Text(
+                                                                    valueItem));
+                                                          }).toList(),
+                                                          onChanged:
+                                                              (newValue) {
+                                                            setState(() {
+                                                              valueChooseForLocationForBasicInfo =
+                                                                  newValue;
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        margin:
+                                                            EdgeInsets.all(10),
+                                                        child: Text(
+                                                          'Residence:',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        width: width * 0.65,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        //margin: EdgeInsets.only(left: 8),
+                                                        //padding: EdgeInsets.only(right  : 30),
+                                                        child: TextFormField(
+                                                          //scrollPadding: EdgeInsets.zero,
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .name,
+                                                          controller:
+                                                              residence, //snapshot.data
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                          //controller: nameController,
+                                                          decoration:
+                                                              InputDecoration(
+                                                            contentPadding:
+                                                                EdgeInsets.zero,
+                                                            border: InputBorder
+                                                                .none,
+                                                            focusedBorder:
+                                                                UnderlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                  color: Color(
+                                                                      0xff4044fc)),
+                                                            ),
+                                                            //helperText: 'Helper Text',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Container(
+                                                    margin: EdgeInsets.only(
+                                                        left: width * 0.7),
+                                                    child: ElevatedButton(
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                                primary: Color(
+                                                                    0xff4044fc)),
+                                                        onPressed: () {
+                                                          FocusManager.instance
+                                                              .primaryFocus
+                                                              ?.unfocus();
+                                                          putBasic();
+                                                        },
+                                                        child: Text(
+                                                          'Save',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                                  fontSize: 16),
+                                                        )),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    child: Column(
+                                  ),
+                                ),
+
+                                Container(
+                                    width: double.infinity,
+                                    child: Container(
+                                      margin:
+                                          EdgeInsets.symmetric(horizontal: 4),
+                                      child: Container(
+                                        margin: EdgeInsets.only(
+                                            top: 8, left: 4, right: 4),
+                                        //color: Colors.pink,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: ExpansionTile(
+                                          textColor: Colors.black,
+                                          collapsedIconColor: Colors.black,
+                                          collapsedTextColor: Colors.grey,
+                                          iconColor: Colors.black,
+                                          initiallyExpanded: false,
+                                          //tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                                          //collapsedBackgroundColor: Color(0xff007bff),
+                                          title: Container(
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10)),
+                                            child: Text(
+                                              'Work Information',
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 16,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                          children: [
+                                            Container(
+                                              //height: height * 0.42,
+                                              margin: EdgeInsets.only(
+                                                  bottom: 5, left: 5, right: 5),
+                                              width: double.infinity,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  border: Border.all(
+                                                      color: Colors.black),
+                                                  color: Colors.white,
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          margin:
+                                                              EdgeInsets.all(
+                                                                  10),
+                                                          child: Text(
+                                                            'Occupation:',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          width: width * 0.60,
+                                                          child: DropdownButton<
+                                                              String>(
+                                                            isExpanded: true,
+                                                            iconSize: 40,
+                                                            iconEnabledColor:
+                                                                Color(
+                                                                    0xff4044fc),
+                                                            icon: Icon(Icons
+                                                                .arrow_drop_down),
+                                                            underline:
+                                                                SizedBox(),
+                                                            hint: Text(
+                                                              '$initialOccupation',
+                                                              style: GoogleFonts
+                                                                  .poppins(
+                                                                      fontSize:
+                                                                          16,
+                                                                      color: Colors
+                                                                          .black),
+                                                            ),
+                                                            value:
+                                                                valueChooseOccupation,
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              textStyle: TextStyle(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontSize: 16),
+                                                            ),
+                                                            items: occ_list.map(
+                                                                (valueItem) {
+                                                              return DropdownMenuItem(
+                                                                  value:
+                                                                      valueItem,
+                                                                  child: Text(
+                                                                      valueItem));
+                                                            }).toList(),
+                                                            onChanged:
+                                                                (newValue) {
+                                                              setState(() {
+                                                                valueChooseOccupation =
+                                                                    newValue;
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          margin:
+                                                              EdgeInsets.all(
+                                                                  10),
+                                                          child: Text(
+                                                            'Organization:',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          width: width * 0.6,
+                                                          padding:
+                                                              EdgeInsets.zero,
+                                                          //margin: EdgeInsets.only(left: 8),
+                                                          //padding: EdgeInsets.only(right  : 30),
+                                                          child: TextFormField(
+                                                            //scrollPadding: EdgeInsets.zero,
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .name,
+                                                            controller:
+                                                                organization, //snapshot.data
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                            //controller: nameController,
+                                                            decoration:
+                                                                InputDecoration(
+                                                              contentPadding:
+                                                                  EdgeInsets
+                                                                      .zero,
+                                                              border:
+                                                                  InputBorder
+                                                                      .none,
+                                                              focusedBorder:
+                                                                  UnderlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                    color: Color(
+                                                                        0xff4044fc)),
+                                                              ),
+                                                              //helperText: 'Helper Text',
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          margin:
+                                                              EdgeInsets.all(
+                                                                  10),
+                                                          child: Text(
+                                                            'Office:',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          width: width * 0.715,
+                                                          padding:
+                                                              EdgeInsets.zero,
+                                                          //margin: EdgeInsets.only(left: 8),
+                                                          //padding: EdgeInsets.only(right  : 30),
+                                                          child: DropdownButton<
+                                                              String>(
+                                                            isExpanded: true,
+                                                            iconSize: 40,
+                                                            iconEnabledColor:
+                                                                Color(
+                                                                    0xff4044fc),
+                                                            icon: Icon(Icons
+                                                                .arrow_drop_down),
+                                                            underline:
+                                                                SizedBox(),
+                                                            value:
+                                                                valueChooseForLocationForWorkInfo,
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              textStyle: TextStyle(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontSize: 16),
+                                                            ),
+                                                            items: locationList
+                                                                .map(
+                                                                    (valueItem) {
+                                                              return DropdownMenuItem(
+                                                                  value:
+                                                                      valueItem,
+                                                                  child: Text(
+                                                                      valueItem));
+                                                            }).toList(),
+                                                            onChanged:
+                                                                (newValue) {
+                                                              setState(() {
+                                                                valueChooseForLocationForWorkInfo =
+                                                                    newValue;
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          margin:
+                                                              EdgeInsets.all(
+                                                                  10),
+                                                          child: Text(
+                                                            'Designation:',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          width: width * 0.6,
+                                                          padding:
+                                                              EdgeInsets.zero,
+                                                          //margin: EdgeInsets.only(left: 8),
+                                                          //padding: EdgeInsets.only(right  : 30),
+                                                          child: TextFormField(
+                                                            //scrollPadding: EdgeInsets.zero,
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .name,
+                                                            controller:
+                                                                designation, //snapshot.data
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                            //controller: nameController,
+                                                            decoration:
+                                                                InputDecoration(
+                                                              contentPadding:
+                                                                  EdgeInsets
+                                                                      .zero,
+                                                              border:
+                                                                  InputBorder
+                                                                      .none,
+                                                              focusedBorder:
+                                                                  UnderlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                    color: Color(
+                                                                        0xff4044fc)),
+                                                              ),
+                                                              //helperText: 'Helper Text',
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: width * 0.7),
+                                                      child: ElevatedButton(
+                                                          style: ElevatedButton
+                                                              .styleFrom(
+                                                                  primary: Color(
+                                                                      0xff4044fc)),
+                                                          onPressed: () {
+                                                            FocusManager
+                                                                .instance
+                                                                .primaryFocus
+                                                                ?.unfocus();
+                                                            putWork();
+                                                          },
+                                                          child: Text(
+                                                            'Save',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                          )),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )),
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 4),
+                                  width: double.infinity,
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                        top: 8, left: 4, right: 4),
+                                    //color: Colors.pink,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: ExpansionTile(
+                                      textColor: Colors.black,
+                                      collapsedIconColor: Colors.black,
+                                      collapsedTextColor: Colors.grey,
+                                      iconColor: Colors.black,
+                                      initiallyExpanded: false,
+                                      //tilePadding: EdgeInsets.symmetric(horizontal: 8),
+                                      //collapsedBackgroundColor: Color(0xff007bff),
+                                      title: Container(
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
+                                        child: Text(
+                                          'Requirements',
+                                          style: GoogleFonts.poppins(
+                                              fontSize: 16,
+                                              color: Colors.black),
+                                        ),
+                                      ),
                                       children: [
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.all(10),
-                                              child: Text(
-                                                'First Name:',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: width * 0.65,
-                                              padding: EdgeInsets.zero,
-                                              //margin: EdgeInsets.only(left: 8),
-                                              //padding: EdgeInsets.only(right  : 30),
-                                              child: TextFormField(
-                                                controller: fname,
-                                                autofocus: true,
-
-                                                onEditingComplete: () {},
-                                                //scrollPadding: EdgeInsets.zero,
-                                                keyboardType:
-                                                    TextInputType.name,
-
-                                                // initialValue:
-                                                // '$initialFirstName', //snapshot.data
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                                //controller: nameController,
-                                                decoration: InputDecoration(
-                                                  floatingLabelBehavior:
-                                                      FloatingLabelBehavior
-                                                          .always,
-
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  border: InputBorder.none,
-                                                  focusedBorder:
-                                                      UnderlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                        color:
-                                                            Color(0xff4044fc)),
-                                                  ),
-                                                  //helperText: 'Helper Text',
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.all(10),
-                                              child: Text(
-                                                'Last Name:',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: width * 0.65,
-                                              padding: EdgeInsets.zero,
-                                              //margin: EdgeInsets.only(left: 8),
-                                              //padding: EdgeInsets.only(right  : 30),
-                                              child: TextFormField(
-                                                //scrollPadding: EdgeInsets.zero,
-                                                keyboardType:
-                                                    TextInputType.name,
-                                                controller: lname,
-
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                                //controller: nameController,
-                                                decoration: InputDecoration(
-                                                  floatingLabelBehavior:
-                                                      FloatingLabelBehavior
-                                                          .always,
-
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  border: InputBorder.none,
-                                                  focusedBorder:
-                                                      UnderlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                        color:
-                                                            Color(0xff4044fc)),
-                                                  ),
-                                                  //helperText: 'Helper Text',
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.all(10),
-                                              child: Text(
-                                                'Email:',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: width * 0.7,
-                                              padding: EdgeInsets.zero,
-                                              //margin: EdgeInsets.only(left: 8),
-                                              //padding: EdgeInsets.only(right  : 30),
-                                              child: TextFormField(
-                                                //scrollPadding: EdgeInsets.zero,
-                                                keyboardType:
-                                                    TextInputType.name,
-                                                controller: email,
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                                //controller: nameController,
-                                                decoration: InputDecoration(
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  border: InputBorder.none,
-                                                  focusedBorder:
-                                                      UnderlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                        color:
-                                                            Color(0xff4044fc)),
-                                                  ),
-                                                  //helperText: 'Helper Text',
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.all(10),
-                                              child: Text(
-                                                'Phone:',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: width * 0.7,
-                                              padding: EdgeInsets.zero,
-                                              //margin: EdgeInsets.only(left: 8),
-                                              //padding: EdgeInsets.only(right  : 30),
-                                              child: TextFormField(
-                                                //scrollPadding: EdgeInsets.zero,
-                                                keyboardType:
-                                                    TextInputType.name,
-                                                controller: phone,
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                                //controller: nameController,
-                                                decoration: InputDecoration(
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  border: InputBorder.none,
-                                                  focusedBorder:
-                                                      UnderlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                        color:
-                                                            Color(0xff4044fc)),
-                                                  ),
-                                                  //helperText: 'Helper Text',
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.all(10),
-                                              child: Text(
-                                                'Whatsapp:',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: width * 0.65,
-                                              padding: EdgeInsets.zero,
-                                              //margin: EdgeInsets.only(left: 8),
-                                              //padding: EdgeInsets.only(right  : 30),
-                                              child: TextFormField(
-                                                //scrollPadding: EdgeInsets.zero,
-                                                keyboardType:
-                                                    TextInputType.name,
-                                                controller:
-                                                    whatsapp, //snapshot.data
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                                //controller: nameController,
-                                                decoration: InputDecoration(
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  border: InputBorder.none,
-                                                  focusedBorder:
-                                                      UnderlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                        color:
-                                                            Color(0xff4044fc)),
-                                                  ),
-                                                  //helperText: 'Helper Text',
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.all(10),
-                                              child: Text(
-                                                'Location:',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: width * 0.65,
-                                              padding: EdgeInsets.zero,
-                                              //margin: EdgeInsets.only(left: 8),
-                                              //padding: EdgeInsets.only(right  : 30),
-
-                                              child: DropdownButton<String>(
-                                                isExpanded: true,
-                                                iconSize: 40,
-                                                iconEnabledColor:
-                                                    Color(0xff4044fc),
-                                                icon:
-                                                    Icon(Icons.arrow_drop_down),
-                                                underline: SizedBox(),
-                                                value:
-                                                    valueChooseForLocationForBasicInfo,
-                                                style: GoogleFonts.poppins(
-                                                  textStyle: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16),
-                                                ),
-                                                items: locationList
-                                                    .map((valueItem) {
-                                                  return DropdownMenuItem(
-                                                      value: valueItem,
-                                                      child: Text(valueItem));
-                                                }).toList(),
-                                                onChanged: (newValue) {
-                                                  setState(() {
-                                                    valueChooseForLocationForBasicInfo =
-                                                        newValue;
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.all(10),
-                                              child: Text(
-                                                'Residence:',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: width * 0.65,
-                                              padding: EdgeInsets.zero,
-                                              //margin: EdgeInsets.only(left: 8),
-                                              //padding: EdgeInsets.only(right  : 30),
-                                              child: TextFormField(
-                                                //scrollPadding: EdgeInsets.zero,
-                                                keyboardType:
-                                                    TextInputType.name,
-                                                controller:
-                                                    residence, //snapshot.data
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                                //controller: nameController,
-                                                decoration: InputDecoration(
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  border: InputBorder.none,
-                                                  focusedBorder:
-                                                      UnderlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                        color:
-                                                            Color(0xff4044fc)),
-                                                  ),
-                                                  //helperText: 'Helper Text',
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
                                         Container(
                                           margin: EdgeInsets.only(
-                                              left: width * 0.7),
-                                          child: ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                  primary: Color(0xff4044fc)),
-                                              onPressed: () {
-                                                FocusManager
-                                                    .instance.primaryFocus
-                                                    ?.unfocus();
-                                                putBasic();
-                                              },
-                                              child: Text(
-                                                'Save',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16),
-                                              )),
-                                        )
+                                              bottom: 5, left: 5, right: 5),
+                                          width: double.infinity,
+                                          child: Container(
+                                            //margin : EdgeInsets.symmetric(horizontal: 4),
+                                            //padding : EdgeInsets.symmetric(horizontal: 4),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              color: Colors.white,
+                                              border: Border.all(
+                                                  color: Colors.black),
+                                            ),
+                                            child: Column(
+                                              // mainAxisAlignment:
+                                              //     MainAxisAlignment.start,
+                                              // crossAxisAlignment:
+                                              //     CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 10, top: 10),
+                                                      child: Text(
+                                                        'Current Residence:',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      //: 700,
+                                                      //margin: EdgeInsets.all(10),
+                                                      child: Row(
+                                                        children: [
+                                                          Radio(
+                                                              value:
+                                                                  "Self Owned",
+                                                              groupValue:
+                                                                  _value4,
+                                                              activeColor: Color(
+                                                                  0xff4044fc),
+                                                              onChanged:
+                                                                  (value) {
+                                                                setState(() {
+                                                                  _value4 = value
+                                                                      .toString();
+                                                                });
+                                                              }),
+                                                          Text(
+                                                            'Self Owned',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                          Radio(
+                                                              value: "Leased",
+                                                              groupValue:
+                                                                  _value4,
+                                                              autofocus: true,
+                                                              activeColor: Color(
+                                                                  0xff4044fc),
+                                                              onChanged:
+                                                                  (value) {
+                                                                setState(() {
+                                                                  _value4 = value
+                                                                      .toString();
+                                                                });
+                                                              }),
+                                                          Text(
+                                                            'Leased',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 10, top: 10),
+                                                      child: Text(
+                                                        'Family Type:',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      //: 700,
+                                                      margin: EdgeInsets.only(
+                                                          right: width * 0.1),
+                                                      child: Row(
+                                                        children: [
+                                                          Radio(
+                                                              value:
+                                                                  "Joint Family",
+                                                              groupValue:
+                                                                  _value,
+                                                              activeColor: Color(
+                                                                  0xff4044fc),
+                                                              onChanged:
+                                                                  (value) {
+                                                                setState(() {
+                                                                  _value = value
+                                                                      .toString();
+                                                                });
+                                                              }),
+                                                          Text(
+                                                            'Joint Family',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                          Radio(
+                                                              value:
+                                                                  "Nuclear Family",
+                                                              groupValue:
+                                                                  _value,
+                                                              autofocus: true,
+                                                              activeColor: Color(
+                                                                  0xff4044fc),
+                                                              onChanged:
+                                                                  (value) {
+                                                                setState(() {
+                                                                  _value = value
+                                                                      .toString();
+                                                                });
+                                                              }),
+                                                          Text(
+                                                            'Nuclear Family',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 10, top: 10),
+                                                      child: Text(
+                                                        'Configuration Required:',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                FutureBuilder(
+                                                    future: con,
+                                                    builder: (context,
+                                                        AsyncSnapshot
+                                                            snapshot) {
+                                                      switch (snapshot
+                                                          .connectionState) {
+                                                        case ConnectionState
+                                                            .none:
+                                                          return Text('none');
+                                                        case ConnectionState
+                                                            .waiting:
+                                                          return Center(
+                                                              child:
+                                                                  CircularProgressIndicator());
+                                                        case ConnectionState
+                                                            .active:
+                                                          return Text('none');
+                                                        case ConnectionState
+                                                            .done:
+                                                          return Container(
+                                                            padding:
+                                                                EdgeInsets.zero,
+                                                            //padding: EdgeInsets.only(
+                                                            //left: width * 0.1,
+                                                            //right: width * 0.15,
+                                                            //top: height * 0.02),
+                                                            child: GridView
+                                                                .builder(
+                                                                    padding:
+                                                                        EdgeInsets
+                                                                            .zero,
+                                                                    gridDelegate:
+                                                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                                                            //childAspectRatio: 0.1,
+                                                                            mainAxisExtent:
+                                                                                35,
+                                                                            crossAxisCount:
+                                                                                2,
+                                                                            crossAxisSpacing:
+                                                                                20),
+                                                                    shrinkWrap:
+                                                                        true,
+                                                                    scrollDirection:
+                                                                        Axis
+                                                                            .vertical,
+                                                                    itemCount:
+                                                                        snapshot
+                                                                            .data
+                                                                            .length,
+                                                                    itemBuilder:
+                                                                        (BuildContext
+                                                                                context,
+                                                                            int index) {
+                                                                      return Row(
+                                                                        children: [
+                                                                          Container(
+                                                                            //margin: EdgeInsets.only(left: 24),
+                                                                            child:
+                                                                                Transform.scale(
+                                                                              scale: 1,
+                                                                              child: Checkbox(
+                                                                                activeColor: Color(0xff4044fc),
+                                                                                checkColor: Colors.white,
+                                                                                value: selectedConfigs.contains(snapshot.data[index].name) ? test : isChecked[index],
+                                                                                onChanged: (val) {
+                                                                                  configurations[snapshot.data[index].name] = val!;
+                                                                                  selectedConfigs.clear();
+                                                                                  configurations.forEach((key, value) {
+                                                                                    if (value == true) {
+                                                                                      selectedConfigs.add(key);
+                                                                                    }
+                                                                                  });
+                                                                                  setState(() {
+                                                                                    selectedConfigs.contains(snapshot.data[index].name) ? test = val : isChecked[index] = val;
+                                                                                    ;
+                                                                                  });
+                                                                                  print('111111111111111 $configurations');
+                                                                                  print('111111111111111 $selectedConfigs');
+                                                                                },
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          Text(
+                                                                            "${snapshot.data[index].name}",
+                                                                            style:
+                                                                                GoogleFonts.poppins(fontSize: 16),
+                                                                          ),
+                                                                        ],
+                                                                      );
+                                                                    }),
+                                                          );
+                                                      }
+                                                    }),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 10, top: 10),
+                                                      child: Text(
+                                                        'Budget:',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 5, top: 10),
+                                                      width: width * 0.50,
+                                                      child: DropdownButton<
+                                                          String>(
+                                                        isExpanded: true,
+                                                        iconSize: 40,
+                                                        iconEnabledColor:
+                                                            Color(0xff4044fc),
+                                                        icon: Icon(Icons
+                                                            .arrow_drop_down),
+                                                        underline: SizedBox(),
+                                                        value:
+                                                            valueChooseForBudget,
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                          textStyle: TextStyle(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontSize: 16),
+                                                        ),
+                                                        items: budgetList
+                                                            .map((valueItem) {
+                                                          return DropdownMenuItem(
+                                                              value: valueItem,
+                                                              child: Text(
+                                                                  valueItem));
+                                                        }).toList(),
+                                                        onChanged: (newValue) {
+                                                          setState(() {
+                                                            valueChooseForBudget =
+                                                                newValue;
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 10, top: 10),
+                                                      child: Text(
+                                                        'Mode of Funding:',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      //margin: EdgeInsets.all(10),
+                                                      child: Row(
+                                                        children: [
+                                                          //SizedBox(
+                                                          // width: width * 0.05),
+                                                          Transform.scale(
+                                                            scale: 1.1,
+                                                            child: Radio(
+                                                                value:
+                                                                    'Maximum Self',
+                                                                groupValue:
+                                                                    _value2,
+                                                                activeColor: Color(
+                                                                    0xff4044fc),
+                                                                onChanged:
+                                                                    (value) {
+                                                                  setState(() {
+                                                                    _value2 = value
+                                                                        .toString();
+                                                                  });
+                                                                }),
+                                                          ),
+                                                          Text(
+                                                            'Maximum Self',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              textStyle:
+                                                                  TextStyle(
+                                                                      fontSize:
+                                                                          16),
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                              width:
+                                                                  width * 0.03),
+                                                          Transform.scale(
+                                                            scale: 1,
+                                                            child: Radio(
+                                                                value:
+                                                                    'Maximum Loan',
+                                                                groupValue:
+                                                                    _value2,
+                                                                activeColor: Color(
+                                                                    0xff4044fc),
+                                                                onChanged:
+                                                                    (value) {
+                                                                  setState(() {
+                                                                    _value2 = value
+                                                                        .toString();
+                                                                  });
+                                                                }),
+                                                          ),
+                                                          Text(
+                                                            'Maximum Loan',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              textStyle:
+                                                                  TextStyle(
+                                                                      fontSize:
+                                                                          16),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 10, top: 10),
+                                                      child: Text(
+                                                        'Purpose of Purchase:',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    //SizedBox(width: width * 0.05),
+                                                    Transform.scale(
+                                                      scale: 1,
+                                                      child: Radio(
+                                                          value: "Self Use",
+                                                          groupValue: _value3,
+                                                          activeColor:
+                                                              Color(0xff4044fc),
+                                                          onChanged: (value) {
+                                                            setState(() {
+                                                              _value3 = value
+                                                                  .toString();
+                                                            });
+                                                          }),
+                                                    ),
+                                                    Text(
+                                                      'Self Use',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        textStyle: TextStyle(
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: width * 0.16,
+                                                    ),
+                                                    Transform.scale(
+                                                      scale: 1,
+                                                      child: Radio(
+                                                          value: "Second Home",
+                                                          groupValue: _value3,
+                                                          activeColor:
+                                                              Color(0xff4044fc),
+                                                          onChanged: (val) {
+                                                            setState(() {
+                                                              _value3 = val
+                                                                  .toString();
+                                                            });
+                                                          }),
+                                                    ),
+                                                    Text(
+                                                      'Second home',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        textStyle: TextStyle(
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Transform.scale(
+                                                      scale: 1,
+                                                      child: Radio(
+                                                          value: 'Investment',
+                                                          groupValue: _value3,
+                                                          activeColor:
+                                                              Color(0xff4044fc),
+                                                          onChanged: (val) {
+                                                            setState(() {
+                                                              _value3 = val
+                                                                  .toString();
+                                                            });
+                                                          }),
+                                                    ),
+                                                    Text(
+                                                      'Investment',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        textStyle: TextStyle(
+                                                            fontSize: 16),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                        width: width * 0.093),
+                                                    Transform.scale(
+                                                      scale: 1,
+                                                      child: Radio(
+                                                          value:
+                                                              'Organizational',
+                                                          groupValue: _value3,
+                                                          activeColor:
+                                                              Color(0xff4044fc),
+                                                          onChanged: (val) {
+                                                            setState(() {
+                                                              _value3 = val
+                                                                  .toString();
+                                                              print(
+                                                                  ">>>>>>>>>> $_value");
+                                                            });
+                                                          }),
+                                                    ),
+                                                    Text(
+                                                      'Organizational',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        textStyle: TextStyle(
+                                                            fontSize: 16),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                      left: width * 0.7),
+                                                  child: ElevatedButton(
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        primary:
+                                                            Color(0xff4044fc),
+                                                      ),
+                                                      onPressed: () {
+                                                        FocusManager.instance
+                                                            .primaryFocus
+                                                            ?.unfocus();
+                                                        putreq();
+                                                        putres();
+                                                      },
+                                                      child: Text(
+                                                        'Save',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16),
+                                                      )),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
                                 ),
+
+                                //NAME FROM JSON
                               ],
                             ),
-                          ),
-                        ),
-                      ),
-
-                      Container(
-                          width: double.infinity,
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 4),
-                            child: Container(
-                              margin:
-                                  EdgeInsets.only(top: 8, left: 4, right: 4),
-                              //color: Colors.pink,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: ExpansionTile(
-                                textColor: Colors.black,
-                                collapsedIconColor: Colors.black,
-                                collapsedTextColor: Colors.grey,
-                                iconColor: Colors.black,
-                                initiallyExpanded: false,
-                                //tilePadding: EdgeInsets.symmetric(horizontal: 8),
-                                //collapsedBackgroundColor: Color(0xff007bff),
-                                title: Container(
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10)),
-                                  child: Text(
-                                    'Work Information',
-                                    style: GoogleFonts.poppins(
-                                        fontSize: 16, color: Colors.black),
-                                  ),
-                                ),
-                                children: [
-                                  Container(
-                                    //height: height * 0.42,
-                                    margin: EdgeInsets.only(
-                                        bottom: 5, left: 5, right: 5),
-                                    width: double.infinity,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: Colors.black),
-                                        color: Colors.white,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Container(
-                                                margin: EdgeInsets.all(10),
-                                                child: Text(
-                                                  'Occupation:',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                ),
-                                              ),
-                                              Container(
-                                                width: width * 0.60,
-                                                child: DropdownButton<String>(
-                                                  isExpanded: true,
-                                                  iconSize: 40,
-                                                  iconEnabledColor:
-                                                      Color(0xff4044fc),
-                                                  icon: Icon(
-                                                      Icons.arrow_drop_down),
-                                                  underline: SizedBox(),
-                                                  hint: Text(
-                                                    '$initialOccupation',
-                                                    style: GoogleFonts.poppins(
-                                                        fontSize: 16,
-                                                        color: Colors.black),
-                                                  ),
-                                                  value: valueChooseOccupation,
-                                                  style: GoogleFonts.poppins(
-                                                    textStyle: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 16),
-                                                  ),
-                                                  items:
-                                                      occ_list.map((valueItem) {
-                                                    return DropdownMenuItem(
-                                                        value: valueItem,
-                                                        child: Text(valueItem));
-                                                  }).toList(),
-                                                  onChanged: (newValue) {
-                                                    setState(() {
-                                                      valueChooseOccupation =
-                                                          newValue;
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                margin: EdgeInsets.all(10),
-                                                child: Text(
-                                                  'Organization:',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                ),
-                                              ),
-                                              Container(
-                                                width: width * 0.6,
-                                                padding: EdgeInsets.zero,
-                                                //margin: EdgeInsets.only(left: 8),
-                                                //padding: EdgeInsets.only(right  : 30),
-                                                child: TextFormField(
-                                                  //scrollPadding: EdgeInsets.zero,
-                                                  keyboardType:
-                                                      TextInputType.name,
-                                                  controller:
-                                                      organization, //snapshot.data
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                  //controller: nameController,
-                                                  decoration: InputDecoration(
-                                                    contentPadding:
-                                                        EdgeInsets.zero,
-                                                    border: InputBorder.none,
-                                                    focusedBorder:
-                                                        UnderlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                          color: Color(
-                                                              0xff4044fc)),
-                                                    ),
-                                                    //helperText: 'Helper Text',
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                margin: EdgeInsets.all(10),
-                                                child: Text(
-                                                  'Office:',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                ),
-                                              ),
-                                              Container(
-                                                width: width * 0.715,
-                                                padding: EdgeInsets.zero,
-                                                //margin: EdgeInsets.only(left: 8),
-                                                //padding: EdgeInsets.only(right  : 30),
-                                                child: DropdownButton<String>(
-                                                  isExpanded: true,
-                                                  iconSize: 40,
-                                                  iconEnabledColor:
-                                                      Color(0xff4044fc),
-                                                  icon: Icon(
-                                                      Icons.arrow_drop_down),
-                                                  underline: SizedBox(),
-                                                  value:
-                                                      valueChooseForLocationForWorkInfo,
-                                                  style: GoogleFonts.poppins(
-                                                    textStyle: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 16),
-                                                  ),
-                                                  items: locationList
-                                                      .map((valueItem) {
-                                                    return DropdownMenuItem(
-                                                        value: valueItem,
-                                                        child: Text(valueItem));
-                                                  }).toList(),
-                                                  onChanged: (newValue) {
-                                                    setState(() {
-                                                      valueChooseForLocationForWorkInfo =
-                                                          newValue;
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                margin: EdgeInsets.all(10),
-                                                child: Text(
-                                                  'Designation:',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                ),
-                                              ),
-                                              Container(
-                                                width: width * 0.6,
-                                                padding: EdgeInsets.zero,
-                                                //margin: EdgeInsets.only(left: 8),
-                                                //padding: EdgeInsets.only(right  : 30),
-                                                child: TextFormField(
-                                                  //scrollPadding: EdgeInsets.zero,
-                                                  keyboardType:
-                                                      TextInputType.name,
-                                                  controller:
-                                                      designation, //snapshot.data
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                  //controller: nameController,
-                                                  decoration: InputDecoration(
-                                                    contentPadding:
-                                                        EdgeInsets.zero,
-                                                    border: InputBorder.none,
-                                                    focusedBorder:
-                                                        UnderlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                          color: Color(
-                                                              0xff4044fc)),
-                                                    ),
-                                                    //helperText: 'Helper Text',
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: width * 0.7),
-                                            child: ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                    primary: Color(0xff4044fc)),
-                                                onPressed: () {
-                                                  FocusManager
-                                                      .instance.primaryFocus
-                                                      ?.unfocus();
-                                                  putWork();
-                                                },
-                                                child: Text(
-                                                  'Save',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                )),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )),
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 4),
-                        width: double.infinity,
-                        child: Container(
-                          margin: EdgeInsets.only(top: 8, left: 4, right: 4),
-                          //color: Colors.pink,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: ExpansionTile(
-                            textColor: Colors.black,
-                            collapsedIconColor: Colors.black,
-                            collapsedTextColor: Colors.grey,
-                            iconColor: Colors.black,
-                            initiallyExpanded: false,
-                            //tilePadding: EdgeInsets.symmetric(horizontal: 8),
-                            //collapsedBackgroundColor: Color(0xff007bff),
-                            title: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Text(
-                                'Requirements',
-                                style: GoogleFonts.poppins(
-                                    fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(
-                                    bottom: 5, left: 5, right: 5),
-                                width: double.infinity,
-                                child: Container(
-                                  //margin : EdgeInsets.symmetric(horizontal: 4),
-                                  //padding : EdgeInsets.symmetric(horizontal: 4),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Colors.white,
-                                    border: Border.all(color: Colors.black),
-                                  ),
-                                  child: Column(
-                                    // mainAxisAlignment:
-                                    //     MainAxisAlignment.start,
-                                    // crossAxisAlignment:
-                                    //     CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 10, top: 10),
-                                            child: Text(
-                                              'Current Residence:',
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            //: 700,
-                                            //margin: EdgeInsets.all(10),
-                                            child: Row(
-                                              children: [
-                                                Radio(
-                                                    value: "Self Owned",
-                                                    groupValue: _value4,
-                                                    activeColor:
-                                                        Color(0xff4044fc),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        _value4 =
-                                                            value.toString();
-                                                      });
-                                                    }),
-                                                Text(
-                                                  'Self Owned',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                ),
-                                                Radio(
-                                                    value: "Leased",
-                                                    groupValue: _value4,
-                                                    autofocus: true,
-                                                    activeColor:
-                                                        Color(0xff4044fc),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        _value4 =
-                                                            value.toString();
-                                                      });
-                                                    }),
-                                                Text(
-                                                  'Leased',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 10, top: 10),
-                                            child: Text(
-                                              'Family Type:',
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            //: 700,
-                                            margin: EdgeInsets.only(
-                                                right: width * 0.1),
-                                            child: Row(
-                                              children: [
-                                                Radio(
-                                                    value: "Joint Family",
-                                                    groupValue: _value,
-                                                    activeColor:
-                                                        Color(0xff4044fc),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        _value =
-                                                            value.toString();
-                                                      });
-                                                    }),
-                                                Text(
-                                                  'Joint Family',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                ),
-                                                Radio(
-                                                    value: "Nuclear Family",
-                                                    groupValue: _value,
-                                                    autofocus: true,
-                                                    activeColor:
-                                                        Color(0xff4044fc),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        _value =
-                                                            value.toString();
-                                                      });
-                                                    }),
-                                                Text(
-                                                  'Nuclear Family',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 10, top: 10),
-                                            child: Text(
-                                              'Configuration Required:',
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      FutureBuilder(
-                                          future: con,
-                                          builder: (context,
-                                              AsyncSnapshot snapshot) {
-                                            switch (snapshot.connectionState) {
-                                              case ConnectionState.none:
-                                                return Text('none');
-                                              case ConnectionState.waiting:
-                                                return Center(
-                                                    child:
-                                                        CircularProgressIndicator());
-                                              case ConnectionState.active:
-                                                return Text('none');
-                                              case ConnectionState.done:
-                                                return Container(
-                                                  padding: EdgeInsets.zero,
-                                                  //padding: EdgeInsets.only(
-                                                  //left: width * 0.1,
-                                                  //right: width * 0.15,
-                                                  //top: height * 0.02),
-                                                  child: GridView.builder(
-                                                      padding: EdgeInsets.zero,
-                                                      gridDelegate:
-                                                          SliverGridDelegateWithFixedCrossAxisCount(
-                                                              //childAspectRatio: 0.1,
-                                                              mainAxisExtent:
-                                                                  35,
-                                                              crossAxisCount: 2,
-                                                              crossAxisSpacing:
-                                                                  20),
-                                                      shrinkWrap: true,
-                                                      scrollDirection:
-                                                          Axis.vertical,
-                                                      itemCount:
-                                                          snapshot.data.length,
-                                                      itemBuilder:
-                                                          (BuildContext context,
-                                                              int index) {
-                                                        return Row(
-                                                          children: [
-                                                            Container(
-                                                              //margin: EdgeInsets.only(left: 24),
-                                                              child: Transform
-                                                                  .scale(
-                                                                scale: 1,
-                                                                child: Checkbox(
-                                                                  activeColor:
-                                                                      Color(
-                                                                          0xff4044fc),
-                                                                  checkColor:
-                                                                      Colors
-                                                                          .white,
-                                                                  value: selectedConfigs.contains(snapshot
-                                                                          .data[
-                                                                              index]
-                                                                          .name)
-                                                                      ? test
-                                                                      : isChecked[
-                                                                          index],
-                                                                  onChanged:
-                                                                      (val) {
-                                                                    configurations[snapshot
-                                                                        .data[
-                                                                            index]
-                                                                        .name] = val!;
-                                                                    selectedConfigs
-                                                                        .clear();
-                                                                    configurations
-                                                                        .forEach((key,
-                                                                            value) {
-                                                                      if (value ==
-                                                                          true) {
-                                                                        selectedConfigs
-                                                                            .add(key);
-                                                                      }
-                                                                    });
-                                                                    setState(
-                                                                        () {
-                                                                      selectedConfigs.contains(snapshot
-                                                                              .data[
-                                                                                  index]
-                                                                              .name)
-                                                                          ? test =
-                                                                              val
-                                                                          : isChecked[index] =
-                                                                              val;
-                                                                      ;
-                                                                    });
-                                                                    print(
-                                                                        '111111111111111 $configurations');
-                                                                    print(
-                                                                        '111111111111111 $selectedConfigs');
-                                                                  },
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            Text(
-                                                              "${snapshot.data[index].name}",
-                                                              style: GoogleFonts
-                                                                  .poppins(
-                                                                      fontSize:
-                                                                          16),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      }),
-                                                );
-                                            }
-                                          }),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 10, top: 10),
-                                            child: Text(
-                                              'Budget:',
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 5, top: 10),
-                                            width: width * 0.50,
-                                            child: DropdownButton<String>(
-                                              isExpanded: true,
-                                              iconSize: 40,
-                                              iconEnabledColor:
-                                                  Color(0xff4044fc),
-                                              icon: Icon(Icons.arrow_drop_down),
-                                              underline: SizedBox(),
-                                              value: valueChooseForBudget,
-                                              style: GoogleFonts.poppins(
-                                                textStyle: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 16),
-                                              ),
-                                              items:
-                                                  budgetList.map((valueItem) {
-                                                return DropdownMenuItem(
-                                                    value: valueItem,
-                                                    child: Text(valueItem));
-                                              }).toList(),
-                                              onChanged: (newValue) {
-                                                setState(() {
-                                                  valueChooseForBudget =
-                                                      newValue;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 10, top: 10),
-                                            child: Text(
-                                              'Mode of Funding:',
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            //margin: EdgeInsets.all(10),
-                                            child: Row(
-                                              children: [
-                                                //SizedBox(
-                                                // width: width * 0.05),
-                                                Transform.scale(
-                                                  scale: 1.1,
-                                                  child: Radio(
-                                                      value: 'Maximum Self',
-                                                      groupValue: _value2,
-                                                      activeColor:
-                                                          Color(0xff4044fc),
-                                                      onChanged: (value) {
-                                                        setState(() {
-                                                          _value2 =
-                                                              value.toString();
-                                                        });
-                                                      }),
-                                                ),
-                                                Text(
-                                                  'Maximum Self',
-                                                  style: GoogleFonts.poppins(
-                                                    textStyle:
-                                                        TextStyle(fontSize: 16),
-                                                  ),
-                                                ),
-                                                SizedBox(width: width * 0.03),
-                                                Transform.scale(
-                                                  scale: 1,
-                                                  child: Radio(
-                                                      value: 'Maximum Loan',
-                                                      groupValue: _value2,
-                                                      activeColor:
-                                                          Color(0xff4044fc),
-                                                      onChanged: (value) {
-                                                        setState(() {
-                                                          _value2 =
-                                                              value.toString();
-                                                        });
-                                                      }),
-                                                ),
-                                                Text(
-                                                  'Maximum Loan',
-                                                  style: GoogleFonts.poppins(
-                                                    textStyle:
-                                                        TextStyle(fontSize: 16),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 10, top: 10),
-                                            child: Text(
-                                              'Purpose of Purchase:',
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          //SizedBox(width: width * 0.05),
-                                          Transform.scale(
-                                            scale: 1,
-                                            child: Radio(
-                                                value: "Self Use",
-                                                groupValue: _value3,
-                                                activeColor: Color(0xff4044fc),
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    _value3 = value.toString();
-                                                  });
-                                                }),
-                                          ),
-                                          Text(
-                                            'Self Use',
-                                            style: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: width * 0.16,
-                                          ),
-                                          Transform.scale(
-                                            scale: 1,
-                                            child: Radio(
-                                                value: "Second Home",
-                                                groupValue: _value3,
-                                                activeColor: Color(0xff4044fc),
-                                                onChanged: (val) {
-                                                  setState(() {
-                                                    _value3 = val.toString();
-                                                  });
-                                                }),
-                                          ),
-                                          Text(
-                                            'Second home',
-                                            style: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Transform.scale(
-                                            scale: 1,
-                                            child: Radio(
-                                                value: 'Investment',
-                                                groupValue: _value3,
-                                                activeColor: Color(0xff4044fc),
-                                                onChanged: (val) {
-                                                  setState(() {
-                                                    _value3 = val.toString();
-                                                  });
-                                                }),
-                                          ),
-                                          Text(
-                                            'Investment',
-                                            style: GoogleFonts.poppins(
-                                              textStyle:
-                                                  TextStyle(fontSize: 16),
-                                            ),
-                                          ),
-                                          SizedBox(width: width * 0.093),
-                                          Transform.scale(
-                                            scale: 1,
-                                            child: Radio(
-                                                value: 'Organizational',
-                                                groupValue: _value3,
-                                                activeColor: Color(0xff4044fc),
-                                                onChanged: (val) {
-                                                  setState(() {
-                                                    _value3 = val.toString();
-                                                    print(">>>>>>>>>> $_value");
-                                                  });
-                                                }),
-                                          ),
-                                          Text(
-                                            'Organizational',
-                                            style: GoogleFonts.poppins(
-                                              textStyle:
-                                                  TextStyle(fontSize: 16),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Container(
-                                        margin:
-                                            EdgeInsets.only(left: width * 0.7),
-                                        child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              primary: Color(0xff4044fc),
-                                            ),
-                                            onPressed: () {
-                                              FocusManager.instance.primaryFocus
-                                                  ?.unfocus();
-                                              putreq();
-                                              putres();
-                                            },
-                                            child: Text(
-                                              'Save',
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 16),
-                                            )),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      //NAME FROM JSON
-                    ],
-                  ),
-                ),
+                          );
+                      }
+                    }),
                 Theme(
                   data: Theme.of(context).copyWith(),
                   child: Scaffold(
@@ -2165,7 +2377,7 @@ class _DetailspageState extends State<Detailspage> {
                             'Log a Re-Visit',
                             style: GoogleFonts.poppins(fontSize: 20),
                           ),
-                          onPressed: () async{
+                          onPressed: () async {
                             final pref = await SharedPreferences.getInstance();
                             pref.setString('from', 'New');
                             Navigator.push(
@@ -2184,131 +2396,204 @@ class _DetailspageState extends State<Detailspage> {
                             case ConnectionState.none:
                               return Text('none');
                             case ConnectionState.waiting:
-                              return Center(child: CircularProgressIndicator());
+                              return Center(
+                                  child: CupertinoActivityIndicator());
                             case ConnectionState.done:
-                              return ListView.builder(
-                                  itemCount: snapshot.data.length,
-                                  itemBuilder: (context, i) {
-                                    DateTime date = DateTime.parse(snapshot
-                                        .data[i]
-                                        .date); //snapshot.data[i].date;//as DateTime;
+                              if (!snapshot.hasData) {
+                                return Center(
+                                  child: Text(
+                                    'No visit history',
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 16, color: Colors.black),
+                                  ),
+                                );
+                              } else {
+                                return ListView.builder(
+                                    itemCount: snapshot.data.length,
+                                    itemBuilder: (context, i) {
+                                      DateTime date = DateTime.parse(snapshot
+                                          .data[i]
+                                          .date); //snapshot.data[i].date;//as DateTime;
 
-                                    var formatted =
-                                        DateFormat('MMM d, ' 'yy').format(date);
-                                    return Container(
-                                      margin: EdgeInsets.only(
-                                          top: 8, left: 4, right: 4),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          color: Colors.white),
-                                      child: ExpansionTile(
-                                        //onExpansionChanged: _onExpansionChanged,
-                                        collapsedTextColor: Colors.black,
-                                        collapsedIconColor: Colors.black,
-                                        textColor: Colors.black,
-                                        iconColor: Colors.black,
-                                        title: i == 0
-                                            ? Text(
-                                                'First Visit ',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16,
-                                                    color: Colors.black),
-                                              )
-                                            : Text(
-                                                '$i Re-Visit ',
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 16,
-                                                    color: Colors.black),
-                                              ),
-                                        trailing: Text(
-                                          formatted,
-                                          style: GoogleFonts.poppins(
-                                              fontSize: 16,
-                                              color: Colors.black),
-                                        ),
-                                        children: [
-                                          Container(
-                                              margin: EdgeInsets.only(
-                                                  bottom: 8, left: 5, right: 5),
-                                              height: 140,
-                                              width: double.infinity,
-                                              decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  border: Border.all(
+                                      var formatted = DateFormat('MMM d, ' 'yy')
+                                          .format(date);
+                                      return Container(
+                                        margin: EdgeInsets.only(
+                                            top: 8, left: 4, right: 4),
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: Colors.white),
+                                        child: ExpansionTile(
+                                          //onExpansionChanged: _onExpansionChanged,
+                                          collapsedTextColor: Colors.black,
+                                          collapsedIconColor: Colors.black,
+                                          textColor: Colors.black,
+                                          iconColor: Colors.black,
+                                          title: i == 0
+                                              ? Text(
+                                                  'First Visit ',
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 16,
                                                       color: Colors.black),
-                                                  color: Colors.white),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    margin: EdgeInsets.only(
-                                                        left: 10, top: 10),
-                                                    child: Text(
-                                                      'Status: ${snapshot.data[i].status}',
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                              fontSize: 16),
-                                                    ),
-                                                  ),
-                                                  Container(
-                                                    margin: EdgeInsets.only(
-                                                        left: 10, top: 10),
-                                                    child: Text(
-                                                      'Description: ${snapshot.data[i].feedback}',
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                              fontSize: 16),
-                                                    ),
-                                                  ),
-                                                  i == snapshot.data.length - 1
-                                                      ? Container(
+                                                )
+                                              : Text(
+                                                  '$i Re-Visit ',
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      color: Colors.black),
+                                                ),
+                                          trailing: Text(
+                                            formatted,
+                                            style: GoogleFonts.poppins(
+                                                fontSize: 16,
+                                                color: Colors.black),
+                                          ),
+                                          children: [
+                                            Container(
+                                                margin: EdgeInsets.only(
+                                                    bottom: 8,
+                                                    left: 5,
+                                                    right: 5),
+                                                width: double.infinity,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    border: Border.all(
+                                                        color: Colors.black),
+                                                    color: Colors.white),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Container(
                                                           margin:
                                                               EdgeInsets.only(
-                                                                  left: width *
-                                                                      0.78,
-                                                                  top: 20),
-                                                          child: ElevatedButton(
-                                                            onPressed:
-                                                                () async {
-                                                              final pref =
-                                                                  await SharedPreferences
-                                                                      .getInstance();
-                                                              pref.setString(
-                                                                  'status',
-                                                                  snapshot
-                                                                      .data[i]
-                                                                      .status);
-                                                              pref.setString(
-                                                                  'feedback',
-                                                                  snapshot
-                                                                      .data[i]
-                                                                      .feedback);
-                                                              pref.setString('from', 'Revisit');
-
-                                                              Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                  builder:
-                                                                      (context) =>
-                                                                          RevisitLog(),
-                                                                ),
-                                                              );
-                                                            },
-                                                            child: Text('Edit'),
+                                                                  left: 10,
+                                                                  top: 10),
+                                                          child: Text(
+                                                            'Status:',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                                    fontSize:
+                                                                        16),
                                                           ),
-                                                        )
-                                                      : Container()
-                                                ],
-                                              )),
-                                        ],
-                                      ),
-                                    );
-                                  });
+                                                        ),
+                                                        Container(
+                                                          height: 30,
+                                                          width: 90,
+                                                          margin:
+                                                              EdgeInsets.only(
+                                                                  top: 10,
+                                                                  left: 10),
+                                                          child: FlatButton(
+                                                            color: color(
+                                                                snapshot.data[i]
+                                                                    .status),
+                                                            onPressed: () {},
+                                                            child: Text(
+                                                              '${snapshot.data[i].status.toUpperCase()}',
+                                                              style: GoogleFonts
+                                                                  .poppins(
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 10, top: 10),
+                                                      child: Text(
+                                                        'Description:',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left: 10, top: 5),
+                                                      child: Text(
+                                                        '${snapshot.data[i].feedback}',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16),
+                                                      ),
+                                                    ),
+                                                    i ==
+                                                            snapshot.data
+                                                                    .length -
+                                                                1
+                                                        ? Container(
+                                                            width: 80,
+                                                            margin:
+                                                                EdgeInsets.only(
+                                                              left:
+                                                                  width * 0.74,
+                                                            ),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                            ),
+                                                            child:
+                                                                ElevatedButton(
+                                                              style: ElevatedButton
+                                                                  .styleFrom(
+                                                                      primary:
+                                                                          myColor),
+                                                              onPressed:
+                                                                  () async {
+                                                                final pref =
+                                                                    await SharedPreferences
+                                                                        .getInstance();
+                                                                pref.setString(
+                                                                    'status',
+                                                                    snapshot
+                                                                        .data[i]
+                                                                        .status);
+                                                                pref.setString(
+                                                                    'feedback',
+                                                                    snapshot
+                                                                        .data[i]
+                                                                        .feedback);
+                                                                pref.setString(
+                                                                    'from',
+                                                                    'Revisit');
+
+                                                                Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                    builder:
+                                                                        (context) =>
+                                                                            RevisitLog(),
+                                                                  ),
+                                                                );
+                                                              },
+                                                              child:
+                                                                  Text('Edit'),
+                                                            ),
+                                                          )
+                                                        : Container()
+                                                  ],
+                                                )),
+                                          ],
+                                        ),
+                                      );
+                                    });
+                              }
                           }
                         }),
                   ),
@@ -2368,7 +2653,10 @@ class _DetailspageState extends State<Detailspage> {
                           width: width * 0.337,
                           child: FlatButton(
                             color: Colors.red,
-                            onPressed: () {
+                            onPressed: () async {
+                              final pref =
+                                  await SharedPreferences.getInstance();
+                              pref.setString('from', 'New');
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -2402,10 +2690,19 @@ class _DetailspageState extends State<Detailspage> {
                           case ConnectionState.none:
                             return Text('none');
                           case ConnectionState.waiting:
-                            return Center(child: CircularProgressIndicator());
+                            return Center(child: CupertinoActivityIndicator());
                           case ConnectionState.active:
                             return Text('active');
                           case ConnectionState.done:
+                            if (!snapshot.hasData) {
+                              return Center(
+                                child: Text(
+                                  'No call history',
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 16, color: Colors.black),
+                                ),
+                              );
+                            }
                             return ListView.builder(
                                 itemCount: snapshot.data.length,
                                 itemBuilder: (context, index) {
@@ -2438,7 +2735,7 @@ class _DetailspageState extends State<Detailspage> {
                                       ),
                                       children: [
                                         Container(
-                                          height: height * 0.2,
+                                          //height: height * 0.2,
                                           margin: EdgeInsets.only(
                                               bottom: 8, left: 5, right: 5),
                                           decoration: BoxDecoration(
@@ -2482,12 +2779,68 @@ class _DetailspageState extends State<Detailspage> {
                                                 padding: EdgeInsets.only(
                                                     left: 10, top: 10),
                                                 child: Text(
+                                                  'Description:',
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                              Container(
+                                                padding: EdgeInsets.only(
+                                                    left: 10, top: 5),
+                                                child: Text(
                                                   '${snapshot.data[index].call_desc}',
                                                   style: GoogleFonts.poppins(
                                                       fontSize: 16,
                                                       color: Colors.black),
                                                 ),
                                               ),
+                                              index == snapshot.data.length - 1
+                                                  ? Container(
+                                                      width: 80,
+                                                      margin: EdgeInsets.only(
+                                                        left: width * 0.74,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                      ),
+                                                      child: ElevatedButton(
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                                primary:
+                                                                    myColor),
+                                                        onPressed: () async {
+                                                          final pref =
+                                                              await SharedPreferences
+                                                                  .getInstance();
+                                                          pref.setString(
+                                                              'out_come',
+                                                              snapshot
+                                                                  .data[index]
+                                                                  .out_come);
+                                                          pref.setString(
+                                                              'call_desc',
+                                                              snapshot
+                                                                  .data[index]
+                                                                  .call_desc);
+                                                          pref.setString('from',
+                                                              'Followups');
+
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder:
+                                                                  (context) =>
+                                                                      CallLog(),
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: Text('Edit'),
+                                                      ),
+                                                    )
+                                                  : Container()
                                             ],
                                           ),
                                         ),
@@ -2534,5 +2887,17 @@ class _DetailspageState extends State<Detailspage> {
     setState(() {
       time = newTime;
     });
+  }
+
+  color(String status) {
+    if (status == 'hot') {
+      return Colors.red;
+    } else if (status == 'warm') {
+      return Colors.orange;
+    } else if (status == 'cold') {
+      return Colors.blue;
+    } else {
+      return Colors.yellow;
+    }
   }
 }

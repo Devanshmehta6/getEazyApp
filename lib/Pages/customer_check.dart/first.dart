@@ -51,7 +51,8 @@ class _FirstPageState extends State<FirstPage>
     final token = await AuthService.getToken();
     final settoken = 'Token ${token['token']}';
     final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
-    final project_id = pref.getString('project_id');
+    final project_id = pref.getString('pro_id');
+    print('=============ppppppp ========== $project_id');
     http.Response response = await http.post(url,
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +64,8 @@ class _FirstPageState extends State<FirstPage>
           {
             'project': project_id,
             'mobile': mobileController.text,
-            'last_visited': curr_date
+            'last_visited': curr_date,
+            'through':'Direct Walkin'
           },
         ));
     print('RESPONSE BODY FIRST ${response.body}');

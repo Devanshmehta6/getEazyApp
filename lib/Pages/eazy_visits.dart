@@ -1,6 +1,6 @@
 import 'dart:core';
 import 'package:eazy_app/Pages/customer_check.dart/cp_first.dart';
-import 'package:eazy_app/Pages/customer_check.dart/fifth.dart';
+
 import 'package:eazy_app/Pages/customer_check.dart/first.dart';
 import 'package:eazy_app/Pages/customer_check.dart/first.dart';
 import 'package:eazy_app/Pages/customer_check.dart/fourth.dart';
@@ -76,6 +76,7 @@ class _EazyVisitsState extends State<EazyVisits> {
   late Future futureForSales;
   String project_name = '';
   String new_project = '';
+  String project_id = '';
 
   late StreamController _streamController;
   late Stream _stream;
@@ -120,13 +121,14 @@ class _EazyVisitsState extends State<EazyVisits> {
       var entireJson = jsonDecode(response.body);
       ongoingdata = entireJson['on_going_visits'];
       //final cust_url = ongoingdata['customer_url'];
-      print('>>>>>>>>>>>>>>> LENGTH >>>>> ${ongoingdata.length}');
+      print('-------- ON GOING =============== ');
       len = ongoingdata.length;
       sales = entireJson['sales_manager'];
-      
-      final p_id = entireJson['current_project'][0]['project_no'];
-      print('======== ....... $p_id');
-      pref.setString('project_id', p_id);
+
+      final id = entireJson['current project'][0]['project_no'];
+      print('------------- id ================ $id');
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('pro_id', id);
 
       // print('---------------PROJ ------------ $proj_id');
       users.clear();
@@ -227,7 +229,7 @@ class _EazyVisitsState extends State<EazyVisits> {
 
     String mobile = pref1.getString('mobile');
     print('> mobile get>>>>>>>>>>. $mobile');
-    final project_id = pref.getString('project_id');
+    final project_id = pref.getString('pro_id');
 
     http.Response response = await http.put(url,
         headers: {
@@ -457,11 +459,11 @@ class _EazyVisitsState extends State<EazyVisits> {
                 width: width * 0.50,
                 child: FlatButton(
                   color: myColor,
-                  onPressed: () async {
+                  onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => FirstPage(),
+                        builder: (context) => FourthPage(),
                       ),
                     );
                   },
@@ -502,30 +504,33 @@ class _EazyVisitsState extends State<EazyVisits> {
               );
             },
           ),
-          iconTheme: IconThemeData(color: Colors.blue.shade800),
+          iconTheme: IconThemeData(color: myColor),
           backgroundColor: Colors.white,
-          title: Row(
-            children: <Widget>[
-              // IconButton(
-              //     onPressed: () {
-              //       print('>...... pressed refresh');
-              //
-              //     },
-              //     icon: Icon(Icons.refresh)),
-              SizedBox(width: width * 0.13),
-              Text(
-                new_project,
-                style: GoogleFonts.poppins(
-                  textStyle: TextStyle(fontSize: 16, color: Colors.black),
+          //centerTitle: true,
+          title: Container(
+            
+            width: double.infinity,
+            child: Stack(
+              alignment: Alignment.centerLeft,
+              children: <Widget>[
+                Positioned(
+                  child: Container(
+                    margin : EdgeInsets.only(left:60),
+                    child: Text(
+                      new_project,
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              //SizedBox(width: width * 0.12),
-              Container(
-                padding: EdgeInsets.only(left: 50),
-                child: Image.asset('images/eazyapp-logo-blue.png',
-                    height: 45, width: 40),
-              ),
-            ],
+                Positioned(
+                  right: 10,
+                  child: Image.asset('images/eazyapp-logo-blue.png',
+                      height: 48, width: 40),
+                ),
+              ],
+            ),
           ),
         ),
         body: TabBarView(
@@ -536,7 +541,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                 return Future.delayed(Duration(milliseconds: 2), () {
                   myFuture = ongoingclass();
                   _refreshIndicatorKey.currentState!.show();
-                  print('>>>>>>>>. delayed?????????????/');
+                  
                 });
               },
               child: FutureBuilder(
@@ -564,163 +569,177 @@ class _EazyVisitsState extends State<EazyVisits> {
                                   fontWeight: FontWeight.bold),
                             ),
                           );
-                        }
-
-                        return ListView.builder(
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Container(
-                                child: Column(
-                                  children: [
-                                    SizedBox(height: 10),
-                                    Card(
-                                      margin:
-                                          EdgeInsets.only(left: 10, right: 10),
-                                      child: Container(
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              children: <Widget>[
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: 8,
-                                                      left: 8,
-                                                      right: 8),
-                                                  child: Image.network(
-                                                      '${snapshot.data[index].customer_pic.toString()}', //'images/user_image.png',
-                                                      height: 100,
-                                                      width: 100),
-                                                ),
-                                                VerticalDivider(
-                                                  color: Colors.grey,
-                                                  thickness: 1.5,
-                                                ),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      padding: EdgeInsets.only(
-                                                          top: 9),
-                                                      child: Text(
-                                                        'Name : ${snapshot.data[index].name}',
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                          textStyle: TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      padding: EdgeInsets.only(
-                                                          top: 9),
-                                                      child: Text(
-                                                        'Phone : ${snapshot.data[index].phone}',
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                          textStyle: TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      padding: EdgeInsets.only(
-                                                          top: 9),
-                                                      child: snapshot
-                                                                  .data[index]
-                                                                  .assign_to ==
-                                                              'None'
-                                                          ? Text(
-                                                              'Allocated To : -',
-                                                              style: GoogleFonts
-                                                                  .poppins(
-                                                                textStyle:
-                                                                    TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                            )
-                                                          : Text(
-                                                              'Allocated To : ${snapshot.data[index].assign_to}',
-                                                              style: GoogleFonts
-                                                                  .poppins(
-                                                                textStyle:
-                                                                    TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SafeArea(
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: height * 0.05,
-                                        padding: EdgeInsets.only(
+                        } else {
+                          return ListView.builder(
+                              itemCount: snapshot.data.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Container(
+                                  child: Column(
+                                    children: [
+                                      SizedBox(height: 10),
+                                      Card(
+                                        margin: EdgeInsets.only(
                                             left: 10, right: 10),
                                         child: Container(
-                                          color: Colors.white,
-                                          child: OutlinedButton(
-                                            style: OutlinedButton.styleFrom(
-                                              side: BorderSide(
-                                                  color: myColor, width: 1.5),
-                                            ),
-                                            child: snapshot.data[index]
-                                                        .assign_to ==
-                                                    'None'
-                                                ? Text(
-                                                    'ASSIGN SALES MANAGER',
-                                                    style: GoogleFonts.poppins(
-                                                        fontSize: 16,
-                                                        color: myColor),
-                                                  )
-                                                : Text(
-                                                    'RE-ASSIGN SALES MANAGER',
-                                                    style: GoogleFonts.poppins(
-                                                        fontSize: 16,
-                                                        color: myColor),
+                                          child: Column(
+                                            children: [
+                                              Row(
+                                                children: <Widget>[
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        top: 8,
+                                                        left: 8,
+                                                        right: 8),
+                                                    child: Image.network(
+                                                        '${snapshot.data[index].customer_pic.toString()}', //'images/user_image.png',
+                                                        height: 100,
+                                                        width: 100),
                                                   ),
-                                            onPressed: () async {
-                                              showAlertDialog(context);
-                                              final cust_url = snapshot
-                                                  .data[index].customer_url;
-                                              final pref =
-                                                  await SharedPreferences
-                                                      .getInstance();
-                                              pref.setString(
-                                                  'cust_url', cust_url);
-                                              print(
-                                                  '----CUSTOMER URL HAS BEEN SET------ $cust_url');
-
-                                              setState(() {});
-                                            },
+                                                  VerticalDivider(
+                                                    color: Colors.grey,
+                                                    thickness: 1.5,
+                                                  ),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Container(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 9),
+                                                        child: Text(
+                                                          'Name : ${snapshot.data[index].name}',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                            textStyle:
+                                                                TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 9),
+                                                        child: Text(
+                                                          'Phone : ${snapshot.data[index].phone}',
+                                                          style: GoogleFonts
+                                                              .poppins(
+                                                            textStyle:
+                                                                TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 9),
+                                                        child: snapshot
+                                                                    .data[index]
+                                                                    .assign_to ==
+                                                                'None'
+                                                            ? Text(
+                                                                'Allocated To : -',
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .poppins(
+                                                                  textStyle:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                                ),
+                                                              )
+                                                            : Text(
+                                                                'Allocated To : ${snapshot.data[index].assign_to}',
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .poppins(
+                                                                  textStyle:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ); //Text(snapshot.data[index].Name),
-                            });
+                                      SafeArea(
+                                        child: Container(
+                                          width: double.infinity,
+                                          height: height * 0.05,
+                                          padding: EdgeInsets.only(
+                                              left: 10, right: 10),
+                                          child: Container(
+                                            color: Colors.white,
+                                            child: OutlinedButton(
+                                              style: OutlinedButton.styleFrom(
+                                                side: BorderSide(
+                                                    color: myColor, width: 1.5),
+                                              ),
+                                              child: snapshot.data[index]
+                                                          .assign_to ==
+                                                      'None'
+                                                  ? Text(
+                                                      'ASSIGN SALES MANAGER',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                              fontSize: 16,
+                                                              color: myColor),
+                                                    )
+                                                  : Text(
+                                                      'RE-ASSIGN SALES MANAGER',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                              fontSize: 16,
+                                                              color: myColor),
+                                                    ),
+                                              onPressed: () async {
+                                                showAlertDialog(context);
+                                                final cust_url = snapshot
+                                                    .data[index].customer_url;
+                                                final pref =
+                                                    await SharedPreferences
+                                                        .getInstance();
+                                                pref.setString(
+                                                    'cust_url', cust_url);
+                                                print(
+                                                    '----CUSTOMER URL HAS BEEN SET------ $cust_url');
+
+                                                setState(() {});
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ); //Text(snapshot.data[index].Name),
+                              });
+                        }
                     }
                   }),
             ),
@@ -735,7 +754,7 @@ class _EazyVisitsState extends State<EazyVisits> {
                   case ConnectionState.active:
                     return Text('active');
                   case ConnectionState.done:
-                    if (snapshot.data.isEmpty) {
+                    if (!snapshot.hasData) {
                       return Center(
                         child: Text(
                           'No Completed visits yet.',
@@ -745,113 +764,116 @@ class _EazyVisitsState extends State<EazyVisits> {
                               fontWeight: FontWeight.bold),
                         ),
                       );
-                    }
-                    return ListView.builder(
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            child: Column(
-                              children: [
-                                Card(
-                                  margin: EdgeInsets.only(
-                                      left: 10, right: 10, top: 10),
-                                  child: Container(
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          children: <Widget>[
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                  top: 8, left: 8, right: 8),
-                                              child: Image.network(
-                                                  '${snapshot.data[index].customer_pic.toString()}',
-                                                  height: 100,
-                                                  width: 100),
-                                            ),
-                                            VerticalDivider(
-                                              color: Colors.grey,
-                                              thickness: 1.5,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  padding:
-                                                      EdgeInsets.only(top: 9),
-                                                  child: Text(
-                                                    'Name : ${snapshot.data[index].name}',
-                                                    style: GoogleFonts.poppins(
-                                                      textStyle: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Container(
-                                                  padding:
-                                                      EdgeInsets.only(top: 9),
-                                                  child: Text(
-                                                    'Phone : ${snapshot.data[index].phone}',
-                                                    style: GoogleFonts.poppins(
-                                                      textStyle: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Container(
-                                                  padding:
-                                                      EdgeInsets.only(top: 9),
-                                                  child: snapshot.data[index]
-                                                              .was_assign ==
-                                                          'None'
-                                                      ? Text(
-                                                          'Allocated To : -',
-                                                          style: GoogleFonts
-                                                              .poppins(
-                                                            textStyle:
-                                                                TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
-                                                        )
-                                                      : Text(
-                                                          'Allocated To : ${snapshot.data[index].was_assign}',
-                                                          style: GoogleFonts
-                                                              .poppins(
-                                                            textStyle:
-                                                                TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
+                    } else {
+                      return ListView.builder(
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Container(
+                              child: Column(
+                                children: [
+                                  Card(
+                                    margin: EdgeInsets.only(
+                                        left: 10, right: 10, top: 10),
+                                    child: Container(
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: <Widget>[
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    top: 8, left: 8, right: 8),
+                                                child: Image.network(
+                                                    '${snapshot.data[index].customer_pic.toString()}',
+                                                    height: 100,
+                                                    width: 100),
+                                              ),
+                                              VerticalDivider(
+                                                color: Colors.grey,
+                                                thickness: 1.5,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding:
+                                                        EdgeInsets.only(top: 9),
+                                                    child: Text(
+                                                      'Name : ${snapshot.data[index].name}',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        textStyle: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w500,
                                                         ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding:
+                                                        EdgeInsets.only(top: 9),
+                                                    child: Text(
+                                                      'Phone : ${snapshot.data[index].phone}',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        textStyle: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding:
+                                                        EdgeInsets.only(top: 9),
+                                                    child: snapshot.data[index]
+                                                                .was_assign ==
+                                                            'None'
+                                                        ? Text(
+                                                            'Allocated To : -',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              textStyle:
+                                                                  TextStyle(
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                              ),
+                                                            ),
+                                                          )
+                                                        : Text(
+                                                            'Allocated To : ${snapshot.data[index].was_assign}',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              textStyle:
+                                                                  TextStyle(
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                )
-                              ],
-                            ),
-                          ); //Text(snapshot.data[index].Name),
-                        });
+                                  SizedBox(
+                                    height: 10,
+                                  )
+                                ],
+                              ),
+                            ); //Text(snapshot.data[index].Name),
+                          });
+                    }
                 }
               },
             ),

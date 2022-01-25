@@ -55,7 +55,7 @@ class _AssignedState extends State<AssignedCustomer> {
   int currentStep = 0;
   bool _isEnabled = false;
   TextEditingController res_add = TextEditingController();
-  TextEditingController fname = TextEditingController(text: 'header');
+  TextEditingController fname = TextEditingController();
   TextEditingController lname = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController phone = TextEditingController();

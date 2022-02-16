@@ -40,6 +40,8 @@ class LoginPageState extends State<LoginPage> {
   var _text = '';
   bool isLoggedIn = false;
 
+  bool _validate = false;
+
   var authInfo;
 
   @override
@@ -72,21 +74,27 @@ class LoginPageState extends State<LoginPage> {
       HttpHeaders.cookieHeader: setcookie,
     });
 
+    print('RESPONSE BODY USER ROLE : ${response.body}');
+
     final userData = jsonDecode(response.body);
     userRole = userData['user_role'];
     if (userRole == 'Sales Manager') {
       isbusy = userData['is_busy'];
     }
+
+    print('>>>>>>>> is bsy >>>>>>>>>. $isbusy');
   }
 
   dynamic login(BuildContext context) async {
-    authInfo = AuthService();
+    dynamic authInfo = AuthService();
 
     final res = await authInfo.login(emailController.text, passController.text);
     final data = jsonDecode(res.body) as Map<String, dynamic>;
-    //print('========= SERVER DATE ======== ${DateTime.parse(data['expiry'])}');
-    // print(
-    // '========== DATE =========== ${DateTime.now().add(Duration(minutes: 330))}');
+
+    print('========= SERVER DATE ======== ${DateTime.parse(data['expiry'])}');
+    print(
+        '========== DATE =========== ${DateTime.now().add(Duration(minutes: 330))}');
+
     if (data.containsKey('token')) {
       final headers = res.headers.toString();
       final str = headers;
@@ -105,6 +113,7 @@ class LoginPageState extends State<LoginPage> {
       await FlutterSession().set('csrf', csrf);
 
       AuthService.setToken(data['token']);
+
       AuthService.setExpiry(
           DateTime.now().add(Duration(seconds: 1800)).toString());
 
@@ -140,6 +149,7 @@ class LoginPageState extends State<LoginPage> {
       print('Logged in login page : $log');
       print(res.body);
       final token = await AuthService.getToken();
+
       final exp = await AuthService.getExpiry();
 
       print('Expiry--------------- $exp');
@@ -207,8 +217,8 @@ class LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 Positioned(
-                  top: 310,
-                  left: 40,
+                  top: 290,
+                  left: 30,
                   child: Container(
                     child: Text(
                       'Please Login to continue',
@@ -239,7 +249,7 @@ class LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 Positioned(
-                  top: 500,
+                  top: 470,
                   right: 30,
                   child: Container(
                     child: OutlinedButton(
@@ -262,7 +272,32 @@ class LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 Positioned(
-                  top: 380,
+                  top: 500,
+                  left: 20,
+                  right: 26,
+                  child: CheckboxListTile(
+                    activeColor: myColor,
+                    checkColor: Colors.white,
+                    title: Text('Keep me signed in',
+                        style: GoogleFonts.poppins(
+                            fontSize: 15, fontWeight: FontWeight.w500)),
+                    value: _value,
+                    onChanged: (val) async {
+                      setState(() {
+                        _value = val;
+                      });
+                      if (val == true) {
+                        final pref = await SharedPreferences.getInstance();
+                        pref.setString('keep_sign', 'True');
+                      } else {
+                        final pref = await SharedPreferences.getInstance();
+                        pref.setString('keep_sign', 'False');
+                      }
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: 350,
                   left: 30,
                   right: 30,
                   child: Container(
@@ -286,8 +321,10 @@ class LoginPageState extends State<LoginPage> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         errorStyle: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            fontSize: 15,
+                          textStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                         errorBorder: UnderlineInputBorder(
@@ -313,7 +350,7 @@ class LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 Positioned(
-                  top: 440,
+                  top: 410,
                   left: 30,
                   right: 30,
                   child: Container(
@@ -360,16 +397,15 @@ class LoginPageState extends State<LoginPage> {
                         hintText: 'Password',
                         hintStyle: GoogleFonts.poppins(
                           textStyle: TextStyle(
-                              fontWeight: FontWeight.w300,
-                              fontSize: 16,
-                              color: Colors.grey.shade700),
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 550,
+                  top: 560,
                   left: 30,
                   right: 30,
                   child: Container(
@@ -425,6 +461,8 @@ class LoginPageState extends State<LoginPage> {
                             pref.setString('trial token', newToken.toString());
                           });
                         }
+
+                        final pref = await SharedPreferences.getInstance();
                       },
                     ),
                   ),

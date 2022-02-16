@@ -382,8 +382,7 @@ class _EazyCustomersState extends State<EazyCustomers> {
                                                 .getInstance();
                                             pref.setString('cust_name',
                                                 snapshot.data[index].name);
-                                            print(
-                                                '----------- SET ----------- ${snapshot.data[index].customer_url}');
+                                              print('----------- SET ----------- ${snapshot.data[index].customer_url}');
                                             pref.setString(
                                                 'cust_url',
                                                 snapshot

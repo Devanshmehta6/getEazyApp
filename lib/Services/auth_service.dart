@@ -13,7 +13,7 @@ class AuthService {
         'username': email,
         'password': password,
       });
-
+      print('----------- LOGIN RESP -------------- ${res.body}');
       return res;
     } finally {
       //nothing
@@ -22,7 +22,16 @@ class AuthService {
 
   static setToken(String token) async {
     AuthData data = AuthData(token);
+    print('--------- SET TOKEN -----------$data');
     return await SESSION.set('tokens', data);
+  }
+
+  static setExpiry(String expiry) async {
+    return await SESSION.set('expiry', expiry);
+  }
+
+  static getExpiry() async {
+    return await SESSION.get('expiry');
   }
 
   static Future<Map<String, dynamic>> getToken() async {
@@ -31,6 +40,26 @@ class AuthService {
 
   static removeToken() async {
     await SESSION.prefs.clear();
+  }
+
+  static checkValidation() async {
+    final expiry = await getExpiry();
+
+    final token = await getToken();
+    //DateTime tri = DateTime.parse('2021-01-01');
+    print('----------- EXPIRY ========== $expiry');
+    if (token != null) {
+      if (DateTime.now().isBefore(DateTime.parse(expiry))) {
+        print('------ IF --------');
+        print('------------------------ $token');
+        return token;
+      } else {
+        SESSION.prefs.clear();
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 }
 

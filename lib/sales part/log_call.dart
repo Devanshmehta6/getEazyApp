@@ -34,6 +34,11 @@ class _RevisitLogState extends State<CallLog> {
   TimeOfDay time = TimeOfDay(hour: 10, minute: 00);
   TextEditingController descp = TextEditingController();
   String sendDate = '';
+  String from_which = '';
+  TextEditingController desc_controller = TextEditingController();
+  TextEditingController desc_controller_with_value = TextEditingController();
+  String? out_come;
+  String? call_desc;
 
   send_follow_up() async {
     final pref = await SharedPreferences.getInstance();
@@ -65,20 +70,34 @@ class _RevisitLogState extends State<CallLog> {
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
 
       // final date_to_send = DateFormat("yy-MM-dd hh:mm:ss").parse('$date ${time.hour}:${time.minute}');
-      
-      http.Response response = await http.post(url, headers: {
-        //'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': settoken,
-        HttpHeaders.cookieHeader: setcookie,
-      }, body: {
-        'Name': cust_id.toString(),
-        'To': sales_name,
-        'Out_come': valueChoose,
-        'Date': sendDate,
-        'Time': '${time.hour}:${time.minute}',
-        'Call_desc': descp.text
-      });
+
+      http.Response response = from_which == 'New'
+          ? await http.post(url, headers: {
+              //'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': settoken,
+              HttpHeaders.cookieHeader: setcookie,
+            }, body: {
+              'Name': cust_id.toString(),
+              'To': sales_name,
+              'Out_come': valueChoose,
+              'Date': sendDate,
+              'Time': '${time.hour}:${time.minute}',
+              'Call_desc': descp.text
+            })
+          : await http.put(url, headers: {
+              //'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': settoken,
+              HttpHeaders.cookieHeader: setcookie,
+            }, body: {
+              'Name': cust_id.toString(),
+              'To': sales_name,
+              'Out_come': valueChoose,
+              'Date': sendDate,
+              'Time': '${time.hour}:${time.minute}',
+              'Call_desc': descp.text
+            });
 
       print('--------------- follllll _________________ ${response.body}');
       //final jsonData = jsonDecode(response.body);
@@ -89,9 +108,29 @@ class _RevisitLogState extends State<CallLog> {
     }
   }
 
+  getData() async {
+    final pref = await SharedPreferences.getInstance();
+    setState(() {
+      out_come = pref.getString('out_come');
+      call_desc = pref.getString('call_desc');
+      desc_controller_with_value = TextEditingController(text: call_desc);
+      from_which = pref.getString('from');
+    });
+
+    print('----------- out --------- $call_desc');
+    print('');
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
+
   @override
   Widget build(BuildContext context) {
-     FirebaseAnalytics().setCurrentScreen(
+    FirebaseAnalytics().setCurrentScreen(
       screenName: 'Log a call',
       screenClassOverride: 'Log a call',
     );
@@ -271,7 +310,7 @@ class _RevisitLogState extends State<CallLog> {
                     icon: Icon(Icons.arrow_drop_down),
                     underline: SizedBox(),
                     //hint : Text(' $valueChoose'),
-                    value: valueChoose,
+                    value: from_which == 'New' ? valueChoose : out_come,
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(color: Colors.black, fontSize: 16),
                     ),
@@ -295,7 +334,9 @@ class _RevisitLogState extends State<CallLog> {
                   width: double.infinity,
                   margin: EdgeInsets.only(top: 30, left: 35, right: 18),
                   child: TextFormField(
-                    controller: descp,
+                    controller: from_which == 'New'
+                        ? desc_controller
+                        : desc_controller_with_value,
                     style:
                         GoogleFonts.poppins(fontSize: 15, color: Colors.black),
                     minLines: 7,
@@ -316,40 +357,45 @@ class _RevisitLogState extends State<CallLog> {
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    Container(
-                        margin: EdgeInsets.only(left: 35, top: 17),
-                        child: Row(
-                          children: [
-                            Icon(FontAwesomeIcons.calendarAlt),
-                            Container(
-                              height: height * 0.07,
-                              //width: width * 0.4,
-                              child: FlatButton(
-                                onPressed: () {
-                                  pickDate(context).whenComplete(() {
-                                    pickTime(context);
-                                  });
-                                },
-                                child: date == DateTime(2021) &&
-                                        time == TimeOfDay(hour: 10, minute: 0)
-                                    ? Text(
-                                        'Visited Time and Date',
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 18, color: Colors.black),
-                                      )
-                                    : Text(
-                                        '$date ${time.hour}:${time.minute}',
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 18, color: Colors.black),
-                                      ),
-                              ),
-                            ),
-                          ],
-                        )),
-                  ],
-                ),
+                from_which == 'New'
+                    ? Row(
+                        children: [
+                          Container(
+                              margin: EdgeInsets.only(left: 35, top: 17),
+                              child: Row(
+                                children: [
+                                  Icon(FontAwesomeIcons.calendarAlt),
+                                  Container(
+                                    height: height * 0.07,
+                                    //width: width * 0.4,
+                                    child: FlatButton(
+                                      onPressed: () {
+                                        pickDate(context).whenComplete(() {
+                                          pickTime(context);
+                                        });
+                                      },
+                                      child: date == DateTime(2021) &&
+                                              time ==
+                                                  TimeOfDay(hour: 10, minute: 0)
+                                          ? Text(
+                                              'Visited Time and Date',
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 18,
+                                                  color: Colors.black),
+                                            )
+                                          : Text(
+                                              '$date ${time.hour}:${time.minute}',
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 18,
+                                                  color: Colors.black),
+                                            ),
+                                    ),
+                                  ),
+                                ],
+                              )),
+                        ],
+                      )
+                    : Container(),
               ],
             ),
           ),

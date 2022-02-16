@@ -31,7 +31,7 @@ class _ThirdPageState extends State<ThirdPage> {
   String _value = "";
   String _value2 = "";
   bool isLoading = false;
-  late Future con ;
+  late Future con;
   final budgetList = [
     '50L - 75L',
     '75L - 1CR',
@@ -69,7 +69,7 @@ class _ThirdPageState extends State<ThirdPage> {
     final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
     final cust_id = sp.getInt('cust_id');
     print('--------third--------$cust_id');
-    final project_id = pref.getString('project_id');
+    final project_id = pref.getString('pro_id');
     String config = selectedValue.join(',');
     print('>>>>>>>>    ccnenfiefhoij >>>>>>>>>. $config');
     http.Response response = await http.post(
@@ -184,7 +184,7 @@ class _ThirdPageState extends State<ThirdPage> {
         kToolbarHeight;
     final width = MediaQuery.of(context).size.width;
     Color myColor = Color(0xff4044fc);
-    
+
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: WillPopScope(
@@ -300,6 +300,8 @@ class _ThirdPageState extends State<ThirdPage> {
                 child: Center(
                   child: Container(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
                         Container(
                           height: height * 0.1,
@@ -312,28 +314,23 @@ class _ThirdPageState extends State<ThirdPage> {
                         ),
                         SizedBox(height: height * 0.04),
                         Container(
-                          margin: EdgeInsets.only(left: width * 0.04),
-                          child: Padding(
-                            padding: EdgeInsets.only(right: width * 0.48),
-                            child: Text(
-                              'Requirements',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
+                          margin: EdgeInsets.only(left: width * 0.075),
+                          child: Text(
+                            'Requirements',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.only(top: height * 0.025),
-                          child: Container(
-                            padding: EdgeInsets.only(left: width * 0.003),
-                            child: Text(
-                              'What configuration are you looking at?',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w500),
-                              ),
+                          margin: EdgeInsets.only(
+                              left: width * 0.075, top: height * 0.03),
+                          child: Text(
+                            'What configuration are you looking at?',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
                             ),
                           ),
                         ),
@@ -357,9 +354,8 @@ class _ThirdPageState extends State<ThirdPage> {
                                 case ConnectionState.done:
                                   return Container(
                                     padding: EdgeInsets.only(
-                                        left: width * 0.1,
-                                        right: width * 0.15,
-                                        top: height * 0.02),
+                                        left: width * 0.075,
+                                        top: height * 0.03),
                                     child: GridView.builder(
                                         padding: EdgeInsets.zero,
                                         gridDelegate:
@@ -410,7 +406,7 @@ class _ThirdPageState extends State<ThirdPage> {
                         SizedBox(height: height * 0.01),
                         Container(
                           margin: EdgeInsets.only(
-                              left: width * 0.12 , right: 50),
+                              left: width * 0.075, right: width * 0.075),
                           padding: EdgeInsets.all(5),
                           decoration: BoxDecoration(
                             border: Border(
@@ -446,116 +442,113 @@ class _ThirdPageState extends State<ThirdPage> {
                         ),
                         Container(
                           margin: EdgeInsets.only(
-                            top: height * 0.03,
-                            right: width * 0.09,
+                              left: width * 0.075, top: height * 0.03),
+                          child: Text(
+                            'What is the purpose of your purchase?',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
+                            ),
                           ),
-                          child: Column(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.only(left: width * 0.08),
-                                child: Text(
-                                    'What is the purpose of your purchase?',
-                                    style: GoogleFonts.poppins(
-                                        textStyle: TextStyle(fontSize: 16))),
-                              ),
-                              Row(
-                                children: [
-                                  SizedBox(width: width * 0.05),
-                                  Transform.scale(
-                                    scale: 1.1,
-                                    child: Radio(
-                                        value: "Self Use",
-                                        groupValue: _value,
-                                        activeColor: myColor,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _value = value.toString();
-                                          });
-                                        }),
-                                  ),
-                                  Text(
-                                    'Self Use',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(
-                                        fontSize: 15,
-                                      ),
+                        ),
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                SizedBox(width: width * 0.05),
+                                Transform.scale(
+                                  scale: 1.1,
+                                  child: Radio(
+                                      value: "Self Use",
+                                      groupValue: _value,
+                                      activeColor: myColor,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _value = value.toString();
+                                        });
+                                      }),
+                                ),
+                                Text(
+                                  'Self Use',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontSize: 15,
                                     ),
                                   ),
-                                  SizedBox(
-                                    width: width * 0.16,
-                                  ),
-                                  Transform.scale(
-                                    scale: 1.1,
-                                    child: Radio(
-                                        value: "Second Home",
-                                        groupValue: _value,
-                                        activeColor: myColor,
-                                        onChanged: (val) {
-                                          setState(() {
-                                            _value = val.toString();
-                                          });
-                                        }),
-                                  ),
-                                  Text(
-                                    'Second home',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  SizedBox(width: width * 0.05),
-                                  Transform.scale(
-                                    scale: 1.1,
-                                    child: Radio(
-                                        value: 'Investment',
-                                        groupValue: _value,
-                                        activeColor: myColor,
-                                        onChanged: (val) {
-                                          setState(() {
-                                            _value = val.toString();
-                                          });
-                                        }),
-                                  ),
-                                  Text(
-                                    'Investment',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(fontSize: 15),
+                                ),
+                                SizedBox(
+                                  width: width * 0.16,
+                                ),
+                                Transform.scale(
+                                  scale: 1.1,
+                                  child: Radio(
+                                      value: "Second Home",
+                                      groupValue: _value,
+                                      activeColor: myColor,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _value = val.toString();
+                                        });
+                                      }),
+                                ),
+                                Text(
+                                  'Second home',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontSize: 15,
                                     ),
                                   ),
-                                  SizedBox(width: width * 0.09),
-                                  Transform.scale(
-                                    scale: 1.1,
-                                    child: Radio(
-                                        value: 'Organizational',
-                                        groupValue: _value,
-                                        activeColor: myColor,
-                                        onChanged: (val) {
-                                          setState(() {
-                                            _value = val.toString();
-                                            print(">>>>>>>>>> $_value");
-                                          });
-                                        }),
+                                )
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                SizedBox(width: width * 0.05),
+                                Transform.scale(
+                                  scale: 1.1,
+                                  child: Radio(
+                                      value: 'Investment',
+                                      groupValue: _value,
+                                      activeColor: myColor,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _value = val.toString();
+                                        });
+                                      }),
+                                ),
+                                Text(
+                                  'Investment',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(fontSize: 15),
                                   ),
-                                  Text(
-                                    'Organizational',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(fontSize: 15),
-                                    ),
+                                ),
+                                SizedBox(width: width * 0.09),
+                                Transform.scale(
+                                  scale: 1.1,
+                                  child: Radio(
+                                      value: 'Organizational',
+                                      groupValue: _value,
+                                      activeColor: myColor,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _value = val.toString();
+                                          print(">>>>>>>>>> $_value");
+                                        });
+                                      }),
+                                ),
+                                Text(
+                                  'Organizational',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(fontSize: 15),
                                   ),
-                                ],
-                              )
-                            ],
-                          ),
+                                ),
+                              ],
+                            )
+                          ],
                         ),
                         Container(
                           margin: EdgeInsets.only(
-                              top: height * 0.02, right: width * 0.27),
-                          padding: EdgeInsets.only(left: width * 0.075),
+                              left: width * 0.075, top: height * 0.02),
                           child: Text(
                             'Provide your mode of funding',
                             style: GoogleFonts.poppins(

@@ -248,7 +248,8 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => EazyVisits(),
-                                          settings: RouteSettings(name : 'EazyVisits'),
+                                          settings:
+                                              RouteSettings(name: 'EazyVisits'),
                                         ),
                                       );
                                     },
@@ -361,6 +362,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
             Divider(thickness: 0.5),
             ListTile(
               onTap: () {
+                AuthService.removeToken();
                 Navigator.push(
                   context,
                   MaterialPageRoute(

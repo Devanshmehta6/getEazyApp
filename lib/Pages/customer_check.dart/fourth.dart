@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera_camera/camera_camera.dart';
-import 'package:eazy_app/Pages/customer_check.dart/fifth.dart';
-import 'package:eazy_app/Pages/customer_check.dart/first.dart';
+
 import 'package:eazy_app/Pages/customer_check.dart/sixth.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:form_field_validator/form_field_validator.dart';
@@ -399,7 +398,7 @@ class _FourthPageState extends State<FourthPage> {
       final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
       final cust_id = sp.getInt('cust_id');
       print('--------third--------$cust_id');
-      final project_id = pref.getString('project_id');
+      final project_id = pref.getString('pro_id');
       print('>>>>>>>>>> design ========== ${designation.text}');
       http.Response response = await http.post(
         url,
@@ -453,6 +452,7 @@ class _FourthPageState extends State<FourthPage> {
           return moveTopreviousScreen();
         },
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           home: Scaffold(
             resizeToAvoidBottomInset: false,
             bottomNavigationBar: Container(
@@ -573,6 +573,8 @@ class _FourthPageState extends State<FourthPage> {
               child: Center(
                 child: Container(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       Container(
                         height: height * 0.1,
@@ -585,7 +587,7 @@ class _FourthPageState extends State<FourthPage> {
                       ),
                       SizedBox(height: height * 0.04),
                       Container(
-                        margin: EdgeInsets.only(right: width * 0.35),
+                        margin: EdgeInsets.only(left: width * 0.075),
                         child: Text(
                           'Work Information',
                           style: GoogleFonts.poppins(
@@ -596,7 +598,7 @@ class _FourthPageState extends State<FourthPage> {
                       ),
                       Container(
                         margin: EdgeInsets.only(
-                            top: height * 0.02, right: width * 0.22),
+                            left: width * 0.075, top: height * 0.03),
                         child: Text(
                           'What is your occupation?',
                           style: GoogleFonts.poppins(
@@ -649,9 +651,6 @@ class _FourthPageState extends State<FourthPage> {
                             right: width * 0.075),
                         child: TextFormField(
                           controller: org_name,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: RequiredValidator(
-                              errorText: 'This field is required'),
                           decoration: InputDecoration(
                             errorStyle: GoogleFonts.poppins(
                               textStyle: TextStyle(
@@ -682,9 +681,6 @@ class _FourthPageState extends State<FourthPage> {
                             right: width * 0.075),
                         child: TextFormField(
                           controller: designation,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: RequiredValidator(
-                              errorText: 'This field is required'),
                           style: GoogleFonts.poppins(
                               fontSize: 16, color: Colors.black),
                           decoration: InputDecoration(
@@ -712,7 +708,7 @@ class _FourthPageState extends State<FourthPage> {
                       ),
                       Container(
                         margin: EdgeInsets.only(
-                            top: height * 0.02, right: width * 0.48),
+                            left: width * 0.075, top: height * 0.03),
                         child: Text(
                           'Office Location',
                           style: GoogleFonts.poppins(

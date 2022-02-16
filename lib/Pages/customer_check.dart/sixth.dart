@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:eazy_app/Pages/customer_check.dart/fifth.dart';
+import 'package:camera_camera/camera_camera.dart';
+
 import 'package:eazy_app/Pages/dashboard.dart';
 import 'package:eazy_app/Pages/eazy_visits.dart';
 import 'package:eazy_app/Services/auth_service.dart';
@@ -20,6 +21,7 @@ class SixthPage extends StatefulWidget {
 
 class _SixthPageState extends State<SixthPage> {
   bool isLoading = false;
+  File? camFile;
 
   Future<http.StreamedResponse> patchImage(String filepath) async {
     final pref = await SharedPreferences.getInstance();
@@ -39,7 +41,7 @@ class _SixthPageState extends State<SixthPage> {
     final setcookie = "csrftoken=$csrf; sessionid=$sessionId";
     final cust_id = pref.getInt('cust_id');
     final mobile = pref.getString('mobile');
-    final project_id = pref.getString('project_id');
+    final project_id = pref.getString('pro_id');
 
     var request = http.MultipartRequest('PUT', Uri.parse(url));
     request.files.add(await http.MultipartFile.fromPath("pic", filepath));
@@ -93,6 +95,7 @@ class _SixthPageState extends State<SixthPage> {
         return moveTopreviousScreen();
       },
       child: MaterialApp(
+        debugShowCheckedModeBanner:false,
         home: Scaffold(
           bottomNavigationBar: Container(
             height: height * 0.1,
@@ -107,13 +110,25 @@ class _SixthPageState extends State<SixthPage> {
                     child: FlatButton(
                       color: Colors.white,
                       onPressed: () async {
-                        await availableCameras().then((value) => Navigator.pop(
+                        Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      FifthPage(cameras: value),
-                                  maintainState: true),
-                            ));
+                                builder: (_) => CameraCamera(
+                                  onFile: (file) {
+                                    camFile = file;
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => SixthPage(),
+                                        settings:
+                                            RouteSettings(arguments: camFile),
+                                      ),
+                                    );
+                                    setState(() {});
+                                  },
+                                ),
+                              ),
+                            );
                       },
                       child: isLoading
                           ? Row(
@@ -199,7 +214,8 @@ class _SixthPageState extends State<SixthPage> {
             //margin: EdgeInsets.only(top: height * 0.01),
             padding: EdgeInsets.only(top: height * 0.07),
             height: height * 2.2,
-            width: double.infinity,
+            width: width*2,
+            //width: double.infinity,
             child: Image.file(
               File(displayImage.path),
             ),

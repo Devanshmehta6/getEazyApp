@@ -17,7 +17,6 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:im_stepper/main.dart';
 import 'package:im_stepper/stepper.dart';
-import 'package:cupertino_stepper/cupertino_stepper.dart';
 import 'package:rxdart/rxdart.dart';
 import 'dart:core';
 
@@ -55,7 +54,7 @@ class _AssignedState extends State<AssignedCustomer> {
   int currentStep = 0;
   bool _isEnabled = false;
   TextEditingController res_add = TextEditingController();
-  TextEditingController fname = TextEditingController(text: 'header');
+  TextEditingController fname = TextEditingController();
   TextEditingController lname = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController phone = TextEditingController();

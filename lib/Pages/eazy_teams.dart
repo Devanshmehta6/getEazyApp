@@ -63,7 +63,7 @@ class _EazyTeamsState extends State<EazyTeams> {
 
       print('RESPONSE BODY TEAMS : ${response.body}');
       final responseData = jsonDecode(response.body);
-      final mem = responseData[0]['team_member'];
+      final mem = responseData[0]['team_member'][0];
       print(mem);
       //project_name = sp.getString('project_name');
 
@@ -160,6 +160,7 @@ class _EazyTeamsState extends State<EazyTeams> {
       ),
     );
     final res = jsonDecode(response.body);
+    print('========= teams ============ $res');
     setState(() {
       checkouttime = res[0]['history_data']['checkout_time'];
     });
@@ -196,6 +197,7 @@ class _EazyTeamsState extends State<EazyTeams> {
         return moveTopreviousScreen();
       },
       child: MaterialApp(
+        debugShowCheckedModeBanner:false,
         home: Scaffold(
           backgroundColor: Colors.grey.shade300,
           appBar: AppBar(

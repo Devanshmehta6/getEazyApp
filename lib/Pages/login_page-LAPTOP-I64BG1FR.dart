@@ -73,6 +73,7 @@ class LoginPageState extends State<LoginPage> {
     });
 
     final userData = jsonDecode(response.body);
+    print('------------- ROLE =============== $userData');
     userRole = userData['user_role'];
     if (userRole == 'Sales Manager') {
       isbusy = userData['is_busy'];
@@ -130,6 +131,13 @@ class LoginPageState extends State<LoginPage> {
                     builder: (context) => Sales_Dashboard(),
                   ),
                 );
+        } else if (userRole == 'Team Lead'){
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Sales_Dashboard(),
+            ),
+          );
         }
       });
 
@@ -239,7 +247,7 @@ class LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 Positioned(
-                  top: 500,
+                  top: 510,
                   right: 30,
                   child: Container(
                     child: OutlinedButton(
@@ -313,7 +321,7 @@ class LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 Positioned(
-                  top: 440,
+                  top: 450,
                   left: 30,
                   right: 30,
                   child: Container(

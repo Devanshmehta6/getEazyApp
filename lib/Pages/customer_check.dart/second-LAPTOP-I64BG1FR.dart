@@ -749,7 +749,7 @@ class _SecondPageState extends State<SecondPage> {
                                   textStyle: TextStyle(
                                       color: Colors.black, fontSize: 16),
                                 ),
-                               
+                               // autovalidate: true,
                                 decoration: InputDecoration(
                                   enabledBorder: UnderlineInputBorder(
                                     borderSide: BorderSide(color: Colors.grey),

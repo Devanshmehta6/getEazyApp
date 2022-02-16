@@ -24,7 +24,7 @@ class _Sales_DashboardState extends State<Sales_Dashboard> {
 
   Future getData() async {
     final pref = await SharedPreferences.getInstance();
-
+    pref.setString('last_opened', 'Sales Manager');
     final isLoggedIn = pref.getBool('log');
     print('Logged in dashboard : $isLoggedIn');
 

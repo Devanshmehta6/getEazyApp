@@ -48,6 +48,7 @@ class _DashboardState extends State<Dashboard> {
       String csrf = await FlutterSession().get('csrf');
 
       final sp = await SharedPreferences.getInstance();
+      sp.setString('last_opened', 'Visit Manager');
 
       //final finalToken = 'Token ${token[token]}';
 

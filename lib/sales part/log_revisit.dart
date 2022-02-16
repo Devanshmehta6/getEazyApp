@@ -66,17 +66,29 @@ class _RevisitLogState extends State<RevisitLog> {
       print('-------333333333333 $date $time');
       // final date_to_send = DateFormat("yy-MM-dd hh:mm:ss").parse('$date ${time.hour}:${time.minute}');
       print('############ $send');
-      http.Response response = await http.put(url, headers: {
-        //'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': settoken,
-        HttpHeaders.cookieHeader: setcookie,
-      }, body: {
-        'customer': cust_id.toString(),
-        'status': valueChoose.toString().toLowerCase(),
-        'feedback': feedback.text,
-        'date_time': send
-      });
+      http.Response response = from_which == 'New'
+          ? await http.post(url, headers: {
+              //'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': settoken,
+              HttpHeaders.cookieHeader: setcookie,
+            }, body: {
+              'customer': cust_id.toString(),
+              'status': valueChoose.toString().toLowerCase(),
+              'feedback': feedback.text,
+              'date_time': send
+            })
+          : await http.put(url, headers: {
+              //'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': settoken,
+              HttpHeaders.cookieHeader: setcookie,
+            }, body: {
+              'customer': cust_id.toString(),
+              'status': valueChoose.toString().toLowerCase(),
+              'feedback': feedback.text,
+              'date_time': send
+            });
       final jsonData = jsonDecode(response.body);
 
       print('>>>>>>>> PUT FOLLOW UP >>>>>>>>. $jsonData');
@@ -93,6 +105,7 @@ class _RevisitLogState extends State<RevisitLog> {
       feedback_with_value = TextEditingController(text: feedback_str);
       from_which = pref.getString('from');
     });
+
     print('------------------- $status');
     print('---------------- $feedback_str');
   }
@@ -290,7 +303,9 @@ class _RevisitLogState extends State<RevisitLog> {
                     icon: Icon(Icons.arrow_drop_down),
                     underline: SizedBox(),
                     //hint : Text(' $valueChoose'),
-                    value: from_which == 'New' ? valueChoose : status!.toLowerCase(),
+                    value: from_which == 'New'
+                        ? valueChoose
+                        : status!.toLowerCase(),
 
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(color: Colors.black, fontSize: 16),
@@ -315,7 +330,8 @@ class _RevisitLogState extends State<RevisitLog> {
                   width: double.infinity,
                   margin: EdgeInsets.only(top: 30, left: 35, right: 18),
                   child: TextFormField(
-                    controller: from_which == 'New' ? feedback :  feedback_with_value,
+                    controller:
+                        from_which == 'New' ? feedback : feedback_with_value,
                     style:
                         GoogleFonts.poppins(fontSize: 15, color: Colors.black),
                     minLines: 7,
@@ -336,40 +352,45 @@ class _RevisitLogState extends State<RevisitLog> {
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    Container(
-                        margin: EdgeInsets.only(left: 35, top: 17),
-                        child: Row(
-                          children: [
-                            Icon(FontAwesomeIcons.calendarAlt),
-                            Container(
-                              height: height * 0.07,
-                              //width: width * 0.4,
-                              child: FlatButton(
-                                onPressed: () {
-                                  pickDate(context).whenComplete(() {
-                                    pickTime(context);
-                                  });
-                                },
-                                child: date == DateTime(2021) &&
-                                        time == TimeOfDay(hour: 10, minute: 0)
-                                    ? Text(
-                                        'Visited Time and Date',
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 18, color: Colors.black),
-                                      )
-                                    : Text(
-                                        '$date ${time.hour}:${time.minute}',
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 18, color: Colors.black),
-                                      ),
-                              ),
-                            ),
-                          ],
-                        )),
-                  ],
-                ),
+                from_which == 'New'
+                    ? Row(
+                        children: [
+                          Container(
+                              margin: EdgeInsets.only(left: 35, top: 17),
+                              child: Row(
+                                children: [
+                                  Icon(FontAwesomeIcons.calendarAlt),
+                                  Container(
+                                    height: height * 0.07,
+                                    //width: width * 0.4,
+                                    child: FlatButton(
+                                      onPressed: () {
+                                        pickDate(context).whenComplete(() {
+                                          pickTime(context);
+                                        });
+                                      },
+                                      child: date == DateTime(2021) &&
+                                              time ==
+                                                  TimeOfDay(hour: 10, minute: 0)
+                                          ? Text(
+                                              'Visited Time and Date',
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 18,
+                                                  color: Colors.black),
+                                            )
+                                          : Text(
+                                              '$date ${time.hour}:${time.minute}',
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 18,
+                                                  color: Colors.black),
+                                            ),
+                                    ),
+                                  ),
+                                ],
+                              )),
+                        ],
+                      )
+                    : Container(),
               ],
             ),
           ),
